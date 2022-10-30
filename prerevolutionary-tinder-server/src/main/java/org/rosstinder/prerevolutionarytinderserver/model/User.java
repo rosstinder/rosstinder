@@ -24,24 +24,21 @@ public class User {
     @Setter
     private String description;
     @Setter
-    private Gender preference1;
-    @Setter
-    private Gender preference2;
+    private Preference preference;
     private List<User> likedUsers = new ArrayList<>();
     private boolean searchFlag = false;
     private boolean editFlag = false;
     private boolean likesFlag = false;
 
     public User(int chatId, String username, Gender gender, String name, String title,
-                String description, Gender preference1, Gender preference2) {
+                String description, Preference preference) {
         this.chatId = chatId;
         this.username = username;
         this.gender = gender;
         this.name = name;
         this.title = title;
         this.description = description;
-        this.preference1 = preference1;
-        this.preference2 = preference2;
+        this.preference = preference;
     }
 
     public void addLikesUser(User user) {
@@ -60,7 +57,6 @@ public class User {
                 name,
                 title,
                 description,
-                preference1,
-                preference2);
+                preference);
     }
 }
