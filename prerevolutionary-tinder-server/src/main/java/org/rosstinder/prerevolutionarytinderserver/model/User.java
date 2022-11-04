@@ -7,13 +7,14 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @EqualsAndHashCode
 @AllArgsConstructor
 public class User {
-    private final int chatId;
-
+    private final UUID id;
+    private final Long chatId;
     private String username;
     @Setter
     private Gender gender;
@@ -30,8 +31,9 @@ public class User {
     private boolean editFlag = false;
     private boolean likesFlag = false;
 
-    public User(int chatId, String username, Gender gender, String name, String title,
+    public User(Long chatId, String username, Gender gender, String name, String title,
                 String description, Preference preference) {
+        this.id = UUID.randomUUID();
         this.chatId = chatId;
         this.username = username;
         this.gender = gender;
@@ -51,7 +53,8 @@ public class User {
 
     @Override
     public String toString() {
-        return String.format("User{id=%s,gender=%s,name=%s,title=%s,description=%s,preference1=%s,prederence2=%s}",
+        return String.format("User{id=%s,chatId=%s,gender=%s,name=%s,title=%s,description=%s,preference1=%s,prederence2=%s}",
+                id,
                 chatId,
                 gender,
                 name,

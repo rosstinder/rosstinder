@@ -1,16 +1,16 @@
-package org.rosstinder.prerevolutionarytinderserver.controller;
+package org.rosstinder.prerevolutionarytinderserver.service;
 
 import org.rosstinder.prerevolutionarytinderserver.model.User;
 import java.util.List;
 
 public interface Service {
-    User findById(int chatId);
+    User findById(Long chatId);
 
     int create(User user);
 
     void update(User user);
 
-    void deleteById(int chatId);
+    void deleteById(Long chatId);
 
     List<User> findAll();
 }

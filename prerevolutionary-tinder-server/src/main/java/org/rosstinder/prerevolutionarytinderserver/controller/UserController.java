@@ -1,6 +1,7 @@
 package org.rosstinder.prerevolutionarytinderserver.controller;
 
 import org.rosstinder.prerevolutionarytinderserver.model.User;
+import org.rosstinder.prerevolutionarytinderserver.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +18,7 @@ public class UserController {
     }
 
     @GetMapping(value = "/{id}")
-    public User findById(@PathVariable("id") int id) {
+    public User findById(@PathVariable("id") Long id) {
         return service.findById(id);
     }
 
@@ -29,14 +30,14 @@ public class UserController {
 
     @PutMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public void update(@PathVariable("id") int id, @RequestBody User resource) {
+    public void update(@PathVariable("id") Long id, @RequestBody User resource) {
         service.findById(resource.getChatId());
         service.update(resource);
     }
 
     @DeleteMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public void delete(@PathVariable("id") int id) {
+    public void delete(@PathVariable("id") Long id) {
         service.deleteById(id);
     }
 }
