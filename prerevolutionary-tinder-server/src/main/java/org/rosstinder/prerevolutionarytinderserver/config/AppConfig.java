@@ -1,22 +1,34 @@
 package org.rosstinder.prerevolutionarytinderserver.config;
 
-import org.rosstinder.prerevolutionarytinderserver.model.repository.LikeRepository;
-import org.rosstinder.prerevolutionarytinderserver.service.LikeService;
-import org.rosstinder.prerevolutionarytinderserver.service.UserService;
+import liquibase.integration.spring.SpringLiquibase;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 @Configuration
 public class AppConfig {
 
-    /*private final LikeRepository likeRepository;
-
-    public AppConfig(LikeRepository likeRepository) {
-        this.likeRepository = likeRepository;
+    @Bean
+    public JdbcTemplate jdbcTemplate(DriverManagerDataSource dataSource){
+        return new JdbcTemplate(dataSource);
     }
 
     @Bean
-    public LikeService likeService() {
-        return ;
-    }*/
+    public DriverManagerDataSource dataSource(){
+        DriverManagerDataSource ds = new DriverManagerDataSource();
+        ds.setDriverClassName("org.postgresql.Driver");
+        ds.setUrl("jdbc:postgresql://localhost:5432/postgres");
+        ds.setUsername("postgres");
+        ds.setPassword("postgres");
+        return ds;
+    }
+
+    @Bean
+    public SpringLiquibase springLiquibase(){
+        SpringLiquibase liquibase = new SpringLiquibase();
+        liquibase.setDataSource(dataSource());
+        liquibase.setChangeLog("classpath:/db/changelog-master.yaml");
+        return liquibase;
+    }
 }

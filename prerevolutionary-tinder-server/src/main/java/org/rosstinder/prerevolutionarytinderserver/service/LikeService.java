@@ -1,7 +1,7 @@
 package org.rosstinder.prerevolutionarytinderserver.service;
 
 import lombok.NonNull;
-import org.rosstinder.prerevolutionarytinderserver.model.Like;
+import org.rosstinder.prerevolutionarytinderserver.model.entity.Like;
 import org.rosstinder.prerevolutionarytinderserver.model.repository.LikeRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

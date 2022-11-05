@@ -1,4 +1,4 @@
-package org.rosstinder.prerevolutionarytinderserver.model;
+package org.rosstinder.prerevolutionarytinderserver.model.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

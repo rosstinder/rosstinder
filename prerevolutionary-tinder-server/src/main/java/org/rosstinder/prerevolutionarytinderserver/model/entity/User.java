@@ -1,36 +1,50 @@
-package org.rosstinder.prerevolutionarytinderserver.model;
+package org.rosstinder.prerevolutionarytinderserver.model.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import org.rosstinder.prerevolutionarytinderserver.model.Gender;
+import org.rosstinder.prerevolutionarytinderserver.model.Preference;
 
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @Getter
-@EqualsAndHashCode
-@AllArgsConstructor
+@Entity
+@Table(name = "users")
 public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private final UUID id;
+    @Column(name = "chat_id", unique = true, nullable = false)
     private final Long chatId;
+    @Column(name = "username", unique = true, nullable = false)
     private String username;
+    @Column(name = "gender")
     @Setter
     private Gender gender;
+    @Column(name = "name")
     @Setter
     private String name;
+    @Column(name = "title")
     @Setter
     private String title;
+    @Column(name = "description")
     @Setter
     private String description;
+    @Column(name = "preference")
     @Setter
     private Preference preference;
-    private List<User> likedUsers = new ArrayList<>();
-    private boolean searchFlag = false;
-    private boolean editFlag = false;
-    private boolean likesFlag = false;
 
+    public User(Long chatId, String username) {
+        this.id = UUID.randomUUID();
+        this.chatId = chatId;
+        this.username = username;
+    }
     public User(Long chatId, String username, Gender gender, String name, String title,
                 String description, Preference preference) {
         this.id = UUID.randomUUID();
@@ -41,14 +55,6 @@ public class User {
         this.title = title;
         this.description = description;
         this.preference = preference;
-    }
-
-    public void addLikesUser(User user) {
-        this.likedUsers.add(user);
-    }
-
-    public void editUser(User editedUser) {
-
     }
 
     @Override

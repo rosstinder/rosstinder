@@ -1,6 +1,6 @@
 package org.rosstinder.prerevolutionarytinderserver.controller;
 
-import org.rosstinder.prerevolutionarytinderserver.model.User;
+import org.rosstinder.prerevolutionarytinderserver.model.entity.User;
 import org.rosstinder.prerevolutionarytinderserver.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;

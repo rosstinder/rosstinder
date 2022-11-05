@@ -1,6 +1,6 @@
 package org.rosstinder.prerevolutionarytinderserver.service;
 
-import org.rosstinder.prerevolutionarytinderserver.model.User;
+import org.rosstinder.prerevolutionarytinderserver.model.entity.User;
 import java.util.List;
 
 public interface Service {

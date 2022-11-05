@@ -2,7 +2,7 @@ package org.rosstinder.prerevolutionarytinderserver.service;
 
 import org.rosstinder.prerevolutionarytinderserver.model.Gender;
 import org.rosstinder.prerevolutionarytinderserver.model.Preference;
-import org.rosstinder.prerevolutionarytinderserver.model.User;
+import org.rosstinder.prerevolutionarytinderserver.model.entity.User;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
