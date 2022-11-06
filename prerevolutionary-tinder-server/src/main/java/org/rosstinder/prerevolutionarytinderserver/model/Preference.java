@@ -8,13 +8,22 @@ public enum Preference {
     ALL ("Все");
 
     @Getter
-    private String gender;
-    Preference(String gender) {
-        this.gender = gender;
+    private String preference;
+    Preference(String preference) {
+        this.preference = preference;
     }
 
     @Override
     public String toString() {
-        return this.gender;
+        return this.preference;
+    }
+
+    public static boolean compareGenderAndPreference(Gender gender, Preference preference) {
+        if (preference.getPreference().equals(gender.getGender())) {
+            return true;
+        } else if (preference.getPreference().equals(Preference.ALL)) {
+            return true;
+        }
+        return false;
     }
 }

@@ -1,5 +1,7 @@
 package org.rosstinder.prerevolutionarytinderserver.controller;
 
+import org.rosstinder.prerevolutionarytinderserver.model.Gender;
+import org.rosstinder.prerevolutionarytinderserver.model.Preference;
 import org.rosstinder.prerevolutionarytinderserver.model.entity.User;
 import org.rosstinder.prerevolutionarytinderserver.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -39,5 +41,31 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     public void delete(@PathVariable("id") Long id) {
         service.deleteById(id);
+    }
+
+
+
+    @PutMapping(value = "/{id}/gender")
+    @ResponseStatus(HttpStatus.OK)
+    public void updateGender(@PathVariable("id") Long id, Gender gender) {
+        service.updateGender(id, gender);
+    }
+
+    @PutMapping(value = "/{id}/description")
+    @ResponseStatus(HttpStatus.OK)
+    public void updateDescription(@PathVariable("id") Long id, String description) {
+        service.updateDescription(id, description);
+    }
+
+    @PutMapping(value = "/{id}/preference")
+    @ResponseStatus(HttpStatus.OK)
+    public void updatePreference(@PathVariable("id") Long id, Preference preference) {
+        service.updatePreference(id, preference);
+    }
+
+    @GetMapping(value = "/search")
+    @ResponseStatus(HttpStatus.OK)
+    public List<User> search(@PathVariable("id") Long id) {
+        return service.search(id);
     }
 }

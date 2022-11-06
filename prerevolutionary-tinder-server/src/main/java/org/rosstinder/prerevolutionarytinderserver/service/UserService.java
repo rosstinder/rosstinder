@@ -8,9 +8,10 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
-public class UserService implements Service {
+public class UserService {
 
     private List<User> users;
 
@@ -24,7 +25,7 @@ public class UserService implements Service {
                 Preference.MALE));
     }
 
-    @Override
+
     public User findById(Long chatId) {
         Optional<User> optUser = users.stream()
                 .filter(u -> u.getChatId() == chatId)
@@ -32,13 +33,12 @@ public class UserService implements Service {
         return optUser.get();
     }
 
-    @Override
+
     public int create(User user) {
         users.add(user);
         return 0;
     }
 
-    @Override
     public void update(User user) {
         User userToEdit = users.stream()
                 .filter(u -> u.getChatId() == user.getChatId())
@@ -47,13 +47,45 @@ public class UserService implements Service {
 
     }
 
-    @Override
     public void deleteById(Long chatId) {
         users.removeIf(u -> u.getChatId() == chatId);
     }
 
-    @Override
     public List<User> findAll() {
         return users;
+    }
+
+    public void updateGender(Long id, Gender gender) {
+        User user = findById(id);
+        user.setGender(gender);
+    }
+
+    public void updateDescription(Long id, String description) {
+        User user = findById(id);
+        String title;
+        String[] splitted = description.split("\n");
+        if (splitted.length == 1) {
+            title = description.split(" ")[0];
+            description = description.replaceFirst("[^ ]+", "");
+        } else {
+            title = splitted[0];
+            description = description.replaceFirst("[^\n]+", "");
+        }
+        user.setTitle(title);
+        user.setDescription(description);
+    }
+
+    public void updatePreference(Long id, Preference preference) {
+        User user = findById(id);
+        user.setPreference(preference);
+    }
+
+    public List<User> search(Long id) {
+        User user = findById(id);
+        return findAll().stream()
+                .filter(u -> !u.getChatId().equals(id))
+                .filter(u -> Preference.compareGenderAndPreference(user.getGender(), u.getPreference())
+                        && Preference.compareGenderAndPreference(u.getGender(), user.getPreference()))
+                .collect(Collectors.toList());
     }
 }
