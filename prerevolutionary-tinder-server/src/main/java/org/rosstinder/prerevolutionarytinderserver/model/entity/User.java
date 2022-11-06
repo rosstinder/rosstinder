@@ -14,6 +14,23 @@ import java.util.UUID;
 //@Entity
 //@Table(name = "users")
 public class User {
+
+    //private final Long id;
+    private final Long chatId;
+
+    private String status;
+
+    private Long lastLoverId;
+
+    private Long lastProfileId;
+
+    public User(Long id, Long chatId) {
+        //this.id = id;
+        this.chatId = chatId;
+    }
+
+
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", unique = true, nullable = false)
