@@ -18,6 +18,15 @@ public enum Preference {
         return this.preference;
     }
 
+    public static Preference fromString(String text) {
+        for (Preference preference : Preference.values()) {
+            if (preference.getPreference().equalsIgnoreCase(text)) {
+                return preference;
+            }
+        }
+        return null;
+    }
+
     public static boolean compareGenderAndPreference(Gender gender, Preference preference) {
         if (preference.getPreference().equals(gender.getGender())) {
             return true;

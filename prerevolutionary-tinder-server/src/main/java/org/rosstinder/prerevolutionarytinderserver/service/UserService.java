@@ -2,6 +2,7 @@ package org.rosstinder.prerevolutionarytinderserver.service;
 
 import org.rosstinder.prerevolutionarytinderserver.model.Gender;
 import org.rosstinder.prerevolutionarytinderserver.model.Preference;
+import org.rosstinder.prerevolutionarytinderserver.model.entity.Profile;
 import org.rosstinder.prerevolutionarytinderserver.model.entity.User;
 import org.springframework.stereotype.Component;
 
@@ -14,54 +15,57 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private List<User> users;
+    private List<Profile> profiles;
 
     public UserService() {
         this.users = new ArrayList<>();
-        this.users.add(new User(Long.valueOf(1), "user1", Gender.MALE, "Некто", "Интеллигентный",
-                "Одинокий купец, 37 лет, имеет около двадцати лет большое торговое дело. Ежегодный оборот около ста тысяч рублей, желает познакомиться в целях брака, с барышней или вдовой не старше 30 лет. Предпочитаю брюнетку высокого роста, полную, с капиталом. Предложение серьезное.",
-                Preference.ALL));
-        this.users.add(new User(Long.valueOf(2), "user2", Gender.FEMALE, "Никто", "Желаю выйти замуж",
-                "Брюнетка, выше среднего роста, стройная, неполная, 25 л., интеллигентная, говорят очень недурненькая, но бедна, приданого нет. Надоело одиночество в Сибири, хочется выйти замуж в России или на Кавказе за господина, способного и мне оказать материальную помощь. Буду любящей преданной женой. Люблю семью и хозяйство. Ищущих приключений и любопытных прошу не беспокоиться. Таким не отвечу.",
-                Preference.MALE));
+        this.users.add(new User(Long.valueOf(1), "start"));
+        this.users.add(new User(Long.valueOf(2), "start"));
+
+        this.profiles = new ArrayList<>();
+        this.profiles.add(new Profile(Long.valueOf(1)));
+        this.profiles.add(new Profile(Long.valueOf(2)));
+
+        this.profiles.get(0).setGender(Gender.fromString("Сударъ"));
+        this.profiles.get(0).setName("Некто");
+        this.profiles.get(0).setTitle("Интеллигентный");
+        this.profiles.get(0).setTitle("Одинокий купец, 37 лет, имеет около двадцати лет большое торговое дело. Ежегодный оборот около ста тысяч рублей, желает познакомиться в целях брака, с барышней или вдовой не старше 30 лет. Предпочитаю брюнетку высокого роста, полную, с капиталом. Предложение серьезное.");
+        this.profiles.get(0).setPreference(Preference.FEMALE);
+
+        this.profiles.get(1).setGender(Gender.fromString("Сударыня"));
+        this.profiles.get(1).setName("Никто");
+        this.profiles.get(1).setTitle("Желаю выйти замуж");
+        this.profiles.get(1).setTitle("Брюнетка, выше среднего роста, стройная, неполная, 25 л., интеллигентная, говорят очень недурненькая, но бедна, приданого нет. Надоело одиночество в Сибири, хочется выйти замуж в России или на Кавказе за господина, способного и мне оказать материальную помощь. Буду любящей преданной женой. Люблю семью и хозяйство. Ищущих приключений и любопытных прошу не беспокоиться. Таким не отвечу.");
+        this.profiles.get(1).setPreference(Preference.MALE);
     }
 
 
-    public User findById(Long chatId) {
+    public User findUserByChatId(Long chatId) {
         Optional<User> optUser = users.stream()
                 .filter(u -> u.getChatId() == chatId)
                 .findAny();
         return optUser.get();
     }
 
-
-    public int create(User user) {
-        users.add(user);
-        return 0;
-    }
-
-    public void update(User user) {
-        User userToEdit = users.stream()
-                .filter(u -> u.getChatId() == user.getChatId())
+    private Profile findProfileByChatId(Long chatId) {
+        return profiles.stream()
+                .filter(p -> p.getChatId().equals(chatId))
                 .findAny()
                 .get();
-
     }
 
-    public void deleteById(Long chatId) {
-        users.removeIf(u -> u.getChatId() == chatId);
+    public void updateGender(Long chatId, Gender gender) {
+        Profile profile = findProfileByChatId(chatId);
+        profile.setGender(gender);
     }
 
-    public List<User> findAll() {
-        return users;
+    public void updateName(Long chatId, String name) {
+        Profile profile = findProfileByChatId(chatId);
+        profile.setName(name);
     }
 
-    public void updateGender(Long id, Gender gender) {
-        User user = findById(id);
-        user.setGender(gender);
-    }
-
-    public void updateDescription(Long id, String description) {
-        User user = findById(id);
+    public void updateDescription(Long chatId, String description) {
+        Profile profile = findProfileByChatId(chatId);
         String title;
         String[] splitted = description.split("\n");
         if (splitted.length == 1) {
@@ -71,21 +75,74 @@ public class UserService {
             title = splitted[0];
             description = description.replaceFirst("[^\n]+", "");
         }
-        user.setTitle(title);
-        user.setDescription(description);
+        profile.setTitle(title);
+        profile.setDescription(description);
     }
 
-    public void updatePreference(Long id, Preference preference) {
-        User user = findById(id);
-        user.setPreference(preference);
+    public void updatePreference(Long chatId, Preference preference) {
+        Profile profile = findProfileByChatId(chatId);
+        profile.setPreference(preference);
     }
 
-    public List<User> search(Long id) {
-        User user = findById(id);
-        return findAll().stream()
-                .filter(u -> !u.getChatId().equals(id))
-                .filter(u -> Preference.compareGenderAndPreference(user.getGender(), u.getPreference())
-                        && Preference.compareGenderAndPreference(u.getGender(), user.getPreference()))
-                .collect(Collectors.toList());
+    public void updateUserStatus(Long chatId, String status) {
+        User user = findUserByChatId(chatId);
+        user.setStatus(status);
     }
+
+    public void createUser(Long chatId, String status) {
+        users.add(new User(chatId, status));
+    }
+
+    public void createProfile(Long chatId) {
+        profiles.add(new Profile(chatId));
+    }
+
+    public List<User> findAllUsers() {
+        return users;
+    }
+
+    public List<Profile> findAllProfiles() {
+        return profiles;
+    }
+
+    public String findProfileUrl(Long chatId) {
+        return profiles.stream()
+                .filter(p -> p.getChatId().equals(chatId))
+                .map(Profile::toString)
+                .findAny()
+                .get();
+    }
+
+    public Long findNextProfileChatId(Long chatId) {
+        User user = findUserByChatId(chatId);
+        Profile profile = findProfileByChatId(chatId);
+        Long lastSeenProfile = user.getLastProfileNumber();
+        Optional<Long> nextProfile = findAllProfiles().stream()
+                .filter(p -> !p.getChatId().equals(chatId))
+                .filter(p -> Preference.compareGenderAndPreference(profile.getGender(), p.getPreference())
+                        && Preference.compareGenderAndPreference(p.getGender(), profile.getPreference()))
+                .map(Profile::getChatId)
+                .sorted(Long::compareTo)
+                .filter(id -> id.compareTo(user.getLastProfileNumber()) > 0)
+                .findFirst();
+        if(nextProfile.isEmpty()) {
+            user.setLastProfileNumber(User.ZERO);
+            nextProfile = findAllProfiles().stream()
+                    .filter(p -> !p.getChatId().equals(chatId))
+                    .filter(p -> Preference.compareGenderAndPreference(profile.getGender(), p.getPreference())
+                            && Preference.compareGenderAndPreference(p.getGender(), profile.getPreference()))
+                    .map(Profile::getChatId)
+                    .sorted(Long::compareTo)
+                    .filter(id -> id.compareTo(user.getLastProfileNumber()) > 0)
+                    .findFirst();
+        }
+        updateUserProfileNumber(chatId, nextProfile.get());
+        return nextProfile.get();
+    }
+
+    private void updateUserProfileNumber(Long chatId, Long profileNumber) {
+        User user = findUserByChatId(chatId);
+        user.setLastProfileNumber(profileNumber);
+    }
+
 }

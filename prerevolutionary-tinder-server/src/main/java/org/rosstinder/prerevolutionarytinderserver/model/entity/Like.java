@@ -9,18 +9,15 @@ import java.util.UUID;
 @Getter
 @AllArgsConstructor
 public class Like {
-    private final UUID id;
+    private final Long whoChatId;
 
-    private final UUID who;
-
-    private final UUID whom;
+    private final Long whomChatId;
 
     @Setter
     private boolean isLike;
 
-    public Like(UUID who, UUID whom) {
-        this.id = UUID.randomUUID();
-        this.who = who;
-        this.whom = whom;
+    public Like(Long who, Long whom) {
+        this.whoChatId = who;
+        this.whomChatId = whom;
     }
 }

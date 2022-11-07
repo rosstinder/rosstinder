@@ -1,7 +1,5 @@
 package org.rosstinder.prerevolutionarytinderserver.model.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.rosstinder.prerevolutionarytinderserver.model.Gender;
@@ -14,73 +12,31 @@ import java.util.UUID;
 //@Entity
 //@Table(name = "users")
 public class User {
+    public final static Long ZERO = Long.valueOf(0);
 
     //private final Long id;
     private final Long chatId;
-
+    @Setter
     private String status;
+    @Setter
+    private Long lastLoverNumber;
+    @Setter
+    private Long lastProfileNumber;
 
-    private Long lastLoverId;
-
-    private Long lastProfileId;
-
-    public User(Long id, Long chatId) {
+    public User(Long chatId, String status) {
         //this.id = id;
         this.chatId = chatId;
-    }
-
-
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", unique = true, nullable = false)
-    private final UUID id;
-    @Column(name = "chat_id", unique = true, nullable = false)
-    private final Long chatId;
-    @Column(name = "username", unique = true, nullable = false)
-    private String username;
-    @Column(name = "gender")
-    @Setter
-    private Gender gender;
-    @Column(name = "name")
-    @Setter
-    private String name;
-    @Column(name = "title")
-    @Setter
-    private String title;
-    @Column(name = "description")
-    @Setter
-    private String description;
-    @Column(name = "preference")
-    @Setter
-    private Preference preference;
-
-    public User(Long chatId, String username) {
-        this.id = UUID.randomUUID();
-        this.chatId = chatId;
-        this.username = username;
-    }
-    public User(Long chatId, String username, Gender gender, String name, String title,
-                String description, Preference preference) {
-        this.id = UUID.randomUUID();
-        this.chatId = chatId;
-        this.username = username;
-        this.gender = gender;
-        this.name = name;
-        this.title = title;
-        this.description = description;
-        this.preference = preference;
+        this.status = status;
+        this.lastLoverNumber = ZERO;
+        this.lastProfileNumber = ZERO;
     }
 
     @Override
     public String toString() {
-        return String.format("User{id=%s,chatId=%s,gender=%s,name=%s,title=%s,description=%s,preference1=%s,prederence2=%s}",
-                id,
+        return String.format("User{chatId=%s,status=%s,lastLoverNumber=%s,lastProfileNumber=%s}",
                 chatId,
-                gender,
-                name,
-                title,
-                description,
-                preference);
+                status,
+                lastLoverNumber,
+                lastProfileNumber);
     }
 }
