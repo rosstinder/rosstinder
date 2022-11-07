@@ -2,11 +2,6 @@ package org.rosstinder.prerevolutionarytinderserver.model.entity;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.rosstinder.prerevolutionarytinderserver.model.Gender;
-import org.rosstinder.prerevolutionarytinderserver.model.Preference;
-
-import javax.persistence.*;
-import java.util.UUID;
 
 @Getter
 //@Entity
@@ -19,7 +14,7 @@ public class User {
     @Setter
     private String status;
     @Setter
-    private Long lastLoverNumber;
+    private Long lastFavoriteNumber;
     @Setter
     private Long lastProfileNumber;
 
@@ -27,7 +22,7 @@ public class User {
         //this.id = id;
         this.chatId = chatId;
         this.status = status;
-        this.lastLoverNumber = ZERO;
+        this.lastFavoriteNumber = ZERO;
         this.lastProfileNumber = ZERO;
     }
 
@@ -36,7 +31,7 @@ public class User {
         return String.format("User{chatId=%s,status=%s,lastLoverNumber=%s,lastProfileNumber=%s}",
                 chatId,
                 status,
-                lastLoverNumber,
+                lastFavoriteNumber,
                 lastProfileNumber);
     }
 }

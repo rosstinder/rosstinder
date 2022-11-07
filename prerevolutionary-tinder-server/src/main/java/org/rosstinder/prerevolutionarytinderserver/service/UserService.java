@@ -116,7 +116,6 @@ public class UserService {
     public Long findNextProfileChatId(Long chatId) {
         User user = findUserByChatId(chatId);
         Profile profile = findProfileByChatId(chatId);
-        Long lastSeenProfile = user.getLastProfileNumber();
         Optional<Long> nextProfile = findAllProfiles().stream()
                 .filter(p -> !p.getChatId().equals(chatId))
                 .filter(p -> Preference.compareGenderAndPreference(profile.getGender(), p.getPreference())
@@ -140,7 +139,7 @@ public class UserService {
         return nextProfile.get();
     }
 
-    private void updateUserProfileNumber(Long chatId, Long profileNumber) {
+    public void updateUserProfileNumber(Long chatId, Long profileNumber) {
         User user = findUserByChatId(chatId);
         user.setLastProfileNumber(profileNumber);
     }

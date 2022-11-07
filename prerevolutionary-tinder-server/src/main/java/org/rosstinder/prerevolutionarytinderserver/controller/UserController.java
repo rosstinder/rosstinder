@@ -65,7 +65,7 @@ public class UserController {
 
     @GetMapping(value = "/{chatId}/search/nextProfile")
     @ResponseStatus(HttpStatus.OK)
-    public Long search(@PathVariable("chatId") Long chatId, String status) {
+    public Long searchNextProfile(@PathVariable("chatId") Long chatId, String status) {
         Long profileChatId = service.findNextProfileChatId(chatId);
         try {
             service.updateUserStatus(chatId, status);
