@@ -1,6 +1,7 @@
 package org.rosstinder.prerevolutionarytinderserver.model;
 
 import lombok.Getter;
+import org.rosstinder.prerevolutionarytinderserver.exception.BusinessException;
 
 public enum Gender {
     MALE ("Сударъ"),
@@ -17,12 +18,12 @@ public enum Gender {
         return this.gender;
     }
 
-    public static Gender fromString(String text) {
+    public static Gender fromString(String text) throws BusinessException {
         for (Gender gender : Gender.values()) {
             if (gender.getGender().equalsIgnoreCase(text)) {
                 return gender;
             }
         }
-        return null;
+        throw new BusinessException("Неправильный формат пола. Допустимые значения: Сударъ, Сударыня.");
     }
 }

@@ -1,6 +1,7 @@
 package org.rosstinder.prerevolutionarytinderserver.model;
 
 import lombok.Getter;
+import org.rosstinder.prerevolutionarytinderserver.exception.BusinessException;
 
 public enum Preference {
     MALE ("Сударъ"),
@@ -18,13 +19,13 @@ public enum Preference {
         return this.preference;
     }
 
-    public static Preference fromString(String text) {
+    public static Preference fromString(String text) throws BusinessException {
         for (Preference preference : Preference.values()) {
             if (preference.getPreference().equalsIgnoreCase(text)) {
                 return preference;
             }
         }
-        return null;
+        throw new BusinessException("Неправильный формат предпочтения. Допустимые значения: Сударъ, Сударыня, Всех.");
     }
 
     public static boolean compareGenderAndPreference(Gender gender, Preference preference) {

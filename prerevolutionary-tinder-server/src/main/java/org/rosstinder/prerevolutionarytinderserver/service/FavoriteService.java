@@ -31,22 +31,22 @@ public class FavoriteService {
      * @param isLike флаг лайка (true) / отказа (false)
      * @return возвращает "Вы любимы" в случае взаимного лайка, иначе пустую строку
      */
-    public String makeLikeOrDislike(Long who, Long whom, boolean isLike, String status) {
-        //Long whom = userService.findUserByChatId(who).getLastProfileNumber();
-        if (isLikeAlreadyExist(who, whom)) {
-            editLikeOrDislike(who, whom, isLike);
-        } else {
-            favorites.add(new Favorite(who, whom, isLike));
-        }
-        if (isMatch(who, whom)) {
-            userService.updateUserStatus(who, status);
-            return "Вы любимы";
-        }
-        else {
-            userService.updateUserStatus(who, status);
-            return "";
-        }
-    }
+    //public String makeLikeOrDislike(Long who, Long whom, boolean isLike, String status) {
+    //    //Long whom = userService.findUserByChatId(who).getLastProfileNumber();
+    //    if (isLikeAlreadyExist(who, whom)) {
+    //        editLikeOrDislike(who, whom, isLike);
+    //    } else {
+    //        favorites.add(new Favorite(who, whom, isLike));
+    //    }
+    //    if (isMatch(who, whom)) {
+    //        userService.updateUserStatus(who, status);
+    //        return "Вы любимы";
+    //    }
+    //    else {
+    //        userService.updateUserStatus(who, status);
+    //        return "";
+    //    }
+    //}
 
     /**
      * Получить все содержимое таблицы likes
@@ -77,77 +77,77 @@ public class FavoriteService {
                 .isPresent();
     }
 
-    /**
-     * Метод вычисляет id следующей анкеты Любимцев
-     * @param chatId пользователь, который просматривает своих Любимцев
-     * @return chatId пользователя, которого следует отобразить следующим при просмотре Любимцев
-     */
-    public Long findNextFavoriteChatId(Long chatId, String status) {
-        User user = userService.findUserByChatId(chatId);
-        Optional<Long> nextFavorite = findAllLikes().stream()
-                .filter(l -> l.getWhoChatId().equals(chatId))
-                .map(Favorite::getWhomChatId)
-                .sorted(Long::compareTo)
-                .filter(id -> id.compareTo(user.getLastFavoriteNumber()) > 0)
-                .findFirst();
-        if (nextFavorite.isEmpty()) {
-            user.setLastFavoriteNumber(User.ZERO_VALUE);
-            nextFavorite = findAllLikes().stream()
-                    .filter(l -> l.getWhoChatId().equals(chatId))
-                    .map(Favorite::getWhomChatId)
-                    .sorted(Long::compareTo)
-                    .filter(id -> id.compareTo(user.getLastFavoriteNumber()) > 0)
-                    .findFirst();
-            if(nextFavorite.isEmpty()) {
-                userService.updateUserStatus(chatId, status);
-                return null;
-            }
-        }
-        userService.updateUserFavoriteNumber(chatId, nextFavorite.get());
-        userService.updateUserStatus(chatId, status);
-        return nextFavorite.get();
-    }
+    ///**
+    // * Метод вычисляет id следующей анкеты Любимцев
+    // * @param chatId пользователь, который просматривает своих Любимцев
+    // * @return chatId пользователя, которого следует отобразить следующим при просмотре Любимцев
+    // */
+    //public Long findNextFavoriteChatId(Long chatId, String status) {
+    //    User user = userService.findUserByChatId(chatId);
+    //    Optional<Long> nextFavorite = findAllLikes().stream()
+    //            .filter(l -> l.getWhoChatId().equals(chatId))
+    //            .map(Favorite::getWhomChatId)
+    //            .sorted(Long::compareTo)
+    //            .filter(id -> id.compareTo(user.getLastFavoriteNumber()) > 0)
+    //            .findFirst();
+    //    if (nextFavorite.isEmpty()) {
+    //        user.setLastFavoriteNumber(User.ZERO_VALUE);
+    //        nextFavorite = findAllLikes().stream()
+    //                .filter(l -> l.getWhoChatId().equals(chatId))
+    //                .map(Favorite::getWhomChatId)
+    //                .sorted(Long::compareTo)
+    //                .filter(id -> id.compareTo(user.getLastFavoriteNumber()) > 0)
+    //                .findFirst();
+    //        if(nextFavorite.isEmpty()) {
+    //            userService.updateUserStatus(chatId, status);
+    //            return null;
+    //        }
+    //    }
+    //    userService.updateUserFavoriteNumber(chatId, nextFavorite.get());
+    //    userService.updateUserStatus(chatId, status);
+    //    return nextFavorite.get();
+    //}
+//
+    //public Long findPreviousFavoriteChatId(Long chatId, String status) {
+    //    User user = userService.findUserByChatId(chatId);
+    //    Optional<Long> previousFavorite = findAllLikes().stream()
+    //            .filter(l -> l.getWhoChatId().equals(chatId))
+    //            .map(Favorite::getWhomChatId)
+    //            .sorted(Long::compareTo)
+    //            .filter(id -> id.compareTo(user.getLastFavoriteNumber()) < 0)
+    //            .findFirst();
+    //    if (previousFavorite.isEmpty()) {
+    //        user.setLastFavoriteNumber(Long.MAX_VALUE);
+    //        previousFavorite = findAllLikes().stream()
+    //                .filter(l -> l.getWhoChatId().equals(chatId))
+    //                .map(Favorite::getWhomChatId)
+    //                .sorted(Long::compareTo)
+    //                .filter(id -> id.compareTo(user.getLastFavoriteNumber()) < 0)
+    //                .reduce((first, second) -> second);
+    //        if(previousFavorite.isEmpty()) {
+    //            userService.updateUserStatus(chatId, status);
+    //            return null;
+    //        }
+    //    }
+    //    userService.updateUserFavoriteNumber(chatId, previousFavorite.get());
+    //    userService.updateUserStatus(chatId, status);
+    //    return previousFavorite.get();
+    //}
 
-    public Long findPreviousFavoriteChatId(Long chatId, String status) {
-        User user = userService.findUserByChatId(chatId);
-        Optional<Long> previousFavorite = findAllLikes().stream()
-                .filter(l -> l.getWhoChatId().equals(chatId))
-                .map(Favorite::getWhomChatId)
-                .sorted(Long::compareTo)
-                .filter(id -> id.compareTo(user.getLastFavoriteNumber()) < 0)
-                .findFirst();
-        if (previousFavorite.isEmpty()) {
-            user.setLastFavoriteNumber(Long.MAX_VALUE);
-            previousFavorite = findAllLikes().stream()
-                    .filter(l -> l.getWhoChatId().equals(chatId))
-                    .map(Favorite::getWhomChatId)
-                    .sorted(Long::compareTo)
-                    .filter(id -> id.compareTo(user.getLastFavoriteNumber()) < 0)
-                    .reduce((first, second) -> second);
-            if(previousFavorite.isEmpty()) {
-                userService.updateUserStatus(chatId, status);
-                return null;
-            }
-        }
-        userService.updateUserFavoriteNumber(chatId, previousFavorite.get());
-        userService.updateUserStatus(chatId, status);
-        return previousFavorite.get();
-    }
-
-    public String checkLike(Long whoChatId) {
-        StringBuilder result = new StringBuilder("");
-        Long whomChatId = userService.findUserByChatId(whoChatId).getLastFavoriteNumber();
-        Profile whomProfile = userService.findProfileByChatId(whomChatId);
-        result.append(whomProfile.getGender().getGender() + ", " + whomProfile.getName());
-        if (isMatch(whoChatId, whomChatId)) {
-            result.append(", Взаимность");
-        } else if (isUserFavoritesAnotherUser(whomChatId, whoChatId)) {
-            result.append(", Вы любимы");
-        } else if (isUserFavoritesAnotherUser(whoChatId, whomChatId)) {
-            result.append(", Любим вами");
-        }
-        return result.toString();
-    }
+    //public String checkLike(Long whoChatId) {
+    //    StringBuilder result = new StringBuilder("");
+    //    Long whomChatId = userService.findUserByChatId(whoChatId).getLastFavoriteNumber();
+    //    Profile whomProfile = userService.findProfileByChatId(whomChatId);
+    //    result.append(whomProfile.getGender().getGender() + ", " + whomProfile.getName());
+    //    if (isMatch(whoChatId, whomChatId)) {
+    //        result.append(", Взаимность");
+    //    } else if (isUserFavoritesAnotherUser(whomChatId, whoChatId)) {
+    //        result.append(", Вы любимы");
+    //    } else if (isUserFavoritesAnotherUser(whoChatId, whomChatId)) {
+    //        result.append(", Любим вами");
+    //    }
+    //    return result.toString();
+    //}
 
     private boolean isMatch(Long whoChatId, Long whomChatId) {
         if (isUserFavoritesAnotherUser(whoChatId, whomChatId) && (isUserFavoritesAnotherUser(whomChatId, whoChatId))) {
