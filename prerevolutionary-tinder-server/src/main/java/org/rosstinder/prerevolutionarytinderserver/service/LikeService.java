@@ -20,6 +20,7 @@ public class LikeService {
     private List<Like> likes = new ArrayList<>();
     public LikeService() {
         likes.add(new Like(Long.valueOf(2),Long.valueOf(1)));
+        likes.add(new Like(Long.valueOf(2),Long.valueOf(3)));
     }
 
     /**
@@ -88,7 +89,7 @@ public class LikeService {
                 .filter(id -> id.compareTo(user.getLastFavoriteNumber()) > 0)
                 .findFirst();
         if (nextFavorite.isEmpty()) {
-            user.setLastFavoriteNumber(User.ZERO);
+            user.setLastFavoriteNumber(User.ZERO_VALUE);
             nextFavorite = findAllLikes().stream()
                     .filter(l -> l.getWhoChatId().equals(chatId))
                     .map(Like::getWhomChatId)
@@ -99,8 +100,32 @@ public class LikeService {
                 return null;
             }
         }
-        userService.updateUserProfileNumber(chatId, nextFavorite.get());
+        userService.updateUserFavoriteNumber(chatId, nextFavorite.get());
         return nextFavorite.get();
+    }
+
+    public Long findPreviousFavoriteChatId(Long chatId) {
+        User user = userService.findUserByChatId(chatId);
+        Optional<Long> previousFavorite = findAllLikes().stream()
+                .filter(l -> l.getWhoChatId().equals(chatId))
+                .map(Like::getWhomChatId)
+                .sorted(Long::compareTo)
+                .filter(id -> id.compareTo(user.getLastFavoriteNumber()) < 0)
+                .findFirst();
+        if (previousFavorite.isEmpty()) {
+            user.setLastFavoriteNumber(Long.MAX_VALUE);
+            previousFavorite = findAllLikes().stream()
+                    .filter(l -> l.getWhoChatId().equals(chatId))
+                    .map(Like::getWhomChatId)
+                    .sorted(Long::compareTo)
+                    .filter(id -> id.compareTo(user.getLastFavoriteNumber()) < 0)
+                    .reduce((first, second) -> second);
+            if(previousFavorite.isEmpty()) {
+                return null;
+            }
+        }
+        userService.updateUserFavoriteNumber(chatId, previousFavorite.get());
+        return previousFavorite.get();
     }
 
 

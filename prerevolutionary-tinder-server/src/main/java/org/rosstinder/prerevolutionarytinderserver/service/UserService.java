@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Component
 public class UserService {
@@ -21,10 +20,12 @@ public class UserService {
         this.users = new ArrayList<>();
         this.users.add(new User(Long.valueOf(1), "start"));
         this.users.add(new User(Long.valueOf(2), "start"));
+        this.users.add(new User(Long.valueOf(3), "start"));
 
         this.profiles = new ArrayList<>();
         this.profiles.add(new Profile(Long.valueOf(1)));
         this.profiles.add(new Profile(Long.valueOf(2)));
+        this.profiles.add(new Profile(Long.valueOf(3)));
 
         this.profiles.get(0).setGender(Gender.fromString("Сударъ"));
         this.profiles.get(0).setName("Некто");
@@ -37,6 +38,12 @@ public class UserService {
         this.profiles.get(1).setTitle("Желаю выйти замуж");
         this.profiles.get(1).setTitle("Брюнетка, выше среднего роста, стройная, неполная, 25 л., интеллигентная, говорят очень недурненькая, но бедна, приданого нет. Надоело одиночество в Сибири, хочется выйти замуж в России или на Кавказе за господина, способного и мне оказать материальную помощь. Буду любящей преданной женой. Люблю семью и хозяйство. Ищущих приключений и любопытных прошу не беспокоиться. Таким не отвечу.");
         this.profiles.get(1).setPreference(Preference.MALE);
+
+        this.profiles.get(2).setGender(Gender.fromString("Сударъ"));
+        this.profiles.get(2).setName("Ничто");
+        this.profiles.get(2).setTitle("Холостой человек");
+        this.profiles.get(2).setTitle("33 лет, желает познакомиться с особой, при взаимном сочувствии брак. Прелестного отзывчивого характера, коммерсант, не долюбливаю спиртные напитки, не курю, в карты не играю. Тайну переписки гарантирую честным словом.");
+        this.profiles.get(2).setPreference(Preference.FEMALE);
     }
 
 
@@ -125,7 +132,7 @@ public class UserService {
                 .filter(id -> id.compareTo(user.getLastProfileNumber()) > 0)
                 .findFirst();
         if(nextProfile.isEmpty()) {
-            user.setLastProfileNumber(User.ZERO);
+            user.setLastProfileNumber(User.ZERO_VALUE);
             nextProfile = findAllProfiles().stream()
                     .filter(p -> !p.getChatId().equals(chatId))
                     .filter(p -> Preference.compareGenderAndPreference(profile.getGender(), p.getPreference())
@@ -144,4 +151,8 @@ public class UserService {
         user.setLastProfileNumber(profileNumber);
     }
 
+    public void updateUserFavoriteNumber(Long chatId, Long favoriteNumber) {
+        User user = findUserByChatId(chatId);
+        user.setLastFavoriteNumber(favoriteNumber);
+    }
 }

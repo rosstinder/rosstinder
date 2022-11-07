@@ -28,4 +28,11 @@ public class LikesController {
         Long profileChatId = likeService.findNextFavoriteChatId(chatId);
         return profileChatId;
     }
+
+    @GetMapping(value = "/{chatId}/previousFavorite")
+    @ResponseStatus(HttpStatus.OK)
+    public Long searchPreviousFavorite(@PathVariable("chatId") Long chatId, String status) {
+        Long profileChatId = likeService.findPreviousFavoriteChatId(chatId);
+        return profileChatId;
+    }
 }

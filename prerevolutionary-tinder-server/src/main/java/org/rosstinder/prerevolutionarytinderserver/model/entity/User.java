@@ -7,7 +7,7 @@ import lombok.Setter;
 //@Entity
 //@Table(name = "users")
 public class User {
-    public final static Long ZERO = Long.valueOf(0);
+    public final static Long ZERO_VALUE = Long.valueOf(0);
 
     //private final Long id;
     private final Long chatId;
@@ -22,8 +22,8 @@ public class User {
         //this.id = id;
         this.chatId = chatId;
         this.status = status;
-        this.lastFavoriteNumber = ZERO;
-        this.lastProfileNumber = ZERO;
+        this.lastFavoriteNumber = ZERO_VALUE;
+        this.lastProfileNumber = ZERO_VALUE;
     }
 
     @Override
