@@ -128,6 +128,11 @@ public class LikeService {
         return previousFavorite.get();
     }
 
+    //public String checkLike(Long chatId) {
+    //    Long whom = userService.findUserByChatId(chatId).getLastFavoriteNumber();
+    //
+    //}
+
 
     //private final LikeRepository likeRepository;
 

@@ -35,4 +35,10 @@ public class LikesController {
         Long profileChatId = likeService.findPreviousFavoriteChatId(chatId);
         return profileChatId;
     }
+
+    @GetMapping(value = "/{chatId}/likeChecker")
+    @ResponseStatus(HttpStatus.OK)
+    public String checkLike(@PathVariable("chatId") Long chatId) {
+        return likeService.checkLike(chatId);
+    }
 }
