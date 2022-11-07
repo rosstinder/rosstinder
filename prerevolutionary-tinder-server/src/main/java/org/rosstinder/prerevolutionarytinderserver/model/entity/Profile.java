@@ -27,10 +27,23 @@ public class Profile {
     public String toString() {
         return String.format("User{chatId=%s,name=%s,gender=%s,title=%s,desc=%s,preference=%s}",
                 chatId,
-                name,
-                gender.getGender(),
-                title,
-                description,
-                preference.getPreference());
+                getPropertyAsString(name),
+                getPropertyAsString(gender),
+                getPropertyAsString(title),
+                getPropertyAsString(description),
+                getPropertyAsString(preference));
+    }
+
+    private String getPropertyAsString(Object obj) {
+        if (obj == null) {
+            return "null";
+        }
+        else if (obj instanceof Gender) {
+            return ((Gender) obj).getGender();
+        } else if (obj instanceof Preference) {
+            return ((Preference) obj).getPreference();
+        } else {
+            return obj.toString();
+        }
     }
 }

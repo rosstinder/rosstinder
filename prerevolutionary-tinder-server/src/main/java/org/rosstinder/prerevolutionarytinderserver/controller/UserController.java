@@ -23,13 +23,15 @@ public class UserController {
 
     @GetMapping(value = "/{chatId}/profile")
     @ResponseStatus(HttpStatus.OK)
-    public String getProfilePictureUrl(@PathVariable("chatId") Long chatId) {
-        return service.findProfileUrl(chatId);
+    public String getProfilePictureUrl(@PathVariable("chatId") Long chatId, String status) {
+        String result = service.findProfileUrl(chatId);
+        service.updateUserStatus(chatId, status);
+        return result;
     }
 
     @PutMapping(value = "/{chatId}")
     @ResponseStatus(HttpStatus.OK)
-    public void updateProfile(@PathVariable("chatId") Long chatId, String key, String value) {
+    public void updateProfile(@PathVariable("chatId") Long chatId, String key, String value, String status) {
         switch (key) {
             case ("gender"):
                 service.updateGender(chatId, Gender.fromString(value));
@@ -47,6 +49,7 @@ public class UserController {
                 //исключение неправильный аргумент
                 break;
         }
+        service.updateUserStatus(chatId, status);
     }
 
     @PutMapping(value = "/{chatId}/status")
@@ -74,5 +77,12 @@ public class UserController {
 
         }
         return profileChatId;
+    }
+
+    //удалить после тестирования
+    @GetMapping(value = "/{chatId}")
+    @ResponseStatus(HttpStatus.OK)
+    public String findUserByChatId(@PathVariable("chatId") Long chatId) {
+        return service.findUserByChatId(chatId).toString();
     }
 }

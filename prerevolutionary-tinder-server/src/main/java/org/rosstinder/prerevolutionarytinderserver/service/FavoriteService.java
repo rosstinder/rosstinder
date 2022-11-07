@@ -1,7 +1,6 @@
 package org.rosstinder.prerevolutionarytinderserver.service;
 
-import org.rosstinder.prerevolutionarytinderserver.model.Preference;
-import org.rosstinder.prerevolutionarytinderserver.model.entity.Like;
+import org.rosstinder.prerevolutionarytinderserver.model.entity.Favorite;
 //import org.rosstinder.prerevolutionarytinderserver.model.repository.LikeRepository;
 import org.rosstinder.prerevolutionarytinderserver.model.entity.Profile;
 import org.rosstinder.prerevolutionarytinderserver.model.entity.User;
@@ -12,15 +11,16 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
-public class LikeService {
-    private final Logger logger = LoggerFactory.getLogger(LikeService.class);
+public class FavoriteService {
+    private final Logger logger = LoggerFactory.getLogger(FavoriteService.class);
     private final UserService userService = new UserService();
-    private List<Like> likes = new ArrayList<>();
-    public LikeService() {
-        likes.add(new Like(Long.valueOf(2),Long.valueOf(1)));
-        likes.add(new Like(Long.valueOf(2),Long.valueOf(3)));
+    private List<Favorite> favorites = new ArrayList<>();
+    public FavoriteService() {
+        favorites.add(new Favorite(Long.valueOf(2),Long.valueOf(1), true));
+        favorites.add(new Favorite(Long.valueOf(2),Long.valueOf(3), true));
     }
 
     /**
@@ -31,17 +31,19 @@ public class LikeService {
      * @param isLike флаг лайка (true) / отказа (false)
      * @return возвращает "Вы любимы" в случае взаимного лайка, иначе пустую строку
      */
-    public String makeLikeOrDislike(Long who, Long whom, boolean isLike) {
+    public String makeLikeOrDislike(Long who, Long whom, boolean isLike, String status) {
         //Long whom = userService.findUserByChatId(who).getLastProfileNumber();
         if (isLikeAlreadyExist(who, whom)) {
             editLikeOrDislike(who, whom, isLike);
         } else {
-            likes.add(new Like(who, whom, isLike));
+            favorites.add(new Favorite(who, whom, isLike));
         }
-        if (isLikeAlreadyExist(whom, who)) {
+        if (isMatch(who, whom)) {
+            userService.updateUserStatus(who, status);
             return "Вы любимы";
         }
         else {
+            userService.updateUserStatus(who, status);
             return "";
         }
     }
@@ -50,16 +52,16 @@ public class LikeService {
      * Получить все содержимое таблицы likes
      * @return список записей таблицы likes
      */
-    private List<Like> findAllLikes() {
-        return likes;
+    private List<Favorite> findAllLikes() {
+        return favorites;
     }
 
     private void editLikeOrDislike(Long who, Long whom, boolean isLike) {
-        Like like = likes.stream()
+        Favorite favorite = favorites.stream()
                 .filter(l -> l.getWhoChatId().equals(who) && l.getWhomChatId().equals(whom))
                 .findAny()
                 .get();
-        like.setLike(isLike);
+        favorite.setLike(isLike);
     }
 
     /**
@@ -69,8 +71,8 @@ public class LikeService {
      * @return true если лайк/отказ уже сущетвует в БД, false если записи о лайке/отказе нет
      */
     private boolean isLikeAlreadyExist(Long who, Long whom) {
-        return likes.stream()
-                .filter(like -> like.getWhoChatId().equals(who) && like.getWhomChatId().equals(whom))
+        return favorites.stream()
+                .filter(favorite -> favorite.getWhoChatId().equals(who) && favorite.getWhomChatId().equals(whom))
                 .findAny()
                 .isPresent();
     }
@@ -80,11 +82,11 @@ public class LikeService {
      * @param chatId пользователь, который просматривает своих Любимцев
      * @return chatId пользователя, которого следует отобразить следующим при просмотре Любимцев
      */
-    public Long findNextFavoriteChatId(Long chatId) {
+    public Long findNextFavoriteChatId(Long chatId, String status) {
         User user = userService.findUserByChatId(chatId);
         Optional<Long> nextFavorite = findAllLikes().stream()
                 .filter(l -> l.getWhoChatId().equals(chatId))
-                .map(Like::getWhomChatId)
+                .map(Favorite::getWhomChatId)
                 .sorted(Long::compareTo)
                 .filter(id -> id.compareTo(user.getLastFavoriteNumber()) > 0)
                 .findFirst();
@@ -92,23 +94,25 @@ public class LikeService {
             user.setLastFavoriteNumber(User.ZERO_VALUE);
             nextFavorite = findAllLikes().stream()
                     .filter(l -> l.getWhoChatId().equals(chatId))
-                    .map(Like::getWhomChatId)
+                    .map(Favorite::getWhomChatId)
                     .sorted(Long::compareTo)
                     .filter(id -> id.compareTo(user.getLastFavoriteNumber()) > 0)
                     .findFirst();
             if(nextFavorite.isEmpty()) {
+                userService.updateUserStatus(chatId, status);
                 return null;
             }
         }
         userService.updateUserFavoriteNumber(chatId, nextFavorite.get());
+        userService.updateUserStatus(chatId, status);
         return nextFavorite.get();
     }
 
-    public Long findPreviousFavoriteChatId(Long chatId) {
+    public Long findPreviousFavoriteChatId(Long chatId, String status) {
         User user = userService.findUserByChatId(chatId);
         Optional<Long> previousFavorite = findAllLikes().stream()
                 .filter(l -> l.getWhoChatId().equals(chatId))
-                .map(Like::getWhomChatId)
+                .map(Favorite::getWhomChatId)
                 .sorted(Long::compareTo)
                 .filter(id -> id.compareTo(user.getLastFavoriteNumber()) < 0)
                 .findFirst();
@@ -116,92 +120,51 @@ public class LikeService {
             user.setLastFavoriteNumber(Long.MAX_VALUE);
             previousFavorite = findAllLikes().stream()
                     .filter(l -> l.getWhoChatId().equals(chatId))
-                    .map(Like::getWhomChatId)
+                    .map(Favorite::getWhomChatId)
                     .sorted(Long::compareTo)
                     .filter(id -> id.compareTo(user.getLastFavoriteNumber()) < 0)
                     .reduce((first, second) -> second);
             if(previousFavorite.isEmpty()) {
+                userService.updateUserStatus(chatId, status);
                 return null;
             }
         }
         userService.updateUserFavoriteNumber(chatId, previousFavorite.get());
+        userService.updateUserStatus(chatId, status);
         return previousFavorite.get();
     }
 
-    //public String checkLike(Long chatId) {
-    //    Long whom = userService.findUserByChatId(chatId).getLastFavoriteNumber();
-    //
-    //}
+    public String checkLike(Long whoChatId) {
+        StringBuilder result = new StringBuilder("");
+        Long whomChatId = userService.findUserByChatId(whoChatId).getLastFavoriteNumber();
+        Profile whomProfile = userService.findProfileByChatId(whomChatId);
+        result.append(whomProfile.getGender().getGender() + ", " + whomProfile.getName());
+        if (isMatch(whoChatId, whomChatId)) {
+            result.append(", Взаимность");
+        } else if (isUserFavoritesAnotherUser(whomChatId, whoChatId)) {
+            result.append(", Вы любимы");
+        } else if (isUserFavoritesAnotherUser(whoChatId, whomChatId)) {
+            result.append(", Любим вами");
+        }
+        return result.toString();
+    }
 
+    private boolean isMatch(Long whoChatId, Long whomChatId) {
+        if (isUserFavoritesAnotherUser(whoChatId, whomChatId) && (isUserFavoritesAnotherUser(whomChatId, whoChatId))) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-    //private final LikeRepository likeRepository;
-
-    //public LikeService(LikeRepository likeRepository) {
-    //    this.likeRepository = likeRepository;
-    //}
-
-    //public UUID like(UUID who, UUID whom) {
-    //    logger.debug("Starting method <like>...");
-    //    Like like = withLike(who, whom); //может вернуться NullPointerException, если who или whom null
-    //    if (likeRepository.isUserMatchesWithAnotherUser(who, whom)) {
-    //        //"Вы любимы"
-    //    } else {
-    //        //"ОК"
-    //    }
-    //    //void вероятно убрать
-    //    logger.debug("Ending <like> method...");
-    //    return like.getId();
-    //}
-//
-    //public UUID dislike(UUID who, UUID whom) {
-    //    logger.debug("Starting method <dislike>...");
-    //    Like dislike = withDislike(who, whom); //может вернуться NullPointerException, если who или whom null
-    //    //void вероятно убрать
-    //    logger.debug("Ending <dislike> method...");
-    //    return dislike.getId();
-    //}
-//
-    //public boolean isLikeOrDislikeExist(UUID who, UUID whom) {
-    //    logger.debug("Starting method <isLikeOrDislikeExist>...");
-    //    if (likeRepository.isUserLikedAnotherUser(who, whom)) {
-    //        logger.debug("Ending <isLikeOrDislikeExist> method...");
-    //        return true;
-    //    } else {
-    //        logger.debug("Ending <isLikeOrDislikeExist> method...");
-    //        return false;
-    //    }
-    //}
-//
-    //public List<UUID> getAllUserMatches(UUID who) {
-    //    return likeRepository.getAllUserLikes(who).stream()
-    //            .filter(like -> likeRepository.isUserMatchesWithAnotherUser(like.getWhom(), who))
-    //            .map(Like::getWhom)
-    //            .collect(Collectors.toList());
-    //}
-//
-    //public List<UUID> getAllUserLikes(UUID who) {
-    //    return likeRepository.getAllUserLikes(who).stream()
-    //            .map(Like::getWhom)
-    //            .collect(Collectors.toList());
-    //}
-//
-    //public List<UUID> getUsersWhoLikesUser(UUID whom) {
-    //    return likeRepository.getAllLikes().stream()
-    //            .filter(like -> likeRepository.isUserLikedAnotherUser(like.getWho(), whom))
-    //            .map(Like::getWho)
-    //            .collect(Collectors.toList());
-    //}
-//
-//
-    //private Like withLike(UUID who, UUID whom) {
-    //    Like like = new Like(who, whom);
-    //    like.setLike(LIKE);
-    //    return like;
-    //}
-    //
-    //private Like withDislike(UUID who, UUID whom) {
-    //    Like dislike = new Like(who, whom);
-    //    dislike.setLike(DISLIKE);
-    //    return dislike;
-    //}
+    private boolean isUserFavoritesAnotherUser(Long whoChatId, Long whomChatId) {
+        Optional<Favorite> optFavorite = findAllLikes().stream()
+                .filter(f -> f.isLike() && f.getWhoChatId().equals(whoChatId) && f.getWhomChatId().equals(whomChatId))
+                .findAny();
+        if (optFavorite.isEmpty()) {
+            return false;
+        } else {
+            return true;
+        }
+    }
 }

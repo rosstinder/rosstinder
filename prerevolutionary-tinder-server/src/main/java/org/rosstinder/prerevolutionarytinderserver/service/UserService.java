@@ -51,10 +51,13 @@ public class UserService {
         Optional<User> optUser = users.stream()
                 .filter(u -> u.getChatId() == chatId)
                 .findAny();
+        if (optUser.isEmpty()) {
+            return null;
+        }
         return optUser.get();
     }
 
-    private Profile findProfileByChatId(Long chatId) {
+    public Profile findProfileByChatId(Long chatId) {
         return profiles.stream()
                 .filter(p -> p.getChatId().equals(chatId))
                 .findAny()
@@ -115,7 +118,7 @@ public class UserService {
     public String findProfileUrl(Long chatId) {
         return profiles.stream()
                 .filter(p -> p.getChatId().equals(chatId))
-                .map(Profile::toString)
+                .map(Profile::toString)//исправить
                 .findAny()
                 .get();
     }
@@ -141,6 +144,9 @@ public class UserService {
                     .sorted(Long::compareTo)
                     .filter(id -> id.compareTo(user.getLastProfileNumber()) > 0)
                     .findFirst();
+            if(nextProfile.isEmpty()) {
+                return null;
+            }
         }
         updateUserProfileNumber(chatId, nextProfile.get());
         return nextProfile.get();
