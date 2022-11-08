@@ -10,6 +10,6 @@ import org.springframework.http.ResponseEntity;
 public class Response {
     private final Long chatId;
     private final String userStatus;
-    private final String info;
+    private final String status;
     private final Object attachment;
 }

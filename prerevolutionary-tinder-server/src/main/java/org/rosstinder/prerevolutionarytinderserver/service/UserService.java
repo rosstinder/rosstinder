@@ -31,34 +31,46 @@ public class UserService {
         this.profiles.add(new Profile(Long.valueOf(3)));
 
         try {
-            this.profiles.get(0).setGender(Gender.fromString("Сударъ"));
+            this.profiles.get(0).setGender(new Gender("Сударъ"));
         } catch (BusinessException e) {
             throw new RuntimeException(e);
         }
         this.profiles.get(0).setName("Некто");
         this.profiles.get(0).setTitle("Интеллигентный");
         this.profiles.get(0).setDescription("Одинокий купец, 37 лет, имеет около двадцати лет большое торговое дело. Ежегодный оборот около ста тысяч рублей, желает познакомиться в целях брака, с барышней или вдовой не старше 30 лет. Предпочитаю брюнетку высокого роста, полную, с капиталом. Предложение серьезное.");
-        this.profiles.get(0).setPreference(Preference.FEMALE);
+        try {
+            this.profiles.get(0).setPreference(new Preference("Сударыня"));
+        } catch (BusinessException e) {
+            throw new RuntimeException(e);
+        }
 
         try {
-            this.profiles.get(1).setGender(Gender.fromString("Сударыня"));
+            this.profiles.get(1).setGender(new Gender("Сударыня"));
         } catch (BusinessException e) {
             throw new RuntimeException(e);
         }
         this.profiles.get(1).setName("Никто");
         this.profiles.get(1).setTitle("Желаю выйти замуж");
         this.profiles.get(1).setDescription("Брюнетка, выше среднего роста, стройная, неполная, 25 л., интеллигентная, говорят очень недурненькая, но бедна, приданого нет. Надоело одиночество в Сибири, хочется выйти замуж в России или на Кавказе за господина, способного и мне оказать материальную помощь. Буду любящей преданной женой. Люблю семью и хозяйство. Ищущих приключений и любопытных прошу не беспокоиться. Таким не отвечу.");
-        this.profiles.get(1).setPreference(Preference.MALE);
+        try {
+            this.profiles.get(1).setPreference(new Preference("Сударъ"));
+        } catch (BusinessException e) {
+            throw new RuntimeException(e);
+        }
 
         try {
-            this.profiles.get(2).setGender(Gender.fromString("Сударъ"));
+            this.profiles.get(2).setGender(new Gender("Сударъ"));
         } catch (BusinessException e) {
             throw new RuntimeException(e);
         }
         this.profiles.get(2).setName("Ничто");
         this.profiles.get(2).setTitle("Холостой человек");
         this.profiles.get(2).setDescription("33 лет, желает познакомиться с особой, при взаимном сочувствии брак. Прелестного отзывчивого характера, коммерсант, не долюбливаю спиртные напитки, не курю, в карты не играю. Тайну переписки гарантирую честным словом.");
-        this.profiles.get(2).setPreference(Preference.FEMALE);
+        try {
+            this.profiles.get(2).setPreference(new Preference("Сударыня"));
+        } catch (BusinessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private final Logger logger = LoggerFactory.getLogger(UserService.class);
@@ -69,7 +81,7 @@ public class UserService {
                 .findAny();
         if (optUser.isEmpty()) {
             logger.info("Пользователь chatId={} не был найден.", chatId);
-            throw new BusinessException("Пользователь chatId={"+chatId+"} не был найден.");
+            throw new BusinessException("Пользователь chatId="+chatId+" не был найден.");
         }
         logger.debug("Пользователь chatId={} найден.", chatId);
         return optUser.get();
@@ -81,18 +93,19 @@ public class UserService {
                 .findAny();
         if (optProfile.isEmpty()) {
             logger.info("Анкета chatId={} не была найдена.", chatId);
-            throw new BusinessException("Анкета chatId={"+chatId+"} не была найдена.");
+            throw new BusinessException("Анкета chatId="+chatId+" не была найдена.");
         }
         logger.debug("Анкета chatId={} найдена.", chatId);
         return optProfile.get();
     }
 
-    public void updateGender(Long chatId, Gender gender) {
+    public void updateGender(Long chatId, String gender) throws BusinessException {
         try {
             Profile profile = findProfileByChatId(chatId);
-            profile.setGender(gender);
+            profile.setGender(new Gender(gender));
         } catch (BusinessException e) {
             logger.error(e.getMessage());
+            throw new BusinessException(e.getMessage());
         }
 
     }
@@ -126,12 +139,13 @@ public class UserService {
         }
     }
 
-    public void updatePreference(Long chatId, Preference preference) {
+    public void updatePreference(Long chatId, String preference) throws BusinessException {
         try {
             Profile profile = findProfileByChatId(chatId);
-            profile.setPreference(preference);
+            profile.setPreference(new Preference(preference));
         } catch (BusinessException e) {
             logger.error(e.getMessage());
+            throw new BusinessException(e.getMessage());
         }
 
     }
@@ -145,12 +159,45 @@ public class UserService {
         }
     }
 
-    public void createUser(Long chatId, String status) {
-        users.add(new User(chatId, status));
+    public void createUser(Long chatId, String status) throws BusinessException {
+        if (isUserDoesNotExist(chatId)) {
+            users.add(new User(chatId, status));
+            logger.debug("Новый пользователь chatId={} был добавлен.", chatId);
+        }
+        else {
+            throw new BusinessException("Пользователь с chatId={" + chatId + "} уже существует. ChatId должен быть уникальным.");
+        }
     }
 
-    public void createProfile(Long chatId) {
-        profiles.add(new Profile(chatId));
+    public void createProfile(Long chatId) throws BusinessException {
+        if (isProfileDoesNotExist(chatId)) {
+            profiles.add(new Profile(chatId));
+            logger.debug("Новая анкета пользователя chatId={} была добавлена.", chatId);
+        } else {
+            throw new BusinessException("Анкета с chatId={" + chatId + "} уже существует. ChatId должен быть уникальным.");
+        }
+    }
+
+    public boolean isUserDoesNotExist(Long chatId) {
+        Optional<User> optUser = users.stream()
+                .filter(u -> u.getChatId() == chatId)
+                .findAny();
+        if (optUser.isEmpty()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean isProfileDoesNotExist(Long chatId) {
+        Optional<Profile> optProfile = findAllProfiles().stream()
+                .filter(p -> p.getChatId().equals(chatId))
+                .findAny();
+        if (optProfile.isEmpty()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public List<User> findAllUsers() {
@@ -167,48 +214,65 @@ public class UserService {
                 .findAny();
         if (optProfile.isEmpty()) {
             logger.info("Анкета chatId={} не была найдена.", chatId);
-            throw new BusinessException("Анкета chatId={"+chatId+"} не была найдена.");
+            throw new BusinessException("Анкета chatId="+chatId+" не была найдена.");
         }
         logger.debug("Анкета chatId={} найдена.", chatId);
         return optProfile.get();
     }
 
-    //public Long findNextProfileChatId(Long chatId) {
-    //    User user = findUserByChatId(chatId);
-    //    Profile profile = findProfileByChatId(chatId);
-    //    Optional<Long> nextProfile = findAllProfiles().stream()
-    //            .filter(p -> !p.getChatId().equals(chatId))
-    //            .filter(p -> Preference.compareGenderAndPreference(profile.getGender(), p.getPreference())
-    //                    && Preference.compareGenderAndPreference(p.getGender(), profile.getPreference()))
-    //            .map(Profile::getChatId)
-    //            .sorted(Long::compareTo)
-    //            .filter(id -> id.compareTo(user.getLastProfileNumber()) > 0)
-    //            .findFirst();
-    //    if(nextProfile.isEmpty()) {
-    //        user.setLastProfileNumber(User.ZERO_VALUE);
-    //        nextProfile = findAllProfiles().stream()
-    //                .filter(p -> !p.getChatId().equals(chatId))
-    //                .filter(p -> Preference.compareGenderAndPreference(profile.getGender(), p.getPreference())
-    //                        && Preference.compareGenderAndPreference(p.getGender(), profile.getPreference()))
-    //                .map(Profile::getChatId)
-    //                .sorted(Long::compareTo)
-    //                .filter(id -> id.compareTo(user.getLastProfileNumber()) > 0)
-    //                .findFirst();
-    //        if(nextProfile.isEmpty()) {
-    //            return null;
-    //        }
-    //    }
-    //    updateUserProfileNumber(chatId, nextProfile.get());
-    //    return nextProfile.get();
-    //}
+    public Long findNextProfileChatId(Long chatId) throws BusinessException {
+        Long result;
+        try {
+            User user = findUserByChatId(chatId);
+            Profile profile = findProfileByChatId(chatId);
+            Optional<Long> nextProfile = findAllProfiles().stream()
+                    .filter(p -> !p.getChatId().equals(chatId))
+                    .filter(p -> Preference.compareGenderAndPreference(profile.getGender(), p.getPreference())
+                            && Preference.compareGenderAndPreference(p.getGender(), profile.getPreference()))
+                    .map(Profile::getChatId)
+                    .sorted(Long::compareTo)
+                    .filter(id -> id.compareTo(user.getLastProfileNumber()) > 0)
+                    .findFirst();
+            if(nextProfile.isEmpty()) {
+                logger.info("Поиск анкеты, удовлетворяющей критериям пользователя chatId={}, начат с начала", chatId);
+                user.setLastProfileNumber(User.ZERO_VALUE);
+                nextProfile = findAllProfiles().stream()
+                        .filter(p -> !p.getChatId().equals(chatId))
+                        .filter(p -> Preference.compareGenderAndPreference(profile.getGender(), p.getPreference())
+                                && Preference.compareGenderAndPreference(p.getGender(), profile.getPreference()))
+                        .map(Profile::getChatId)
+                        .sorted(Long::compareTo)
+                        .filter(id -> id.compareTo(user.getLastProfileNumber()) > 0)
+                        .findFirst();
+                if(nextProfile.isEmpty()) {
+                    logger.info("Отсутствуют анкеты, удовлетворяющие критериям пользователя chatId="+chatId+".");
+                    throw new BusinessException("Отсутствуют анкеты, удовлетворяющие критериям пользователя chatId="+chatId+".");
+                }
+            }
+            updateUserProfileNumber(chatId, nextProfile.get());
+            result = nextProfile.get();
+        } catch (BusinessException e) {
+            throw new BusinessException(e.getMessage());
+        }
+        return result;
+    }
 
-    //public void updateUserProfileNumber(Long chatId, Long profileNumber) {
-    //    User user = findUserByChatId(chatId);
-    //    user.setLastProfileNumber(profileNumber);
-    //}
+    public void updateUserProfileNumber(Long chatId, Long profileNumber) {
+        try {
+            User user = findUserByChatId(chatId);
+            user.setLastProfileNumber(profileNumber);
+        } catch (BusinessException e) {
+            logger.error(e.getMessage());
+        }
+    }
 
-    //public void updateUserFavoriteNumber(Long chatId, Long favoriteNumber) {
-    //    User user = findUserByChatId(chatId);
-    //    user.setLastFavoriteNumber(favoriteNumber);
-    //}
+    private void save(User user) {
+        //логика
+        logger.debug("Данные пользователя chatId="+user.getChatId()+" сохранены.");
+    }
+
+    public void incorrectKey(Long chatId) {
+        logger.info("Значения для пользователя chatId="+chatId+" были обновлены по причине некорректного значения key в" +
+                " полученном запросе. Допустимые значения: gender, name, description, preference.");
+    }
 }

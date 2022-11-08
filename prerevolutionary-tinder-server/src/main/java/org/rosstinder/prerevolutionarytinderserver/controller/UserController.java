@@ -1,24 +1,18 @@
 package org.rosstinder.prerevolutionarytinderserver.controller;
 
 import org.rosstinder.prerevolutionarytinderserver.exception.BusinessException;
-import org.rosstinder.prerevolutionarytinderserver.model.Gender;
-import org.rosstinder.prerevolutionarytinderserver.model.Preference;
 import org.rosstinder.prerevolutionarytinderserver.model.Response;
 import org.rosstinder.prerevolutionarytinderserver.model.entity.Profile;
 import org.rosstinder.prerevolutionarytinderserver.service.UserService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.NoSuchElementException;
 
 
 @RestController
 @RequestMapping("/users")
 public class UserController {
     public final UserService service = new UserService();
-    private final Logger logger = LoggerFactory.getLogger(UserService.class);
     @GetMapping(value = "/{chatId}/status")
     @ResponseStatus(HttpStatus.OK)
     public Response getUserStatus(@PathVariable("chatId") Long chatId) {
@@ -44,7 +38,7 @@ public class UserController {
         } catch (BusinessException e) {
             response = handleException(e, HttpStatus.NOT_FOUND.toString());
         }
-        return response;
+        return response; //озвращать не profile, а урл на картинку
     }
 
     @PutMapping(value = "/{chatId}")
@@ -54,10 +48,9 @@ public class UserController {
         switch (key) {
             case ("gender"):
                 try {
-                    service.updateGender(chatId, Gender.fromString(value));
+                    service.updateGender(chatId, value);
                     response = new Response(chatId, status, HttpStatus.OK.toString(), null);
                 } catch (BusinessException e) {
-                    logger.error(e.getMessage());
                     response = handleException(e, HttpStatus.BAD_REQUEST.toString());
                 } finally {
                     break;
@@ -72,16 +65,15 @@ public class UserController {
                 break;
             case ("preference"):
                 try {
-                    service.updatePreference(chatId, Preference.fromString(value));
+                    service.updatePreference(chatId, value);
                     response = new Response(chatId, status, HttpStatus.OK.toString(), null);
                 } catch (BusinessException e) {
-                    logger.error(e.getMessage());
                     response = handleException(e, HttpStatus.BAD_REQUEST.toString());
                 } finally {
                     break;
                 }
             default:
-                logger.info("Значения не были обновлены по причине некорректного значения key в полученном запросе");
+                service.incorrectKey(chatId);
                 response = new Response(chatId, status, HttpStatus.NO_CONTENT.toString(), null);
                 break;
         }
@@ -106,33 +98,49 @@ public class UserController {
         return response;
     }
 
-    //@PostMapping(value = "/{chatId}")
-    //@ResponseStatus(HttpStatus.CREATED)
-    //public void create(@PathVariable("chatId") Long chatId, String status) {
-    //    service.createUser(chatId, status);
-    //    service.createProfile(chatId);
-    //    service.updateUserStatus(chatId, status);
-    //}
+    @PostMapping(value = "/{chatId}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Response create(@PathVariable("chatId") Long chatId, String status) {
+        Response response;
+        try {
+            service.createUser(chatId, status);
+            service.createProfile(chatId);
+            service.updateUserStatus(chatId, status);
+            response = new Response(chatId, status, HttpStatus.OK.toString(), null);
+        } catch (BusinessException e) {
+            response = handleException(e, HttpStatus.NOT_ACCEPTABLE.toString());
+        }
+        return response;
+    }
 
-    //@GetMapping(value = "/{chatId}/search/nextProfile")
-    //@ResponseStatus(HttpStatus.OK)
-    //public Long searchNextProfile(@PathVariable("chatId") Long chatId, String status) {
-    //    Long profileChatId = service.findNextProfileChatId(chatId);
-    //    try {
-    //        service.updateUserStatus(chatId, status);
-    //    }
-    //    catch (NoSuchElementException e) {
-//
-    //    }
-    //    return profileChatId;
-    //}
+    @GetMapping(value = "/{chatId}/search/nextProfile")
+    @ResponseStatus(HttpStatus.OK)
+    public Response searchNextProfile(@PathVariable("chatId") Long chatId, String status) {
+        Response response;
+        try {
+            Long nextProfileChatId = service.findNextProfileChatId(chatId);
+            service.updateUserStatus(chatId, status);
+            response = new Response(chatId, status, HttpStatus.OK.toString(), nextProfileChatId);
+        }
+        catch (BusinessException e) {
+            response = handleException(e, HttpStatus.NOT_FOUND.toString());
+        }
+        return response;    //возвращать не nextProfileChatId, а url на картинку
+    }
 
     //удалить после тестирования
-    //@GetMapping(value = "/{chatId}")
-    //@ResponseStatus(HttpStatus.OK)
-    //public String findUserByChatId(@PathVariable("chatId") Long chatId) {
-    //    return service.findUserByChatId(chatId).toString();
-    //}
+    @GetMapping(value = "/{chatId}")
+    @ResponseStatus(HttpStatus.OK)
+    public Response findUserByChatId(@PathVariable("chatId") Long chatId) {
+        Response response;
+        try {
+            response = new Response(chatId, service.findUserByChatId(chatId).getStatus(),
+                    HttpStatus.OK.toString(), service.findUserByChatId(chatId));
+        } catch (BusinessException e) {
+            response = handleException(e, HttpStatus.NOT_FOUND.toString());
+        }
+        return response;
+    }
 
     @ExceptionHandler(BusinessException.class)
     public Response handleException(BusinessException e, String httpStatus) {

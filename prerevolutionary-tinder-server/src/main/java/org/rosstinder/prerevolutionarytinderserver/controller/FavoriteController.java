@@ -1,5 +1,7 @@
 package org.rosstinder.prerevolutionarytinderserver.controller;
 
+import org.rosstinder.prerevolutionarytinderserver.exception.BusinessException;
+import org.rosstinder.prerevolutionarytinderserver.model.Response;
 import org.rosstinder.prerevolutionarytinderserver.service.FavoriteService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,29 +14,47 @@ public class FavoriteController {
     private final Logger logger = LoggerFactory.getLogger(FavoriteController.class);
     private final FavoriteService favoriteService = new FavoriteService();
 
-//    @PostMapping(value = "/{chatId}")
-//    @ResponseStatus(HttpStatus.OK)
-//    public String makeLikeOrDislike(@PathVariable("chatId") Long chatId, Long whom, boolean isLike, String status) {
-//        return favoriteService.makeLikeOrDislike(chatId, whom, isLike, status);
-//    }
-//
-//    @GetMapping(value = "/{chatId}/nextFavorite")
-//    @ResponseStatus(HttpStatus.OK)
-//    public Long searchNextFavorite(@PathVariable("chatId") Long chatId, String status) {
-//        Long profileChatId = favoriteService.findNextFavoriteChatId(chatId, status);
-//        return profileChatId;
-//    }
-//
-//    @GetMapping(value = "/{chatId}/previousFavorite")
-//    @ResponseStatus(HttpStatus.OK)
-//    public Long searchPreviousFavorite(@PathVariable("chatId") Long chatId, String status) {
-//        Long profileChatId = favoriteService.findPreviousFavoriteChatId(chatId, status);
-//        return profileChatId;
-//    }
-//
-//   @GetMapping(value = "/{chatId}/likeChecker")
-//   @ResponseStatus(HttpStatus.OK)
-//   public String checkLike(@PathVariable("chatId") Long chatId) {
-//       return favoriteService.checkLike(chatId);
-//   }
+    @PostMapping(value = "/{chatId}")
+    @ResponseStatus(HttpStatus.OK)
+    public Response makeLikeOrDislike(@PathVariable("chatId") Long chatId, boolean isLike, String status) {
+        Response response;
+        try {
+            response = new Response(chatId, status, HttpStatus.OK.toString(),
+                    favoriteService.makeLikeOrDislike(chatId, isLike, status));
+        } catch (BusinessException e) {
+            response = handleException(e, HttpStatus.NOT_FOUND.toString());
+        }
+        return response;
+    }
+
+    @GetMapping(value = "/{chatId}/nextFavorite")
+    @ResponseStatus(HttpStatus.OK)
+    public Response searchNextFavorite(@PathVariable("chatId") Long chatId, String status) {
+        Response response;
+        try {
+            response = new Response(favoriteService.findNextFavoriteChatId(chatId, status),
+                    status, HttpStatus.OK.toString(), favoriteService.checkLike(chatId));
+        } catch (BusinessException e) {
+            response = handleException(e, HttpStatus.NOT_FOUND.toString());
+        }
+        return response;
+    }
+
+    @GetMapping(value = "/{chatId}/previousFavorite")
+    @ResponseStatus(HttpStatus.OK)
+    public Response searchPreviousFavorite(@PathVariable("chatId") Long chatId, String status) {
+        Response response;
+        try {
+            response = new Response(favoriteService.findPreviousFavoriteChatId(chatId, status),
+                    status, HttpStatus.OK.toString(), favoriteService.checkLike(chatId));
+        } catch (BusinessException e) {
+            response = handleException(e, HttpStatus.NOT_FOUND.toString());
+        }
+        return response;
+    }
+
+    @ExceptionHandler(BusinessException.class)
+    public Response handleException(BusinessException e, String httpStatus) {
+        return new Response(null, null, httpStatus, e.getMessage());
+    }
 }
