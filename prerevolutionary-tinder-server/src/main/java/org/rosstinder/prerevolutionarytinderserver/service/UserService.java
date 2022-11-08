@@ -271,8 +271,9 @@ public class UserService {
         logger.debug("Данные пользователя chatId="+user.getChatId()+" сохранены.");
     }
 
-    public void incorrectKey(Long chatId) {
+    public boolean incorrectKey(Long chatId) {
         logger.info("Значения для пользователя chatId="+chatId+" были обновлены по причине некорректного значения key в" +
                 " полученном запросе. Допустимые значения: gender, name, description, preference.");
+        return true;
     }
 }

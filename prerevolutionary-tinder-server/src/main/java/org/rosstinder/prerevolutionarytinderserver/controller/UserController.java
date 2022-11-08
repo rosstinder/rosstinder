@@ -2,7 +2,6 @@ package org.rosstinder.prerevolutionarytinderserver.controller;
 
 import org.rosstinder.prerevolutionarytinderserver.exception.BusinessException;
 import org.rosstinder.prerevolutionarytinderserver.model.Response;
-import org.rosstinder.prerevolutionarytinderserver.model.entity.Profile;
 import org.rosstinder.prerevolutionarytinderserver.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -32,9 +31,8 @@ public class UserController {
     public Response getProfilePictureUrl(@PathVariable("chatId") Long chatId, String status) {
         Response response;
         try {
-            Profile profile = service.findProfileUrl(chatId);
+            response = new Response(chatId, status, HttpStatus.OK.toString(), service.findProfileUrl(chatId));
             service.updateUserStatus(chatId, status);
-            response = new Response(chatId, status, HttpStatus.OK.toString(), profile);
         } catch (BusinessException e) {
             response = handleException(e, HttpStatus.NOT_FOUND.toString());
         }
@@ -45,6 +43,7 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     public Response updateProfile(@PathVariable("chatId") Long chatId, String key, String value, String status) {
         Response response = null;
+        boolean isIncorrectValue = false;
         switch (key) {
             case ("gender"):
                 try {
@@ -73,12 +72,14 @@ public class UserController {
                     break;
                 }
             default:
-                service.incorrectKey(chatId);
+                isIncorrectValue = service.incorrectKey(chatId);
                 response = new Response(chatId, status, HttpStatus.NO_CONTENT.toString(), null);
                 break;
         }
         try {
-            service.updateUserStatus(chatId, status);
+            if (isIncorrectValue) {
+                service.updateUserStatus(chatId, status);
+            }
         } catch (BusinessException e) {
             response = handleException(e, HttpStatus.NOT_FOUND.toString());
         }
