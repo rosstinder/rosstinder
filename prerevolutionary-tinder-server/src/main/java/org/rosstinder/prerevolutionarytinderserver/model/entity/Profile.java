@@ -5,17 +5,26 @@ import lombok.Setter;
 import org.rosstinder.prerevolutionarytinderserver.model.Gender;
 import org.rosstinder.prerevolutionarytinderserver.model.Preference;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "profiles", schema = "rosstinder")
 @Getter
 public class Profile {
+    @Column(name = "chat_id", unique = true, nullable = false)
     private final Long chatId;
+    @Column(name = "name")
     @Setter
     private String name;
+    @Column(name = "gender")
     @Setter
     private Gender gender;
-    @Setter
-    private String title;
+    @Column(name = "description")
     @Setter
     private String description;
+    @Column(name = "preference")
     @Setter
     private Preference preference;
 
@@ -25,11 +34,10 @@ public class Profile {
 
     @Override
     public String toString() {
-        return String.format("User{chatId=%s,name=%s,gender=%s,title=%s,desc=%s,preference=%s}",
+        return String.format("User{chatId=%s,name=%s,gender=%s,desc=%s,preference=%s}",
                 chatId,
                 getPropertyAsString(name),
                 getPropertyAsString(gender),
-                getPropertyAsString(title),
                 getPropertyAsString(description),
                 getPropertyAsString(preference));
     }

@@ -1,7 +1,9 @@
 package org.rosstinder.prerevolutionarytinderserver.controller;
 
+import lombok.AllArgsConstructor;
 import org.rosstinder.prerevolutionarytinderserver.exception.BusinessException;
 import org.rosstinder.prerevolutionarytinderserver.model.Response;
+import org.rosstinder.prerevolutionarytinderserver.model.repository.UserRepository;
 import org.rosstinder.prerevolutionarytinderserver.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -10,8 +12,11 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/users")
+@AllArgsConstructor
 public class UserController {
-    public final UserService service = new UserService();
+
+    public final UserService service;
+
     @GetMapping(value = "/{chatId}/status")
     @ResponseStatus(HttpStatus.OK)
     public Response getUserStatus(@PathVariable("chatId") Long chatId) {

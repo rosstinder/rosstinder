@@ -1,8 +1,10 @@
 package org.rosstinder.prerevolutionarytinderserver.controller;
 
+import lombok.AllArgsConstructor;
 import org.rosstinder.prerevolutionarytinderserver.exception.BusinessException;
 import org.rosstinder.prerevolutionarytinderserver.model.Response;
 import org.rosstinder.prerevolutionarytinderserver.service.FavoriteService;
+import org.rosstinder.prerevolutionarytinderserver.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -10,9 +12,10 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/favorites")
+@AllArgsConstructor
 public class FavoriteController {
     private final Logger logger = LoggerFactory.getLogger(FavoriteController.class);
-    private final FavoriteService favoriteService = new FavoriteService();
+    private final FavoriteService favoriteService;
 
     @PostMapping(value = "/{chatId}")
     @ResponseStatus(HttpStatus.OK)
