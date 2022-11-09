@@ -1,7 +1,11 @@
 package org.rosstinder.prerevolutionarytinderserver.service;
 
 
+import org.rosstinder.prerevolutionarytinderserver.exception.BusinessException;
+import org.rosstinder.prerevolutionarytinderserver.exception.ServiceException;
 import org.rosstinder.prerevolutionarytinderserver.model.entity.Profile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -21,12 +25,15 @@ public class ImageGenerator {
     public Font TITLE_FONT;
     public Font BODY_FONT;
 
+    private final Logger logger = LoggerFactory.getLogger(ImageGenerator.class);
+
     {
         try {
             InputStream inputStream = ImageGenerator.class.getResourceAsStream("/fonts/OldStandard-Bold.ttf");
             Font oldStandardBold = Font.createFont(Font.TRUETYPE_FONT, inputStream);
             TITLE_FONT = oldStandardBold.deriveFont(Font.PLAIN, TITLE_FONT_SIZE);
         } catch (FontFormatException | IOException e) {
+            logger.error("Ошибка при попытке чтения файла /fonts/OldStandard-Bold.ttf: " + e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -37,11 +44,12 @@ public class ImageGenerator {
             Font oldStandardBold = Font.createFont(Font.TRUETYPE_FONT, inputStream);
             BODY_FONT = oldStandardBold.deriveFont(Font.PLAIN, BODY_FONT_SIZE);
         } catch (FontFormatException | IOException e) {
+            logger.error("Ошибка при попытке чтения файла /fonts/OldStandard-Regular.ttf: " + e.getMessage());
             throw new RuntimeException(e);
         }
     }
 
-    public ByteArrayOutputStream getGeneratedImage(Profile profile) throws IOException, FontFormatException {
+    public ByteArrayOutputStream getGeneratedImage(Profile profile) throws ServiceException {
         try (InputStream input = this.getClass().getResourceAsStream(BACKGROUND)) {
             BufferedImage image = ImageIO.read(Objects.requireNonNull(input));
             Graphics layout = image.getGraphics();
@@ -57,10 +65,11 @@ public class ImageGenerator {
             writeDescription(layout, descriptionLines, leftBorder, topBorder);
             layout.dispose();
             ImageIO.write(image, "png", new File("example.png"));
+            System.out.println(ImageIO.createImageOutputStream(image));
             return (ByteArrayOutputStream) ImageIO.createImageOutputStream(image);
         } catch (IOException ioException) {
-            // todo: заменить логированием
-            throw new RuntimeException(ioException);
+            logger.error("Ошибка при чтении или записи анкеты chatId="+profile.getChatId()+".");
+            throw new ServiceException("Ошибка при чтении или записи анкеты chatId="+profile.getChatId()+".");
         }
     }
 

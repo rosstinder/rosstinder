@@ -1,7 +1,9 @@
 package org.rosstinder.prerevolutionarytinderserver.controller;
 
 import org.rosstinder.prerevolutionarytinderserver.exception.BusinessException;
+import org.rosstinder.prerevolutionarytinderserver.exception.ServiceException;
 import org.rosstinder.prerevolutionarytinderserver.model.Response;
+import org.rosstinder.prerevolutionarytinderserver.service.ImageGenerator;
 import org.rosstinder.prerevolutionarytinderserver.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/users")
 public class UserController {
     public final UserService service = new UserService();
+
     @GetMapping(value = "/{chatId}/status")
     @ResponseStatus(HttpStatus.OK)
     public Response getUserStatus(@PathVariable("chatId") Long chatId) {
@@ -35,8 +38,10 @@ public class UserController {
             service.updateUserStatus(chatId, status);
         } catch (BusinessException e) {
             response = handleException(e, HttpStatus.NOT_FOUND.toString());
+        } catch (ServiceException e) {
+            response = handleException(e, HttpStatus.INTERNAL_SERVER_ERROR.toString());
         }
-        return response; //озвращать не profile, а урл на картинку
+        return response;
     }
 
     @PutMapping(value = "/{chatId}")
@@ -145,6 +150,10 @@ public class UserController {
 
     @ExceptionHandler(BusinessException.class)
     public Response handleException(BusinessException e, String httpStatus) {
+        return new Response(null, null, httpStatus, e.getMessage());
+    }
+    @ExceptionHandler(ServiceException.class)
+    public Response handleException(ServiceException e, String httpStatus) {
         return new Response(null, null, httpStatus, e.getMessage());
     }
 }

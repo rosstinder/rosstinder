@@ -1,6 +1,7 @@
 package org.rosstinder.prerevolutionarytinderserver.service;
 
 import org.rosstinder.prerevolutionarytinderserver.exception.BusinessException;
+import org.rosstinder.prerevolutionarytinderserver.exception.ServiceException;
 import org.rosstinder.prerevolutionarytinderserver.model.Gender;
 import org.rosstinder.prerevolutionarytinderserver.model.Preference;
 import org.rosstinder.prerevolutionarytinderserver.model.entity.Profile;
@@ -9,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -18,6 +20,8 @@ public class UserService {
 
     private List<User> users;
     private List<Profile> profiles;
+
+    public final ImageGenerator imageGenerator = new ImageGenerator();
 
     public UserService() {
         this.users = new ArrayList<>();
@@ -208,7 +212,8 @@ public class UserService {
         return profiles;
     }
 
-    public Profile findProfileUrl(Long chatId) throws BusinessException {
+    public ByteArrayOutputStream findProfileUrl(Long chatId) throws BusinessException, ServiceException {
+        ByteArrayOutputStream result;
         Optional<Profile> optProfile = findAllProfiles().stream()
                 .filter(p -> p.getChatId().equals(chatId))
                 .findAny();
@@ -217,7 +222,12 @@ public class UserService {
             throw new BusinessException("Анкета chatId="+chatId+" не была найдена.");
         }
         logger.debug("Анкета chatId={} найдена.", chatId);
-        return optProfile.get();
+        try {
+            result = imageGenerator.getGeneratedImage(optProfile.get());
+        } catch (ServiceException e) {
+            throw new ServiceException(e.getMessage());
+        }
+        return result;
     }
 
     public Long findNextProfileChatId(Long chatId) throws BusinessException {
