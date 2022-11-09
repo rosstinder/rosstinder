@@ -12,4 +12,5 @@ public class Response {
     private final String userStatus;
     private final String status;
     private final Object attachment;
+    private final Object attachment2;
 }

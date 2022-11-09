@@ -1,6 +1,7 @@
 package org.rosstinder.prerevolutionarytinderserver.service;
 
 import org.rosstinder.prerevolutionarytinderserver.exception.BusinessException;
+import org.rosstinder.prerevolutionarytinderserver.exception.ServiceException;
 import org.rosstinder.prerevolutionarytinderserver.model.entity.Favorite;
 //import org.rosstinder.prerevolutionarytinderserver.model.repository.LikeRepository;
 import org.rosstinder.prerevolutionarytinderserver.model.entity.Profile;
@@ -205,5 +206,17 @@ public class FavoriteService {
         } else {
             return true;
         }
+    }
+
+    public byte[] findProfileUrl(Long chatId) throws BusinessException, ServiceException {
+        byte[] result;
+        try {
+            result = userService.findProfileUrl(chatId);
+        } catch (BusinessException e) {
+            throw new BusinessException(e.getMessage());
+        } catch (ServiceException e) {
+            throw new ServiceException(e.getMessage());
+        }
+        return result;
     }
 }

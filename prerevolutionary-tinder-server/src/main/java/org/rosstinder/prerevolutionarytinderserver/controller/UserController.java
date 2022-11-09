@@ -21,7 +21,7 @@ public class UserController {
         Response response;
         try {
             String status = service.findUserByChatId(chatId).getStatus();
-            response = new Response(chatId, status, HttpStatus.OK.toString(), status);
+            response = new Response(chatId, status, HttpStatus.OK.toString(), status, null);
         }
         catch (BusinessException e) {
             response = handleException(e, HttpStatus.NOT_FOUND.toString());
@@ -34,7 +34,7 @@ public class UserController {
     public Response getProfilePictureUrl(@PathVariable("chatId") Long chatId, String status) {
         Response response;
         try {
-            response = new Response(chatId, status, HttpStatus.OK.toString(), service.findProfileUrl(chatId));
+            response = new Response(chatId, status, HttpStatus.OK.toString(), service.findProfileUrl(chatId), null);
             service.updateUserStatus(chatId, status);
         } catch (BusinessException e) {
             response = handleException(e, HttpStatus.NOT_FOUND.toString());
@@ -53,7 +53,7 @@ public class UserController {
             case ("gender"):
                 try {
                     service.updateGender(chatId, value);
-                    response = new Response(chatId, status, HttpStatus.OK.toString(), null);
+                    response = new Response(chatId, status, HttpStatus.OK.toString(), null, null);
                 } catch (BusinessException e) {
                     response = handleException(e, HttpStatus.BAD_REQUEST.toString());
                 } finally {
@@ -61,16 +61,16 @@ public class UserController {
                 }
             case ("name"):
                 service.updateName(chatId, value);
-                response = new Response(chatId, status, HttpStatus.OK.toString(), null);
+                response = new Response(chatId, status, HttpStatus.OK.toString(), null, null);
                 break;
             case ("description"):
                 service.updateDescription(chatId, value);
-                response = new Response(chatId, status, HttpStatus.OK.toString(), null);
+                response = new Response(chatId, status, HttpStatus.OK.toString(), null, null);
                 break;
             case ("preference"):
                 try {
                     service.updatePreference(chatId, value);
-                    response = new Response(chatId, status, HttpStatus.OK.toString(), null);
+                    response = new Response(chatId, status, HttpStatus.OK.toString(), null, null);
                 } catch (BusinessException e) {
                     response = handleException(e, HttpStatus.BAD_REQUEST.toString());
                 } finally {
@@ -78,7 +78,7 @@ public class UserController {
                 }
             default:
                 isIncorrectValue = service.incorrectKey(chatId);
-                response = new Response(chatId, status, HttpStatus.NO_CONTENT.toString(), null);
+                response = new Response(chatId, status, HttpStatus.NO_CONTENT.toString(), null, null);
                 break;
         }
         try {
@@ -97,7 +97,7 @@ public class UserController {
         Response response;
         try {
             service.updateUserStatus(chatId, status);
-            response = new Response(chatId, status, HttpStatus.OK.toString(), null);
+            response = new Response(chatId, status, HttpStatus.OK.toString(), null, null);
         } catch (BusinessException e) {
             response = handleException(e, HttpStatus.NOT_FOUND.toString());
         }
@@ -112,7 +112,7 @@ public class UserController {
             service.createUser(chatId, status);
             service.createProfile(chatId);
             service.updateUserStatus(chatId, status);
-            response = new Response(chatId, status, HttpStatus.OK.toString(), null);
+            response = new Response(chatId, status, HttpStatus.OK.toString(), null, null);
         } catch (BusinessException e) {
             response = handleException(e, HttpStatus.NOT_ACCEPTABLE.toString());
         }
@@ -126,10 +126,12 @@ public class UserController {
         try {
             Long nextProfileChatId = service.findNextProfileChatId(chatId);
             service.updateUserStatus(chatId, status);
-            response = new Response(chatId, status, HttpStatus.OK.toString(), nextProfileChatId);
+            response = new Response(chatId, status, HttpStatus.OK.toString(), nextProfileChatId, service.findProfileUrl(chatId));
         }
         catch (BusinessException e) {
             response = handleException(e, HttpStatus.NOT_FOUND.toString());
+        } catch (ServiceException e) {
+            response = handleException(e, HttpStatus.INTERNAL_SERVER_ERROR.toString());
         }
         return response;    //возвращать не nextProfileChatId, а url на картинку
     }
@@ -141,7 +143,7 @@ public class UserController {
         Response response;
         try {
             response = new Response(chatId, service.findUserByChatId(chatId).getStatus(),
-                    HttpStatus.OK.toString(), service.findUserByChatId(chatId));
+                    HttpStatus.OK.toString(), service.findUserByChatId(chatId), null);
         } catch (BusinessException e) {
             response = handleException(e, HttpStatus.NOT_FOUND.toString());
         }
@@ -150,10 +152,10 @@ public class UserController {
 
     @ExceptionHandler(BusinessException.class)
     public Response handleException(BusinessException e, String httpStatus) {
-        return new Response(null, null, httpStatus, e.getMessage());
+        return new Response(null, null, httpStatus, e.getMessage(), null);
     }
     @ExceptionHandler(ServiceException.class)
     public Response handleException(ServiceException e, String httpStatus) {
-        return new Response(null, null, httpStatus, e.getMessage());
+        return new Response(null, null, httpStatus, e.getMessage(), null);
     }
 }

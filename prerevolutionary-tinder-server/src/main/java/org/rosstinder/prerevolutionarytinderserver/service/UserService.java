@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -212,8 +211,8 @@ public class UserService {
         return profiles;
     }
 
-    public ByteArrayOutputStream findProfileUrl(Long chatId) throws BusinessException, ServiceException {
-        ByteArrayOutputStream result;
+    public byte[] findProfileUrl(Long chatId) throws BusinessException, ServiceException {
+        byte[] result;
         Optional<Profile> optProfile = findAllProfiles().stream()
                 .filter(p -> p.getChatId().equals(chatId))
                 .findAny();

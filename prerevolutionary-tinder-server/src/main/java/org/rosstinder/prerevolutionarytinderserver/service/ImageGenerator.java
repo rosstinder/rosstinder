@@ -1,7 +1,6 @@
 package org.rosstinder.prerevolutionarytinderserver.service;
 
 
-import org.rosstinder.prerevolutionarytinderserver.exception.BusinessException;
 import org.rosstinder.prerevolutionarytinderserver.exception.ServiceException;
 import org.rosstinder.prerevolutionarytinderserver.model.entity.Profile;
 import org.slf4j.Logger;
@@ -49,7 +48,7 @@ public class ImageGenerator {
         }
     }
 
-    public ByteArrayOutputStream getGeneratedImage(Profile profile) throws ServiceException {
+    public byte[] getGeneratedImage(Profile profile) throws ServiceException {
         try (InputStream input = this.getClass().getResourceAsStream(BACKGROUND)) {
             BufferedImage image = ImageIO.read(Objects.requireNonNull(input));
             Graphics layout = image.getGraphics();
@@ -64,9 +63,9 @@ public class ImageGenerator {
                     width - leftBorder * 2);
             writeDescription(layout, descriptionLines, leftBorder, topBorder);
             layout.dispose();
-            ImageIO.write(image, "png", new File("example.png"));
-            System.out.println(ImageIO.createImageOutputStream(image));
-            return (ByteArrayOutputStream) ImageIO.createImageOutputStream(image);
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            ImageIO.write(image, "png", byteArrayOutputStream);
+            return byteArrayOutputStream.toByteArray();
         } catch (IOException ioException) {
             logger.error("Ошибка при чтении или записи анкеты chatId="+profile.getChatId()+".");
             throw new ServiceException("Ошибка при чтении или записи анкеты chatId="+profile.getChatId()+".");

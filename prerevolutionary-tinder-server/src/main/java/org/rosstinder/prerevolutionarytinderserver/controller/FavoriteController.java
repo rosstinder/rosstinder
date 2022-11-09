@@ -1,8 +1,10 @@
 package org.rosstinder.prerevolutionarytinderserver.controller;
 
 import org.rosstinder.prerevolutionarytinderserver.exception.BusinessException;
+import org.rosstinder.prerevolutionarytinderserver.exception.ServiceException;
 import org.rosstinder.prerevolutionarytinderserver.model.Response;
 import org.rosstinder.prerevolutionarytinderserver.service.FavoriteService;
+import org.rosstinder.prerevolutionarytinderserver.service.ImageGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -20,7 +22,7 @@ public class FavoriteController {
         Response response;
         try {
             response = new Response(chatId, status, HttpStatus.OK.toString(),
-                    favoriteService.makeLikeOrDislike(chatId, isLike, status));
+                    favoriteService.makeLikeOrDislike(chatId, isLike, status), null);
         } catch (BusinessException e) {
             response = handleException(e, HttpStatus.NOT_FOUND.toString());
         }
@@ -32,10 +34,14 @@ public class FavoriteController {
     public Response searchNextFavorite(@PathVariable("chatId") Long chatId, String status) {
         Response response;
         try {
-            response = new Response(favoriteService.findNextFavoriteChatId(chatId, status),
-                    status, HttpStatus.OK.toString(), favoriteService.checkLike(chatId));
+            Long favoriteChatId = favoriteService.findNextFavoriteChatId(chatId, status);
+            response = new Response(favoriteChatId,
+                    status, HttpStatus.OK.toString(), favoriteService.checkLike(chatId),
+                    favoriteService.findProfileUrl(favoriteChatId));
         } catch (BusinessException e) {
             response = handleException(e, HttpStatus.NOT_FOUND.toString());
+        } catch (ServiceException e) {
+            response = handleException(e, HttpStatus.INTERNAL_SERVER_ERROR.toString());
         }
         return response;
     }
@@ -45,16 +51,25 @@ public class FavoriteController {
     public Response searchPreviousFavorite(@PathVariable("chatId") Long chatId, String status) {
         Response response;
         try {
-            response = new Response(favoriteService.findPreviousFavoriteChatId(chatId, status),
-                    status, HttpStatus.OK.toString(), favoriteService.checkLike(chatId));
+            Long favoriteChatId = favoriteService.findNextFavoriteChatId(chatId, status);
+            response = new Response(favoriteChatId,
+                    status, HttpStatus.OK.toString(), favoriteService.checkLike(chatId),
+                    favoriteService.findProfileUrl(favoriteChatId));
         } catch (BusinessException e) {
             response = handleException(e, HttpStatus.NOT_FOUND.toString());
+        } catch (ServiceException e) {
+            response = handleException(e, HttpStatus.INTERNAL_SERVER_ERROR.toString());
         }
         return response;
     }
 
     @ExceptionHandler(BusinessException.class)
     public Response handleException(BusinessException e, String httpStatus) {
-        return new Response(null, null, httpStatus, e.getMessage());
+        return new Response(null, null, httpStatus, e.getMessage(), null);
+    }
+
+    @ExceptionHandler(ServiceException.class)
+    public Response handleException(ServiceException e, String httpStatus) {
+        return new Response(null, null, httpStatus, e.getMessage(), null);
     }
 }
