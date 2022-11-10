@@ -133,17 +133,24 @@ public class UserController {
         } catch (ServiceException e) {
             response = handleException(e, HttpStatus.INTERNAL_SERVER_ERROR.toString());
         }
-        return response;    //возвращать не nextProfileChatId, а url на картинку
+        return response;
     }
 
-    //удалить после тестирования
     @GetMapping(value = "/{chatId}")
     @ResponseStatus(HttpStatus.OK)
-    public Response findUserByChatId(@PathVariable("chatId") Long chatId) {
+    public Response findUserByChatId(@PathVariable("chatId") Long chatId, String status) {
         Response response;
         try {
-            response = new Response(chatId, service.findUserByChatId(chatId).getStatus(),
-                    HttpStatus.OK.toString(), service.findUserByChatId(chatId), null);
+            if (!service.isUserDoesNotExist(chatId)) {
+                response = new Response(chatId, service.findUserByChatId(chatId).getStatus(),
+                        HttpStatus.OK.toString(), service.findUserByChatId(chatId), null);
+            } else {
+                service.createUser(chatId, status);
+                service.createProfile(chatId);
+                service.updateUserStatus(chatId, status);
+                response = new Response(chatId, status, HttpStatus.OK.toString(), null, null);
+            }
+
         } catch (BusinessException e) {
             response = handleException(e, HttpStatus.NOT_FOUND.toString());
         }
