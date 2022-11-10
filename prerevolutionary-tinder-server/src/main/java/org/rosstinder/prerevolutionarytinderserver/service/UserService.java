@@ -1,6 +1,7 @@
 package org.rosstinder.prerevolutionarytinderserver.service;
 
 import org.rosstinder.prerevolutionarytinderserver.exception.BusinessException;
+import org.rosstinder.prerevolutionarytinderserver.exception.ServiceException;
 import org.rosstinder.prerevolutionarytinderserver.model.Gender;
 import org.rosstinder.prerevolutionarytinderserver.model.Preference;
 import org.rosstinder.prerevolutionarytinderserver.model.entity.Profile;
@@ -143,7 +144,8 @@ public class UserService {
         return profileRepository.findAll();
     }
 
-    public Profile findProfileUrl(Long chatId) throws BusinessException {
+    public byte[] findProfileUrl(Long chatId) throws BusinessException, ServiceException {
+        byte[] result;
         Optional<Profile> optProfile = findAllProfiles().stream()
                 .filter(p -> p.getChatId().equals(chatId))
                 .findAny();
@@ -152,7 +154,12 @@ public class UserService {
             throw new BusinessException("Анкета chatId="+chatId+" не была найдена.");
         }
         logger.debug("Анкета chatId={} найдена.", chatId);
-        return optProfile.get();
+        try {
+            result = imageGenerator.getGeneratedImage(optProfile.get());
+        } catch (ServiceException e) {
+            throw new ServiceException(e.getMessage());
+        }
+        return result;
     }
 
     public Long findNextProfileChatId(Long chatId) throws BusinessException {
