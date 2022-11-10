@@ -1,35 +1,51 @@
 package org.rosstinder.prerevolutionarytinderserver.model.entity;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.rosstinder.prerevolutionarytinderserver.model.Gender;
 import org.rosstinder.prerevolutionarytinderserver.model.Preference;
 
+import javax.persistence.*;
+
+@Entity
+@Table(name = "profiles", schema = "rosstinder")
 @Getter
+@NoArgsConstructor
 public class Profile {
-    private final Long chatId;
+
+    @Id
+    @Column(name = "chat_id", unique = true, nullable = false)
+    private Long chatId;
+    @Column(name = "name")
     @Setter
     private String name;
-    @Setter
-    private Gender gender;
-    @Setter
-    private String title;
+    @Column(name = "gender")
+    private String gender;
+    @Column(name = "description")
     @Setter
     private String description;
-    @Setter
-    private Preference preference;
+    @Column(name = "preference")
+    private String preference;
 
     public Profile(Long chatId) {
         this.chatId = chatId;
     }
 
+    public void setGender(Gender gender) {
+        this.gender = gender.getGender();
+    }
+
+    public void setPreference(Preference preference) {
+        this.preference = preference.getPreference();
+    }
+
     @Override
     public String toString() {
-        return String.format("User{chatId=%s,name=%s,gender=%s,title=%s,desc=%s,preference=%s}",
+        return String.format("User{chatId=%s,name=%s,gender=%s,desc=%s,preference=%s}",
                 chatId,
                 getPropertyAsString(name),
                 getPropertyAsString(gender),
-                getPropertyAsString(title),
                 getPropertyAsString(description),
                 getPropertyAsString(preference));
     }
@@ -37,11 +53,6 @@ public class Profile {
     private String getPropertyAsString(Object obj) {
         if (obj == null) {
             return "null";
-        }
-        else if (obj instanceof Gender) {
-            return ((Gender) obj).getGender();
-        } else if (obj instanceof Preference) {
-            return ((Preference) obj).getPreference();
         } else {
             return obj.toString();
         }

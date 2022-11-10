@@ -1,20 +1,29 @@
 package org.rosstinder.prerevolutionarytinderserver.model.entity;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
-//@Entity
-//@Table(name = "users")
-public class User {
-    public final static Long ZERO_VALUE = Long.valueOf(0);
+import javax.persistence.*;
 
-    //private final Long id;
-    private final Long chatId;
+@Getter
+@Entity
+@Table(name = "users", schema = "rosstinder")
+@NoArgsConstructor
+public class User {
+    public final static Long ZERO_VALUE = 0L;
+
+    @Id
+    @Column(name = "chat_id", unique = true, nullable = false)
+    private Long chatId;
+    @Column(name = "status")
     @Setter
     private String status;
+
+    @Column(name = "last_favorite_num")
     @Setter
     private Long lastFavoriteNumber;
+    @Column(name = "last_profile_num")
     @Setter
     private Long lastProfileNumber;
 

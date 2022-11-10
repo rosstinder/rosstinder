@@ -3,26 +3,25 @@ package org.rosstinder.prerevolutionarytinderserver.service;
 import org.rosstinder.prerevolutionarytinderserver.exception.BusinessException;
 import org.rosstinder.prerevolutionarytinderserver.exception.ServiceException;
 import org.rosstinder.prerevolutionarytinderserver.model.entity.Favorite;
-//import org.rosstinder.prerevolutionarytinderserver.model.repository.LikeRepository;
 import org.rosstinder.prerevolutionarytinderserver.model.entity.Profile;
 import org.rosstinder.prerevolutionarytinderserver.model.entity.User;
+import org.rosstinder.prerevolutionarytinderserver.model.repository.FavoriteRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-@Component
+@Service
 public class FavoriteService {
     private final Logger logger = LoggerFactory.getLogger(FavoriteService.class);
-    private final UserService userService = new UserService();
-    private List<Favorite> favorites = new ArrayList<>();
-    public FavoriteService() {
-        favorites.add(new Favorite(Long.valueOf(2),Long.valueOf(1), true));
-        favorites.add(new Favorite(Long.valueOf(2),Long.valueOf(3), true));
+    private final UserService userService;
+    private final FavoriteRepository favoriteRepository;
+
+    public FavoriteService(FavoriteRepository favoriteRepository, UserService userService) {
+        this.favoriteRepository = favoriteRepository;
+        this.userService = userService;
     }
 
     /**
@@ -43,7 +42,7 @@ public class FavoriteService {
             if (isLikeAlreadyExist(who, whom)) {
                 editLikeOrDislike(who, whom, isLike);
             } else {
-                favorites.add(new Favorite(who, whom, isLike));
+                saveFavorite(new Favorite(who, whom, isLike));
             }
             if (isMatch(who, whom)) {
                 userService.updateUserStatus(who, status);
@@ -63,16 +62,17 @@ public class FavoriteService {
      * Получить все содержимое таблицы likes
      * @return список записей таблицы likes
      */
-    private List<Favorite> findAllLikes() {
-        return favorites;
+    private List<Favorite> findAllFavorites() {
+        return favoriteRepository.findAll();
     }
 
     private void editLikeOrDislike(Long who, Long whom, boolean isLike) {
-        Favorite favorite = favorites.stream()
+        Favorite favorite = findAllFavorites().stream()
                 .filter(l -> l.getWhoChatId().equals(who) && l.getWhomChatId().equals(whom))
                 .findAny()
                 .get();
         favorite.setLike(isLike);
+        saveFavorite(favorite);
     }
 
     /**
@@ -82,10 +82,8 @@ public class FavoriteService {
      * @return true если лайк/отказ уже сущетвует в БД, false если записи о лайке/отказе нет
      */
     private boolean isLikeAlreadyExist(Long who, Long whom) {
-        return favorites.stream()
-                .filter(favorite -> favorite.getWhoChatId().equals(who) && favorite.getWhomChatId().equals(whom))
-                .findAny()
-                .isPresent();
+        return findAllFavorites().stream()
+                .anyMatch(favorite -> favorite.getWhoChatId().equals(who) && favorite.getWhomChatId().equals(whom));
     }
 
     /**
@@ -97,7 +95,7 @@ public class FavoriteService {
         Long result;
         try {
             User user = userService.findUserByChatId(chatId);
-            Optional<Long> nextFavorite = findAllLikes().stream()
+            Optional<Long> nextFavorite = findAllFavorites().stream()
                     .filter(l -> l.getWhoChatId().equals(chatId))
                     .map(Favorite::getWhomChatId)
                     .sorted(Long::compareTo)
@@ -105,7 +103,7 @@ public class FavoriteService {
                     .findFirst();
             if (nextFavorite.isEmpty()) {
                 user.setLastFavoriteNumber(User.ZERO_VALUE);
-                nextFavorite = findAllLikes().stream()
+                nextFavorite = findAllFavorites().stream()
                         .filter(l -> l.getWhoChatId().equals(chatId))
                         .map(Favorite::getWhomChatId)
                         .sorted(Long::compareTo)
@@ -131,6 +129,7 @@ public class FavoriteService {
         try {
             User user = userService.findUserByChatId(chatId);
             user.setLastFavoriteNumber(favoriteNumber);
+            userService.saveUser(user);
         }
         catch (BusinessException e) {
             throw new BusinessException(e.getMessage());
@@ -141,7 +140,7 @@ public class FavoriteService {
         Long result;
         try {
             User user = userService.findUserByChatId(chatId);
-            Optional<Long> previousFavorite = findAllLikes().stream()
+            Optional<Long> previousFavorite = findAllFavorites().stream()
                     .filter(l -> l.getWhoChatId().equals(chatId))
                     .map(Favorite::getWhomChatId)
                     .sorted(Long::compareTo)
@@ -149,7 +148,7 @@ public class FavoriteService {
                     .findFirst();
             if (previousFavorite.isEmpty()) {
                 user.setLastFavoriteNumber(Long.MAX_VALUE);
-                previousFavorite = findAllLikes().stream()
+                previousFavorite = findAllFavorites().stream()
                         .filter(l -> l.getWhoChatId().equals(chatId))
                         .map(Favorite::getWhomChatId)
                         .sorted(Long::compareTo)
@@ -175,7 +174,7 @@ public class FavoriteService {
         try {
             Long whomChatId = userService.findUserByChatId(whoChatId).getLastFavoriteNumber();
             Profile whomProfile = userService.findProfileByChatId(whomChatId);
-            result.append(whomProfile.getGender().getGender() + ", " + whomProfile.getName());
+            result.append(whomProfile.getGender()).append(", ").append(whomProfile.getName());
             if (isMatch(whoChatId, whomChatId)) {
                 result.append(", Взаимность");
             } else if (isUserFavoritesAnotherUser(whomChatId, whoChatId)) {
@@ -190,22 +189,18 @@ public class FavoriteService {
     }
 
     private boolean isMatch(Long whoChatId, Long whomChatId) {
-        if (isUserFavoritesAnotherUser(whoChatId, whomChatId) && (isUserFavoritesAnotherUser(whomChatId, whoChatId))) {
-            return true;
-        } else {
-            return false;
-        }
+        return isUserFavoritesAnotherUser(whoChatId, whomChatId) && (isUserFavoritesAnotherUser(whomChatId, whoChatId));
     }
 
     private boolean isUserFavoritesAnotherUser(Long whoChatId, Long whomChatId) {
-        Optional<Favorite> optFavorite = findAllLikes().stream()
+        Optional<Favorite> optFavorite = findAllFavorites().stream()
                 .filter(f -> f.isLike() && f.getWhoChatId().equals(whoChatId) && f.getWhomChatId().equals(whomChatId))
                 .findAny();
-        if (optFavorite.isEmpty()) {
-            return false;
-        } else {
-            return true;
-        }
+        return optFavorite.isPresent();
+    }
+
+    private void saveFavorite(Favorite favorite) {
+        favoriteRepository.save(favorite);
     }
 
     public byte[] findProfileUrl(Long chatId) throws BusinessException, ServiceException {
