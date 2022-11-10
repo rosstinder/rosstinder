@@ -1,4 +1,4 @@
-package org.rosstinder.prerevolutionarytinderserver.model.repository;
+package org.rosstinder.prerevolutionarytinderserver.repository;
 
 import org.rosstinder.prerevolutionarytinderserver.model.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;

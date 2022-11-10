@@ -5,7 +5,7 @@ import org.rosstinder.prerevolutionarytinderserver.exception.ServiceException;
 import org.rosstinder.prerevolutionarytinderserver.model.entity.Favorite;
 import org.rosstinder.prerevolutionarytinderserver.model.entity.Profile;
 import org.rosstinder.prerevolutionarytinderserver.model.entity.User;
-import org.rosstinder.prerevolutionarytinderserver.model.repository.FavoriteRepository;
+import org.rosstinder.prerevolutionarytinderserver.repository.FavoriteRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
