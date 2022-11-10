@@ -4,23 +4,25 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Getter
-@AllArgsConstructor
 @Entity
+@AllArgsConstructor
 @Table(name = "favorites", schema = "rosstinder")
 public class Favorite {
     public final static boolean LIKE = true;
     public final static boolean DISLIKE = false;
 
+    @Column(name = "id", nullable = false)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     @Column(name = "who_chat_id", nullable = false)
-    private final Long whoChatId;
+    private Long whoChatId;
 
     @Column(name = "whom_chat_id", nullable = false)
-    private final Long whomChatId;
+    private Long whomChatId;
 
     @Setter
     @Column(name = "is_like")
@@ -29,5 +31,11 @@ public class Favorite {
     public Favorite(Long who, Long whom) {
         this.whoChatId = who;
         this.whomChatId = whom;
+    }
+
+    public Favorite(Long who, Long whom, boolean isLike) {
+        this.whoChatId = who;
+        this.whomChatId = whom;
+        this.isLike = isLike;
     }
 }

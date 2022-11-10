@@ -11,10 +11,7 @@ import javax.persistence.*;
 public class User {
     public final static Long ZERO_VALUE = Long.valueOf(0);
 
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-//    @Column(name = "id")
-//    private Long id;
+    @Id
     @Column(name = "chat_id", unique = true, nullable = false)
     private Long chatId;
     @Column(name = "status")

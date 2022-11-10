@@ -23,7 +23,6 @@ public class UserService {
     private final ProfileRepository profileRepository;
     private final Logger logger = LoggerFactory.getLogger(UserService.class);
 
-    @Autowired
     public UserService(UserRepository userRepository, ProfileRepository profileRepository) {
         this.userRepository = userRepository;
         this.profileRepository = profileRepository;
