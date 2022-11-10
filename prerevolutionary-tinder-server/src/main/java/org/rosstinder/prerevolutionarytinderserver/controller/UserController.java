@@ -4,8 +4,6 @@ import lombok.AllArgsConstructor;
 import org.rosstinder.prerevolutionarytinderserver.exception.BusinessException;
 import org.rosstinder.prerevolutionarytinderserver.exception.ServiceException;
 import org.rosstinder.prerevolutionarytinderserver.model.Response;
-import org.rosstinder.prerevolutionarytinderserver.service.ImageGenerator;
-import org.rosstinder.prerevolutionarytinderserver.model.repository.UserRepository;
 import org.rosstinder.prerevolutionarytinderserver.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -51,17 +49,16 @@ public class UserController {
     @PutMapping(value = "/{chatId}")
     @ResponseStatus(HttpStatus.OK)
     public Response updateProfile(@PathVariable("chatId") Long chatId, String key, String value, String status) {
-        Response response = null;
+        Response response;
         boolean isIncorrectValue = false;
         switch (key) {
             case ("gender"):
                 try {
                     service.updateGender(chatId, value);
                     response = new Response(chatId, status, HttpStatus.OK.toString(), null, null);
+                    break;
                 } catch (BusinessException e) {
                     response = handleException(e, HttpStatus.BAD_REQUEST.toString());
-                } finally {
-                    break;
                 }
             case ("name"):
                 service.updateName(chatId, value);
@@ -75,10 +72,9 @@ public class UserController {
                 try {
                     service.updatePreference(chatId, value);
                     response = new Response(chatId, status, HttpStatus.OK.toString(), null, null);
+                    break;
                 } catch (BusinessException e) {
                     response = handleException(e, HttpStatus.BAD_REQUEST.toString());
-                } finally {
-                    break;
                 }
             default:
                 isIncorrectValue = service.incorrectKey(chatId);

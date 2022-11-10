@@ -5,10 +5,6 @@ import org.rosstinder.prerevolutionarytinderserver.exception.BusinessException;
 import org.rosstinder.prerevolutionarytinderserver.exception.ServiceException;
 import org.rosstinder.prerevolutionarytinderserver.model.Response;
 import org.rosstinder.prerevolutionarytinderserver.service.FavoriteService;
-import org.rosstinder.prerevolutionarytinderserver.service.ImageGenerator;
-import org.rosstinder.prerevolutionarytinderserver.service.UserService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/favorites")
 @AllArgsConstructor
 public class FavoriteController {
-    private final Logger logger = LoggerFactory.getLogger(FavoriteController.class);
     private final FavoriteService favoriteService;
 
     @PostMapping(value = "/{chatId}")
@@ -54,7 +49,7 @@ public class FavoriteController {
     public Response searchPreviousFavorite(@PathVariable("chatId") Long chatId, String status) {
         Response response;
         try {
-            Long favoriteChatId = favoriteService.findNextFavoriteChatId(chatId, status);
+            Long favoriteChatId = favoriteService.findPreviousFavoriteChatId(chatId, status);
             response = new Response(favoriteChatId,
                     status, HttpStatus.OK.toString(), favoriteService.checkLike(chatId),
                     favoriteService.findProfileUrl(favoriteChatId));
