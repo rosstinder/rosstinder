@@ -2,6 +2,7 @@ package org.rosstinder.prerevolutionarytinderserver.model.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
@@ -9,6 +10,7 @@ import javax.persistence.*;
 @Getter
 @Entity
 @AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "favorites", schema = "rosstinder")
 public class Favorite {
     public final static boolean LIKE = true;
@@ -27,11 +29,6 @@ public class Favorite {
     @Setter
     @Column(name = "is_like")
     private boolean isLike;
-
-    public Favorite(Long who, Long whom) {
-        this.whoChatId = who;
-        this.whomChatId = whom;
-    }
 
     public Favorite(Long who, Long whom, boolean isLike) {
         this.whoChatId = who;

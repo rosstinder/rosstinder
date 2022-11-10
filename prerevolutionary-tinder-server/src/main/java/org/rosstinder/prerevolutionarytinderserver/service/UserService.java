@@ -32,6 +32,12 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    /**
+     * Метод нахождения пользователя по его chatId.
+     * @param chatId идентификатор
+     * @return User пользователя
+     * @throws BusinessException В случае отсутствия пользователя бросает BusinessException
+     */
     public User findUserByChatId(Long chatId) throws BusinessException {
         Optional<User> optUser = findAll().stream()
                 .filter(u -> u.getChatId().equals(chatId))
@@ -44,6 +50,12 @@ public class UserService {
         return optUser.get();
     }
 
+    /**
+     * Метод нахождения анкеты пользователя по его chatId.
+     * @param chatId индентификатор
+     * @return Profile анкета пользователя
+     * @throws BusinessException в случае если анкета не была найдена
+     */
     public Profile findProfileByChatId(Long chatId) throws BusinessException {
         Optional<Profile> optProfile = findAllProfiles().stream()
                 .filter(p -> p.getChatId().equals(chatId))
@@ -56,10 +68,17 @@ public class UserService {
         return optProfile.get();
     }
 
+    /**
+     * Обновление пола пользователя
+     * @param chatId идентификатор
+     * @param gender строка с наименованием пола
+     * @throws BusinessException если анкета пользователя не была найдена или поле gender неверного формата
+     */
     public void updateGender(Long chatId, String gender) throws BusinessException {
         try {
             Profile profile = findProfileByChatId(chatId);
             profile.setGender(new Gender(gender));
+            saveProfile(profile);
         } catch (BusinessException e) {
             logger.error(e.getMessage());
             throw new BusinessException(e.getMessage());
@@ -67,20 +86,32 @@ public class UserService {
 
     }
 
+    /**
+     * Обновление имени пользователя
+     * @param chatId идентификтаор
+     * @param name имя
+     */
     public void updateName(Long chatId, String name) {
         try {
             Profile profile = findProfileByChatId(chatId);
             profile.setName(name);
+            saveProfile(profile);
         } catch (BusinessException e) {
             logger.error(e.getMessage());
         }
 
     }
 
+    /**
+     * Обновление описания пользователя
+     * @param chatId идентификатор
+     * @param description описание
+     */
     public void updateDescription(Long chatId, String description) {
         try {
             Profile profile = findProfileByChatId(chatId);
             profile.setDescription(description);
+            saveProfile(profile);
         } catch (BusinessException e) {
             logger.error(e.getMessage());
         }
@@ -90,6 +121,7 @@ public class UserService {
         try {
             Profile profile = findProfileByChatId(chatId);
             profile.setPreference(new Preference(preference));
+            saveProfile(profile);
         } catch (BusinessException e) {
             logger.error(e.getMessage());
             throw new BusinessException(e.getMessage());
@@ -97,10 +129,17 @@ public class UserService {
 
     }
 
+    /**
+     * Обновление статуса состояния пользователя при использовании бота
+     * @param chatId идентификтаор
+     * @param status новый статус состояния
+     * @throws BusinessException если пользователь не был найден
+     */
     public void updateUserStatus(Long chatId, String status) throws BusinessException {
         try {
             User user = findUserByChatId(chatId);
             user.setStatus(status);
+            saveUser(user);
         } catch (BusinessException e) {
             throw new BusinessException(e.getMessage());
         }
@@ -208,9 +247,14 @@ public class UserService {
         }
     }
 
-    private void saveUser(User user) {
+    protected void saveUser(User user) {
         userRepository.save(user);
         logger.debug("Данные пользователя chatId="+user.getChatId()+" сохранены.");
+    }
+
+    private void saveProfile(Profile profile) {
+        profileRepository.save(profile);
+        logger.debug("Данные анкеты пользователя chatId="+profile.getChatId()+" сохранены.");
     }
 
     public boolean incorrectKey(Long chatId) {

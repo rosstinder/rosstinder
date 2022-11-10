@@ -55,23 +55,23 @@ public class UserController {
             case ("gender"):
                 try {
                     service.updateGender(chatId, value);
-                    response = new Response(chatId, status, HttpStatus.OK.toString(), null, null);
+                    response = new Response(chatId, status, HttpStatus.OK.toString(), value, null);
                     break;
                 } catch (BusinessException e) {
                     response = handleException(e, HttpStatus.BAD_REQUEST.toString());
                 }
             case ("name"):
                 service.updateName(chatId, value);
-                response = new Response(chatId, status, HttpStatus.OK.toString(), null, null);
+                response = new Response(chatId, status, HttpStatus.OK.toString(), value, null);
                 break;
             case ("description"):
                 service.updateDescription(chatId, value);
-                response = new Response(chatId, status, HttpStatus.OK.toString(), null, null);
+                response = new Response(chatId, status, HttpStatus.OK.toString(), value, null);
                 break;
             case ("preference"):
                 try {
                     service.updatePreference(chatId, value);
-                    response = new Response(chatId, status, HttpStatus.OK.toString(), null, null);
+                    response = new Response(chatId, status, HttpStatus.OK.toString(), value, null);
                     break;
                 } catch (BusinessException e) {
                     response = handleException(e, HttpStatus.BAD_REQUEST.toString());
@@ -136,7 +136,6 @@ public class UserController {
         return response;
     }
 
-    //удалить после тестирования
     @GetMapping(value = "/{chatId}")
     @ResponseStatus(HttpStatus.OK)
     public Response findUserByChatId(@PathVariable("chatId") Long chatId, String status) {

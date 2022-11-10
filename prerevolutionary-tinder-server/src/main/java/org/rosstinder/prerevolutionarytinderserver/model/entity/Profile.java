@@ -1,6 +1,7 @@
 package org.rosstinder.prerevolutionarytinderserver.model.entity;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.rosstinder.prerevolutionarytinderserver.model.Gender;
 import org.rosstinder.prerevolutionarytinderserver.model.Preference;
@@ -10,26 +11,33 @@ import javax.persistence.*;
 @Entity
 @Table(name = "profiles", schema = "rosstinder")
 @Getter
+@NoArgsConstructor
 public class Profile {
 
     @Id
     @Column(name = "chat_id", unique = true, nullable = false)
-    private final Long chatId;
+    private Long chatId;
     @Column(name = "name")
     @Setter
     private String name;
     @Column(name = "gender")
-    @Setter
-    private Gender gender;
+    private String gender;
     @Column(name = "description")
     @Setter
     private String description;
     @Column(name = "preference")
-    @Setter
-    private Preference preference;
+    private String preference;
 
     public Profile(Long chatId) {
         this.chatId = chatId;
+    }
+
+    public void setGender(Gender gender) {
+        this.gender = gender.getGender();
+    }
+
+    public void setPreference(Preference preference) {
+        this.preference = preference.getPreference();
     }
 
     @Override
@@ -45,11 +53,6 @@ public class Profile {
     private String getPropertyAsString(Object obj) {
         if (obj == null) {
             return "null";
-        }
-        else if (obj instanceof Gender) {
-            return ((Gender) obj).getGender();
-        } else if (obj instanceof Preference) {
-            return ((Preference) obj).getPreference();
         } else {
             return obj.toString();
         }

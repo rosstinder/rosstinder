@@ -42,7 +42,7 @@ public class FavoriteService {
             if (isLikeAlreadyExist(who, whom)) {
                 editLikeOrDislike(who, whom, isLike);
             } else {
-                save(new Favorite(who, whom, isLike));
+                saveFavorite(new Favorite(who, whom, isLike));
             }
             if (isMatch(who, whom)) {
                 userService.updateUserStatus(who, status);
@@ -72,6 +72,7 @@ public class FavoriteService {
                 .findAny()
                 .get();
         favorite.setLike(isLike);
+        saveFavorite(favorite);
     }
 
     /**
@@ -128,6 +129,7 @@ public class FavoriteService {
         try {
             User user = userService.findUserByChatId(chatId);
             user.setLastFavoriteNumber(favoriteNumber);
+            userService.saveUser(user);
         }
         catch (BusinessException e) {
             throw new BusinessException(e.getMessage());
@@ -172,7 +174,7 @@ public class FavoriteService {
         try {
             Long whomChatId = userService.findUserByChatId(whoChatId).getLastFavoriteNumber();
             Profile whomProfile = userService.findProfileByChatId(whomChatId);
-            result.append(whomProfile.getGender().getGender()).append(", ").append(whomProfile.getName());
+            result.append(whomProfile.getGender()).append(", ").append(whomProfile.getName());
             if (isMatch(whoChatId, whomChatId)) {
                 result.append(", Взаимность");
             } else if (isUserFavoritesAnotherUser(whomChatId, whoChatId)) {
@@ -197,7 +199,7 @@ public class FavoriteService {
         return optFavorite.isPresent();
     }
 
-    private void save(Favorite favorite) {
+    private void saveFavorite(Favorite favorite) {
         favoriteRepository.save(favorite);
     }
 

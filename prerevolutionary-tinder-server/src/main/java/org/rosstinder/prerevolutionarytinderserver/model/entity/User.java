@@ -1,6 +1,7 @@
 package org.rosstinder.prerevolutionarytinderserver.model.entity;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
@@ -8,8 +9,9 @@ import javax.persistence.*;
 @Getter
 @Entity
 @Table(name = "users", schema = "rosstinder")
+@NoArgsConstructor
 public class User {
-    public final static Long ZERO_VALUE = Long.valueOf(0);
+    public final static Long ZERO_VALUE = 0L;
 
     @Id
     @Column(name = "chat_id", unique = true, nullable = false)

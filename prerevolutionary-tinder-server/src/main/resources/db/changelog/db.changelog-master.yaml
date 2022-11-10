@@ -4,4 +4,4 @@ databaseChangeLog:
   - include:
       file: classpath:/db/changelog/changelog-002.sql
   - include:
-      file: classpath:/db/changelog/changelog-002.sql
+      file: classpath:/db/changelog/changelog-003.sql
