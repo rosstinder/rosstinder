@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Preference {
-    private final ArrayList VALUES = new ArrayList(Arrays.asList("Сударъ", "Сударыня", "Все"));
+    private final ArrayList VALUES = new ArrayList(Arrays.asList("Сударъ", "Сударыня", "Всех"));
     @Getter
     private String preference;
 
@@ -27,7 +27,7 @@ public class Preference {
     public static boolean compareGenderAndPreference(String gender, String preference) {
         if (preference.equals(gender)) {
             return true;
-        } else if (preference.equals("Все")) {
+        } else if (preference.equals("Всех")) {
             return true;
         }
         return false;
