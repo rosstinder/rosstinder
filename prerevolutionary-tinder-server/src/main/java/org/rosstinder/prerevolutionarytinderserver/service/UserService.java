@@ -129,6 +129,12 @@ public class UserService {
         }
     }
 
+    /**
+     * Обновление предпочтений пользователя
+     * @param chatId идентификатор пользователя
+     * @param preference новое значение предпочтения
+     * @throws BusinessException если новое значение предпочтения не удовлетворяет возможным значениям поля
+     */
     public void updatePreference(Long chatId, String preference) throws BusinessException {
         try {
             Profile profile = findProfileByChatId(chatId);
@@ -157,6 +163,12 @@ public class UserService {
         }
     }
 
+    /**
+     * Создание нового пользователя
+     * @param chatId идентификатор пользователя
+     * @param status статус пользователя после создания
+     * @throws BusinessException если пользователь с данным chatId уже существует
+     */
     public void createUser(Long chatId, String status) throws BusinessException {
         if (isUserDoesNotExist(chatId)) {
             saveUser(new User(chatId, status));
@@ -167,6 +179,11 @@ public class UserService {
         }
     }
 
+    /**
+     * Создание анкеты пользователя
+     * @param chatId идентификатор пользователя
+     * @throws BusinessException если анкета с полем chatId не уникальна
+     */
     public void createProfile(Long chatId) throws BusinessException {
         if (isProfileDoesNotExistByChatId(chatId)) {
             profileRepository.save(new Profile(chatId));
@@ -176,12 +193,23 @@ public class UserService {
         }
     }
 
+    /**
+     * Метод проверяет, что пользователь не существует
+     * @param chatId идентификтаор пользователя
+     * @return true - не существует; false - существует
+     */
     public boolean isUserDoesNotExist(Long chatId) {
         Optional<User> optUser = findAll().stream()
                 .filter(u -> u.getChatId().equals(chatId))
                 .findAny();
         return optUser.isEmpty();
     }
+
+    /**
+     * Метод проверяет, что анкета не существует
+     * @param id идентификатор анкеты
+     * @return true - анкета не существует; false - анкета существует
+     */
     public boolean isProfileDoesNotExistById(Long id) {
         Optional<Profile> optProfile = findAllProfiles().stream()
                 .filter(p -> p.getId().equals(id))
@@ -189,6 +217,11 @@ public class UserService {
         return optProfile.isEmpty();
     }
 
+    /**
+     * Метод проверяет, что анкета не существует для пользователя с chatId
+     * @param chatId идентификатор пользователя
+     * @return true - анкета существует; false - анкета не существует
+     */
     private boolean isProfileDoesNotExistByChatId(Long chatId) {
         Optional<Profile> optProfile = findAllProfiles().stream()
                 .filter(p -> p.getChatId().equals(chatId))
@@ -196,10 +229,21 @@ public class UserService {
         return optProfile.isEmpty();
     }
 
+    /**
+     * Получение всех анкет
+     * @return список анкет
+     */
     public List<Profile> findAllProfiles() {
         return profileRepository.findAll();
     }
 
+    /**
+     * Метод возвращает сгенерированную картинку в виде byte[] на основе профиля
+     * @param id идентификатор анкеты
+     * @return картинка анкеты в виде byte[]
+     * @throws BusinessException если анкета не существует
+     * @throws ServiceException если не удалось сгенерировать картинку
+     */
     public byte[] findProfileUrl(Long id) throws BusinessException, ServiceException {
         byte[] result;
         Optional<Profile> optProfile = findAllProfiles().stream()
@@ -218,6 +262,12 @@ public class UserService {
         return result;
     }
 
+    /**
+     * Метод находит следующую анкету для отображения в разделе Поиск с учетом предпочтений пользователей
+     * @param chatId идентификатор пользователя, который желает просмотреть анкету
+     * @return идентификатор анкеты (id)
+     * @throws BusinessException если пользователь не найден или отсутствуют анкеты, удовлетворяющие предпочтениям пользователя
+     */
     public Long findNextProfileByChatId(Long chatId) throws BusinessException {
         Long result;
         try {
@@ -255,6 +305,11 @@ public class UserService {
         return result;
     }
 
+    /**
+     * Обновление номера текущей просматриваемой анкеты
+     * @param chatId идентификатор пользователя
+     * @param profileNumber идентификатор просматриваемой анкеты
+     */
     public void updateUserProfileNumber(Long chatId, Long profileNumber) {
         try {
             User user = findUserByChatId(chatId);
@@ -265,22 +320,41 @@ public class UserService {
         }
     }
 
+    /**
+     * Сохранение пользователя и его изменений
+     * @param user данные пользователя
+     */
     protected void saveUser(User user) {
         userRepository.save(user);
         logger.debug("Данные пользователя chatId="+user.getChatId()+" сохранены.");
     }
 
+    /**
+     * Сохранение анкеты и ее изменений
+     * @param profile данные анкеты
+     */
     private void saveProfile(Profile profile) {
         profileRepository.save(profile);
         logger.debug("Данные анкеты пользователя chatId="+profile.getChatId()+" сохранены.");
     }
 
+    /**
+     * Логгирование факта не обновления данных анкеты.
+     * @param chatId идентификатор пользователя
+     * @return true
+     */
     public boolean incorrectKey(Long chatId) {
-        logger.info("Значения для пользователя chatId="+chatId+" были обновлены по причине некорректного значения key в" +
+        logger.info("Анкета пользователя chatId="+chatId+" не была обновлена по причине некорректного значения key в" +
                 " полученном запросе. Допустимые значения: gender, name, description, preference.");
         return true;
     }
 
+    /**
+     * Метод находит идентификатор анкеты на основе chatId пользователя
+     * @param chatId идентификатор пользователя
+     * @return идентификатор анкеты
+     * @throws BusinessException если анкета не была найдена
+     */
     public Long findProfileIdByChatId(Long chatId) throws BusinessException {
         try {
             Long result = findProfileByChatId(chatId).getId();
