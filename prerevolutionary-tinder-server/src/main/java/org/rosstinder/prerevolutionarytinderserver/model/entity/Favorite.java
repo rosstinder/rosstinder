@@ -20,19 +20,20 @@ public class Favorite {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "who_chat_id", nullable = false)
-    private Long whoChatId;
 
-    @Column(name = "whom_chat_id", nullable = false)
-    private Long whomChatId;
+    @Column(name = "who", nullable = false)
+    private Long whoId;
+
+    @Column(name = "whom", nullable = false)
+    private Long whomId;
 
     @Setter
     @Column(name = "is_like")
     private boolean isLike;
 
     public Favorite(Long who, Long whom, boolean isLike) {
-        this.whoChatId = who;
-        this.whomChatId = whom;
+        this.whoId = who;
+        this.whomId = whom;
         this.isLike = isLike;
     }
 }

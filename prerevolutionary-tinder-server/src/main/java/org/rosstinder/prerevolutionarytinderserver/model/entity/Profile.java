@@ -15,6 +15,10 @@ import javax.persistence.*;
 public class Profile {
 
     @Id
+    @Column(name = "id", unique = true, nullable = false)
+    @GeneratedValue(generator = "rosstinder.profiles_sequence")
+    private Long id;
+
     @Column(name = "chat_id", unique = true, nullable = false)
     private Long chatId;
     @Column(name = "name")

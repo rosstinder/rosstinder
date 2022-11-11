@@ -36,7 +36,8 @@ public class UserController {
     public Response getProfilePictureUrl(@PathVariable("chatId") Long chatId, String status) {
         Response response;
         try {
-            response = new Response(chatId, status, HttpStatus.OK.toString(), service.findProfileUrl(chatId), null);
+            Long id = service.findProfileIdByChatId(chatId);
+            response = new Response(chatId, status, HttpStatus.OK.toString(), service.findProfileUrl(id), null);
             service.updateUserStatus(chatId, status);
         } catch (BusinessException e) {
             response = handleException(e, HttpStatus.NOT_FOUND.toString());
@@ -124,9 +125,10 @@ public class UserController {
     public Response searchNextProfile(@PathVariable("chatId") Long chatId, String status) {
         Response response;
         try {
-            Long nextProfileChatId = service.findNextProfileChatId(chatId);
+            Long nextProfileId = service.findNextProfileByChatId(chatId);
             service.updateUserStatus(chatId, status);
-            response = new Response(chatId, status, HttpStatus.OK.toString(), nextProfileChatId, service.findProfileUrl(chatId));
+            response = new Response(chatId, status, HttpStatus.OK.toString(),
+                    nextProfileId, service.findProfileUrl(nextProfileId));
         }
         catch (BusinessException e) {
             response = handleException(e, HttpStatus.NOT_FOUND.toString());

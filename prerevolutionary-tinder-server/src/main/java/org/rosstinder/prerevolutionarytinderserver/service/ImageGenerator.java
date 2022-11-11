@@ -65,6 +65,7 @@ public class ImageGenerator {
             layout.dispose();
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             ImageIO.write(image, "png", byteArrayOutputStream);
+            ImageIO.write(image, "png", new File("example.png"));
             return byteArrayOutputStream.toByteArray();
         } catch (IOException ioException) {
             logger.error("Ошибка при чтении или записи анкеты chatId="+profile.getChatId()+".");

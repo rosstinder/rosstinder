@@ -1,3 +1,10 @@
+create sequence rosstinder.profiles_sequence
+    start with 1
+    increment by 1
+    minvalue 1
+    NO CYCLE
+    cache 1;
+
 create table if not exists rosstinder.users (
   chat_id           bigint NOT NULL primary key,
   status            text,
@@ -6,7 +13,8 @@ create table if not exists rosstinder.users (
 );
 
 create table if not exists rosstinder.profiles (
-  chat_id           bigint NOT NULL primary key,
+  id                bigint NOT NULL primary key default nextval('rosstinder.profiles_sequence'),
+  chat_id           bigint NOT NULL,
   name              text,
   gender            text,
   description       text,

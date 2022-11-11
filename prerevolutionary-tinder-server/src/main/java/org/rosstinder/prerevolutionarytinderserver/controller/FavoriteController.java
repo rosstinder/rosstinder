@@ -32,10 +32,10 @@ public class FavoriteController {
     public Response searchNextFavorite(@PathVariable("chatId") Long chatId, String status) {
         Response response;
         try {
-            Long favoriteChatId = favoriteService.findNextFavoriteChatId(chatId, status);
-            response = new Response(favoriteChatId,
-                    status, HttpStatus.OK.toString(), favoriteService.checkLike(chatId),
-                    favoriteService.findProfileUrl(favoriteChatId));
+            Long favoriteProfileId = favoriteService.findNextFavoriteChatId(chatId, status);
+            response = new Response(chatId,
+                    status, HttpStatus.OK.toString(), favoriteService.findFavoriteRelation(chatId),
+                    favoriteService.findProfileUrl(favoriteProfileId));
         } catch (BusinessException e) {
             response = handleException(e, HttpStatus.NOT_FOUND.toString());
         } catch (ServiceException e) {
@@ -51,7 +51,7 @@ public class FavoriteController {
         try {
             Long favoriteChatId = favoriteService.findPreviousFavoriteChatId(chatId, status);
             response = new Response(favoriteChatId,
-                    status, HttpStatus.OK.toString(), favoriteService.checkLike(chatId),
+                    status, HttpStatus.OK.toString(), favoriteService.findFavoriteRelation(chatId),
                     favoriteService.findProfileUrl(favoriteChatId));
         } catch (BusinessException e) {
             response = handleException(e, HttpStatus.NOT_FOUND.toString());

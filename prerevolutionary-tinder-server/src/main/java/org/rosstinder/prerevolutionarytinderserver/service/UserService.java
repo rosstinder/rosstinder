@@ -68,6 +68,18 @@ public class UserService {
         return optProfile.get();
     }
 
+    public Profile findProfileById(Long id) throws BusinessException {
+        Optional<Profile> optProfile = findAllProfiles().stream()
+                .filter(p -> p.getId().equals(id))
+                .findAny();
+        if (optProfile.isEmpty()) {
+            logger.info("Анкета id={} не была найдена.", id);
+            throw new BusinessException("Анкета chatId="+id+" не была найдена.");
+        }
+        logger.debug("Анкета chatId={} найдена.", id);
+        return optProfile.get();
+    }
+
     /**
      * Обновление пола пользователя
      * @param chatId идентификатор
@@ -156,7 +168,7 @@ public class UserService {
     }
 
     public void createProfile(Long chatId) throws BusinessException {
-        if (isProfileDoesNotExist(chatId)) {
+        if (isProfileDoesNotExistByChatId(chatId)) {
             profileRepository.save(new Profile(chatId));
             logger.debug("Новая анкета пользователя chatId={} была добавлена.", chatId);
         } else {
@@ -170,8 +182,14 @@ public class UserService {
                 .findAny();
         return optUser.isEmpty();
     }
+    public boolean isProfileDoesNotExistById(Long id) {
+        Optional<Profile> optProfile = findAllProfiles().stream()
+                .filter(p -> p.getId().equals(id))
+                .findAny();
+        return optProfile.isEmpty();
+    }
 
-    private boolean isProfileDoesNotExist(Long chatId) {
+    private boolean isProfileDoesNotExistByChatId(Long chatId) {
         Optional<Profile> optProfile = findAllProfiles().stream()
                 .filter(p -> p.getChatId().equals(chatId))
                 .findAny();
@@ -182,16 +200,16 @@ public class UserService {
         return profileRepository.findAll();
     }
 
-    public byte[] findProfileUrl(Long chatId) throws BusinessException, ServiceException {
+    public byte[] findProfileUrl(Long id) throws BusinessException, ServiceException {
         byte[] result;
         Optional<Profile> optProfile = findAllProfiles().stream()
-                .filter(p -> p.getChatId().equals(chatId))
+                .filter(p -> p.getId().equals(id))
                 .findAny();
         if (optProfile.isEmpty()) {
-            logger.info("Анкета chatId={} не была найдена.", chatId);
-            throw new BusinessException("Анкета chatId="+chatId+" не была найдена.");
+            logger.info("Анкета id={} не была найдена.", id);
+            throw new BusinessException("Анкета id="+id+" не была найдена.");
         }
-        logger.debug("Анкета chatId={} найдена.", chatId);
+        logger.debug("Анкета id={} найдена.", id);
         try {
             result = imageGenerator.getGeneratedImage(optProfile.get());
         } catch (ServiceException e) {
@@ -200,7 +218,7 @@ public class UserService {
         return result;
     }
 
-    public Long findNextProfileChatId(Long chatId) throws BusinessException {
+    public Long findNextProfileByChatId(Long chatId) throws BusinessException {
         Long result;
         try {
             User user = findUserByChatId(chatId);
@@ -209,7 +227,7 @@ public class UserService {
                     .filter(p -> !p.getChatId().equals(chatId))
                     .filter(p -> Preference.compareGenderAndPreference(profile.getGender(), p.getPreference())
                             && Preference.compareGenderAndPreference(p.getGender(), profile.getPreference()))
-                    .map(Profile::getChatId)
+                    .map(Profile::getId)
                     .sorted(Long::compareTo)
                     .filter(id -> id.compareTo(user.getLastProfileNumber()) > 0)
                     .findFirst();
@@ -220,7 +238,7 @@ public class UserService {
                         .filter(p -> !p.getChatId().equals(chatId))
                         .filter(p -> Preference.compareGenderAndPreference(profile.getGender(), p.getPreference())
                                 && Preference.compareGenderAndPreference(p.getGender(), profile.getPreference()))
-                        .map(Profile::getChatId)
+                        .map(Profile::getId)
                         .sorted(Long::compareTo)
                         .filter(id -> id.compareTo(user.getLastProfileNumber()) > 0)
                         .findFirst();
@@ -261,5 +279,14 @@ public class UserService {
         logger.info("Значения для пользователя chatId="+chatId+" были обновлены по причине некорректного значения key в" +
                 " полученном запросе. Допустимые значения: gender, name, description, preference.");
         return true;
+    }
+
+    public Long findProfileIdByChatId(Long chatId) throws BusinessException {
+        try {
+            Long result = findProfileByChatId(chatId).getId();
+            return result;
+        } catch (BusinessException e) {
+            throw new BusinessException(e.getMessage());
+        }
     }
 }
