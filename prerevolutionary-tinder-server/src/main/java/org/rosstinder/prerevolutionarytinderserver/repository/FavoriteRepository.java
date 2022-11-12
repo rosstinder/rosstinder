@@ -10,6 +10,13 @@ import java.util.List;
 
 @Repository
 public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
+
+    @Query(value = "select * from rosstinder.favorites", nativeQuery = true)
+    List<Favorite> findAllFavorites();
+
     @Query(value = "select * from rosstinder.favorites f where f.who = ? and f.whom = ?", nativeQuery = true)
-    Favorite findByWhoAndWhom(Long who, Long whom);
+    Favorite findFavoriteByWhoAndWhom(Long who, Long whom);
+
+    @Query(value = "select * from rosstinder.favorites f where f.who = ? and is_like = true", nativeQuery = true)
+    List<Favorite> findFavoritesByWho(Long who);
 }

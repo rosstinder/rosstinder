@@ -1,6 +1,7 @@
 package org.rosstinder.prerevolutionarytinderserver.controller;
 
 import lombok.AllArgsConstructor;
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.rosstinder.prerevolutionarytinderserver.exception.BusinessException;
 import org.rosstinder.prerevolutionarytinderserver.exception.ServiceException;
 import org.rosstinder.prerevolutionarytinderserver.model.Response;
@@ -9,6 +10,7 @@ import org.rosstinder.prerevolutionarytinderserver.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.UnsupportedEncodingException;
 
 
 @RestController
@@ -40,7 +42,8 @@ public class UserController {
         Response response;
         try {
             Long id = service.findProfileIdByChatId(chatId);
-            response = new Response(chatId, status, HttpStatus.OK.toString(), service.findNameAndGender(id), service.findProfileUrl(id));
+            response = new Response(chatId, status, HttpStatus.OK.toString(),
+                    service.findNameAndGender(id), service.findProfileUrl(id));
             service.updateUserStatus(chatId, status);
         } catch (BusinessException e) {
             response = handleException(e, HttpStatus.NOT_FOUND.toString());

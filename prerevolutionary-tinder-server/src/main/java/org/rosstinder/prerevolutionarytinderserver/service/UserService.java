@@ -113,6 +113,7 @@ public class UserService {
             Profile profile = findProfileByChatId(chatId);
             profile.setGender(new Gender(gender));
             saveProfile(profile);
+            logger.info("Пол пользователя chatId="+chatId+" был обновлен.");
         } catch (BusinessException e) {
             logger.error(e.getMessage());
             throw new BusinessException(e.getMessage());
@@ -130,6 +131,7 @@ public class UserService {
             Profile profile = findProfileByChatId(chatId);
             profile.setName(name);
             saveProfile(profile);
+            logger.info("Имя пользователя chatId="+chatId+" было обновлено.");
         } catch (BusinessException e) {
             logger.error(e.getMessage());
         }
@@ -146,6 +148,7 @@ public class UserService {
             Profile profile = findProfileByChatId(chatId);
             profile.setDescription(description);
             saveProfile(profile);
+            logger.info("Описание пользователя chatId="+chatId+" было обновлено.");
         } catch (BusinessException e) {
             logger.error(e.getMessage());
         }
@@ -162,7 +165,7 @@ public class UserService {
             Profile profile = findProfileByChatId(chatId);
             profile.setPreference(new Preference(preference));
             saveProfile(profile);
-            logger.info("Предпочтения были ");
+            logger.info("Предпочтения пользователя chatId="+chatId+" были обновлены.");
         } catch (BusinessException e) {
             logger.error(e.getMessage());
             throw new BusinessException(e.getMessage());
@@ -225,6 +228,11 @@ public class UserService {
      */
     public boolean isUserDoesNotExist(Long chatId) {
         Optional<User> optUser = Optional.of(userRepository.findUserByChatId(chatId));
+        if (optUser.isEmpty()) {
+            logger.info("Пользователь chatId="+chatId+" не найден");
+        } else {
+            logger.info("Пользователь chatId="+chatId+" найден");
+        }
         return optUser.isEmpty();
     }
 
@@ -244,9 +252,12 @@ public class UserService {
      * @return true - анкета существует; false - анкета не существует
      */
     private boolean isProfileDoesNotExistByChatId(Long chatId) {
-        Optional<Profile> optProfile = findAllProfiles().stream()
-                .filter(p -> p.getChatId().equals(chatId))
-                .findAny();
+        Optional<Profile> optProfile = Optional.of(profileRepository.findProfileByChatId(chatId));
+        if (optProfile.isEmpty()) {
+            logger.info("Анкета для пользователя chatId="+chatId+" не найдена.");
+        } else {
+            logger.info("Анкета для пользователя chatId="+chatId+" найдена.");
+        }
         return optProfile.isEmpty();
     }
 
@@ -265,8 +276,8 @@ public class UserService {
      * @throws BusinessException если анкета не существует
      * @throws ServiceException если не удалось сгенерировать картинку
      */
-    public byte[] findProfileUrl(Long id) throws BusinessException, ServiceException {
-        byte[] result;
+    public String findProfileUrl(Long id) throws BusinessException, ServiceException {
+        String result;
         Optional<Profile> optProfile = findAllProfiles().stream()
                 .filter(p -> p.getId().equals(id))
                 .findAny();
@@ -280,6 +291,7 @@ public class UserService {
         } catch (ServiceException e) {
             throw new ServiceException(e.getMessage());
         }
+        logger.debug("Изображение с описанием анкеты id="+id+" сгенерировано.");
         return result;
     }
 
@@ -336,12 +348,11 @@ public class UserService {
             User user = findUserByChatId(chatId);
             user.setLastProfileNumber(profileNumber);
             saveUser(user);
+            logger.info("Статус пользователя chatId="+chatId+" сохранен.");
         } catch (BusinessException e) {
             logger.error(e.getMessage());
         }
     }
-
-
 
     /**
      * Логгирование факта не обновления данных анкеты.

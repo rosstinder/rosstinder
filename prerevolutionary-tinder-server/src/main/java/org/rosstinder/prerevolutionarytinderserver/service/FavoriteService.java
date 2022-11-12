@@ -64,11 +64,11 @@ public class FavoriteService {
      * @return список записей таблицы likes
      */
     private List<Favorite> findAllFavorites() {
-        return favoriteRepository.findAll();
+        return favoriteRepository.findAllFavorites();
     }
 
     private void editLikeOrDislike(Long who, Long whom, boolean isLike) {
-        Favorite favorite = favoriteRepository.findByWhoAndWhom(who, whom);
+        Favorite favorite = favoriteRepository.findFavoriteByWhoAndWhom(who, whom);
         favorite.setLike(isLike);
         saveFavorite(favorite);
     }
@@ -80,8 +80,7 @@ public class FavoriteService {
      * @return true если лайк/отказ уже сущетвует в БД, false если записи о лайке/отказе нет
      */
     private boolean isLikeAlreadyExist(Long who, Long whom) {
-        return findAllFavorites().stream()
-                .anyMatch(favorite -> favorite.getWhoId().equals(who) && favorite.getWhomId().equals(whom));
+        return Optional.of(favoriteRepository.findFavoriteByWhoAndWhom(who, whom)).isPresent();
     }
 
     /**
@@ -153,15 +152,14 @@ public class FavoriteService {
         try {
             User user = userService.findUserByChatId(chatId);
             Long who = userService.findProfileIdByChatId(chatId);
-            Optional<Long> previousFavorite = findAllFavorites().stream()
-                    .filter(l -> l.isLike() && l.getWhoId().equals(who))
+            Optional<Long> previousFavorite = favoriteRepository.findFavoritesByWho(who).stream()
                     .map(Favorite::getWhomId)
                     .sorted(Long::compareTo)
                     .filter(id -> id.compareTo(user.getLastFavoriteNumber()) < 0)
                     .findFirst();
             if (previousFavorite.isEmpty()) {
                 user.setLastFavoriteNumber(Long.MAX_VALUE);
-                previousFavorite = findAllFavorites().stream()
+                previousFavorite = favoriteRepository.findFavoritesByWho(who).stream()
                         .filter(l -> l.isLike() && l.getWhoId().equals(who))
                         .map(Favorite::getWhomId)
                         .sorted(Long::compareTo)
@@ -246,8 +244,8 @@ public class FavoriteService {
      * @throws BusinessException если пользователь не найден
      * @throws ServiceException если возникла ошибка при генерации картинки
      */
-    public byte[] findProfileUrl(Long id) throws BusinessException, ServiceException {
-        byte[] result;
+    public String findProfileUrl(Long id) throws BusinessException, ServiceException {
+        String result;
         try {
             result = userService.findProfileUrl(id);
         } catch (BusinessException e) {
