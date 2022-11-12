@@ -2,6 +2,9 @@ package org.rosstinder.prerevolutionarytindertgbotclient.model;
 
 import lombok.Getter;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public enum BotState {
     NEW("new"),
     CHOOSE_GENDER("choose gender"),
@@ -22,5 +25,17 @@ public enum BotState {
 
     BotState(String status) {
         this.status = status;
+    }
+
+    private static final Map<String, BotState> BY_STATUS = new HashMap<>();
+
+    static {
+        for (BotState a : values()) {
+            BY_STATUS.put(a.status, a);
+        }
+    }
+
+    public static BotState valueOfLabel(String status) {
+        return BY_STATUS.get(status);
     }
 }

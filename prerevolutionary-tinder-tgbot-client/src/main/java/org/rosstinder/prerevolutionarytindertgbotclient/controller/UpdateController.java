@@ -45,7 +45,7 @@ public class UpdateController {
     private void processTextMessage(Update update) {
         Message message = update.getMessage();
         Long chatId = message.getChatId();
-        BotState userStatus = BotState.valueOf(rosstinderClient.getUserStatus(chatId));
+        BotState userStatus = BotState.valueOfLabel(rosstinderClient.getUserStatus(chatId));
 
         switch (userStatus) {
             case NEW -> processNew(update);

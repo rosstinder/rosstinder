@@ -21,6 +21,7 @@ public class RosstinderClient {
     public byte[] getImageProfile(Long chatId) {
         URI uri = getUri("http://localhost:8080/users/" + chatId + "/profile");
         ResponseDto responseDto = restTemplate.getForObject(uri, ResponseDto.class);
+        System.out.println(responseDto);
         return (byte[]) responseDto.getAttachment();
     }
 
