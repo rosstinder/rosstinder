@@ -140,17 +140,17 @@ public class UserController {
 
     @GetMapping(value = "/{chatId}")
     @ResponseStatus(HttpStatus.OK)
-    public Response findUserByChatId(@PathVariable("chatId") Long chatId, String status) {
+    public Response findUserByChatId(@PathVariable("chatId") Long chatId) {
         Response response;
         try {
             if (!service.isUserDoesNotExist(chatId)) {
                 response = new Response(chatId, service.findUserByChatId(chatId).getStatus(),
                         HttpStatus.OK.toString(), service.findUserByChatId(chatId), null);
             } else {
-                service.createUser(chatId, status);
+                service.createUser(chatId, "new");
                 service.createProfile(chatId);
-                service.updateUserStatus(chatId, status);
-                response = new Response(chatId, status, HttpStatus.OK.toString(), null, null);
+                service.updateUserStatus(chatId, "new");
+                response = new Response(chatId, service.findUserByChatId(chatId).getStatus(), HttpStatus.OK.toString(), null, null);
             }
 
         } catch (BusinessException e) {
