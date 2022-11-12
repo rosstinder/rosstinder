@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.rosstinder.prerevolutionarytinderserver.exception.BusinessException;
 import org.rosstinder.prerevolutionarytinderserver.exception.ServiceException;
 import org.rosstinder.prerevolutionarytinderserver.model.Response;
+import org.rosstinder.prerevolutionarytinderserver.service.TranslatorClient;
 import org.rosstinder.prerevolutionarytinderserver.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     public final UserService service;
+
+    public final TranslatorClient translatorClient;
 
     @GetMapping(value = "/{chatId}/status")
     @ResponseStatus(HttpStatus.OK)
@@ -62,10 +65,12 @@ public class UserController {
                     response = handleException(e, HttpStatus.BAD_REQUEST.toString());
                 }
             case ("name"):
+                value = translatorClient.translateDescription(value);
                 service.updateName(chatId, value);
                 response = new Response(chatId, status, HttpStatus.OK.toString(), value, null);
                 break;
             case ("description"):
+                value = translatorClient.translateDescription(value);
                 service.updateDescription(chatId, value);
                 response = new Response(chatId, status, HttpStatus.OK.toString(), value, null);
                 break;

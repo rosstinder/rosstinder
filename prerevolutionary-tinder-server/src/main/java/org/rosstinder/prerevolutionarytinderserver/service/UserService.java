@@ -28,8 +28,12 @@ public class UserService {
         this.profileRepository = profileRepository;
     }
 
-    private List<User> findAll() {
-        return userRepository.findAll();
+    /**
+     * Метод нахождения всех пользователей
+     * @return список пользователей
+     */
+    private List<User> findAllUsers() {
+        return userRepository.findAllUsers();
     }
 
     /**
@@ -39,9 +43,7 @@ public class UserService {
      * @throws BusinessException В случае отсутствия пользователя бросает BusinessException
      */
     public User findUserByChatId(Long chatId) throws BusinessException {
-        Optional<User> optUser = findAll().stream()
-                .filter(u -> u.getChatId().equals(chatId))
-                .findAny();
+        Optional<User> optUser = Optional.of(userRepository.findUserByChatId(chatId));
         if (optUser.isEmpty()) {
             logger.info("Пользователь chatId={} не был найден.", chatId);
             throw new BusinessException("Пользователь chatId="+chatId+" не был найден.");
@@ -199,7 +201,7 @@ public class UserService {
      * @return true - не существует; false - существует
      */
     public boolean isUserDoesNotExist(Long chatId) {
-        Optional<User> optUser = findAll().stream()
+        Optional<User> optUser = findAllUsers().stream()
                 .filter(u -> u.getChatId().equals(chatId))
                 .findAny();
         return optUser.isEmpty();
