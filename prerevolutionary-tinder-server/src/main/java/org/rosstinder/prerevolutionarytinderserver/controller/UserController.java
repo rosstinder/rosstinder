@@ -150,7 +150,7 @@ public class UserController {
                 service.createUser(chatId, "new");
                 service.createProfile(chatId);
                 service.updateUserStatus(chatId, "new");
-                response = new Response(chatId, service.findUserByChatId(chatId).getStatus(), HttpStatus.OK.toString(), null, null);
+                response = new Response(chatId, service.findUserByChatId(chatId).getStatus(), HttpStatus.OK.toString(), service.findUserByChatId(chatId), null);
             }
 
         } catch (BusinessException e) {
