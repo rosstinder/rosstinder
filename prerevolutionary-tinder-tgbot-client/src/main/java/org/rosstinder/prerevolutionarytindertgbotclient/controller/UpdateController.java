@@ -74,7 +74,7 @@ public class UpdateController {
     }
 
     private void processNew(Update update) {
-
+        isMessageStart(update);
     }
 
     private void processChooseGender(Update update) {
