@@ -368,4 +368,19 @@ public class UserService {
             throw new BusinessException(e.getMessage());
         }
     }
+
+    /**
+     * Метод формирует строку с описанием анкеты "[пол], [имя]" для заданной анкеты
+     * @param id идентификатор анкеты
+     * @return строку "[пол], [имя]"
+     */
+    public String findNameAndGender(Long id) throws BusinessException {
+        try {
+            Profile profile = findProfileById(id);
+            return profile.getGender() + ", " + profile.getName();
+        } catch (BusinessException e) {
+            throw new BusinessException(e.getMessage());
+        }
+
+    }
 }

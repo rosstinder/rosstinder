@@ -40,7 +40,7 @@ public class UserController {
         Response response;
         try {
             Long id = service.findProfileIdByChatId(chatId);
-            response = new Response(chatId, status, HttpStatus.OK.toString(), service.findProfileUrl(id), null);
+            response = new Response(chatId, status, HttpStatus.OK.toString(), service.findNameAndGender(id), service.findProfileUrl(id));
             service.updateUserStatus(chatId, status);
         } catch (BusinessException e) {
             response = handleException(e, HttpStatus.NOT_FOUND.toString());
@@ -133,7 +133,7 @@ public class UserController {
             Long nextProfileId = service.findNextProfileByChatId(chatId);
             service.updateUserStatus(chatId, status);
             response = new Response(chatId, status, HttpStatus.OK.toString(),
-                    nextProfileId, service.findProfileUrl(nextProfileId));
+                    service.findNameAndGender(nextProfileId), service.findProfileUrl(nextProfileId));
         }
         catch (BusinessException e) {
             response = handleException(e, HttpStatus.NOT_FOUND.toString());
