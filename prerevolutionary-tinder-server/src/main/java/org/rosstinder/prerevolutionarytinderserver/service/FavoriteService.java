@@ -68,10 +68,7 @@ public class FavoriteService {
     }
 
     private void editLikeOrDislike(Long who, Long whom, boolean isLike) {
-        Favorite favorite = findAllFavorites().stream()
-                .filter(l -> l.getWhoId().equals(who) && l.getWhomId().equals(whom))
-                .findAny()
-                .get();
+        Favorite favorite = favoriteRepository.findByWhoAndWhom(who, whom);
         favorite.setLike(isLike);
         saveFavorite(favorite);
     }

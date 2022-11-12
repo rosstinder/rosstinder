@@ -37,7 +37,7 @@ public class UserService {
     }
 
     /**
-     * Метод нахождения пользователя по его chatId.
+     * Метод нахождения пользователя по его chatId
      * @param chatId идентификатор
      * @return User пользователя
      * @throws BusinessException В случае отсутствия пользователя бросает BusinessException
@@ -53,15 +53,13 @@ public class UserService {
     }
 
     /**
-     * Метод нахождения анкеты пользователя по его chatId.
-     * @param chatId индентификатор
-     * @return Profile анкета пользователя
+     * Метод нахождения анкеты пользователя по его chatId
+     * @param chatId индентификатор пользователя
+     * @return анкета пользователя
      * @throws BusinessException в случае если анкета не была найдена
      */
     public Profile findProfileByChatId(Long chatId) throws BusinessException {
-        Optional<Profile> optProfile = findAllProfiles().stream()
-                .filter(p -> p.getChatId().equals(chatId))
-                .findAny();
+        Optional<Profile> optProfile = Optional.of(profileRepository.findProfileByChatId(chatId));
         if (optProfile.isEmpty()) {
             logger.info("Анкета chatId={} не была найдена.", chatId);
             throw new BusinessException("Анкета chatId="+chatId+" не была найдена.");
@@ -70,16 +68,38 @@ public class UserService {
         return optProfile.get();
     }
 
+    /**
+     * Метод нахождения анкеты по ее идентификатору
+     * @param id идентификатор анкеты
+     * @return анкета
+     * @throws BusinessException в случае если анкета не была найдена
+     */
     public Profile findProfileById(Long id) throws BusinessException {
-        Optional<Profile> optProfile = findAllProfiles().stream()
-                .filter(p -> p.getId().equals(id))
-                .findAny();
+        Optional<Profile> optProfile = Optional.of(profileRepository.findProfileById(id));
         if (optProfile.isEmpty()) {
             logger.info("Анкета id={} не была найдена.", id);
             throw new BusinessException("Анкета chatId="+id+" не была найдена.");
         }
         logger.debug("Анкета chatId={} найдена.", id);
         return optProfile.get();
+    }
+
+    /**
+     * Сохранение пользователя и его изменений
+     * @param user данные пользователя
+     */
+    protected void saveUser(User user) {
+        userRepository.save(user);
+        logger.debug("Данные пользователя chatId="+user.getChatId()+" сохранены.");
+    }
+
+    /**
+     * Сохранение анкеты и ее изменений
+     * @param profile данные анкеты
+     */
+    private void saveProfile(Profile profile) {
+        profileRepository.save(profile);
+        logger.debug("Данные анкеты пользователя chatId="+profile.getChatId()+" сохранены.");
     }
 
     /**
@@ -142,6 +162,7 @@ public class UserService {
             Profile profile = findProfileByChatId(chatId);
             profile.setPreference(new Preference(preference));
             saveProfile(profile);
+            logger.info("Предпочтения были ");
         } catch (BusinessException e) {
             logger.error(e.getMessage());
             throw new BusinessException(e.getMessage());
@@ -160,6 +181,7 @@ public class UserService {
             User user = findUserByChatId(chatId);
             user.setStatus(status);
             saveUser(user);
+            logger.debug("Новый статус пользователя chatId="+chatId+" сохранен.");
         } catch (BusinessException e) {
             throw new BusinessException(e.getMessage());
         }
@@ -174,9 +196,10 @@ public class UserService {
     public void createUser(Long chatId, String status) throws BusinessException {
         if (isUserDoesNotExist(chatId)) {
             saveUser(new User(chatId, status));
-            logger.debug("Новый пользователь chatId={} был добавлен.", chatId);
+            logger.info("Новый пользователь chatId={} был добавлен.", chatId);
         }
         else {
+            logger.info("Пользователь chatId={} не был добавлен.", chatId);
             throw new BusinessException("Пользователь с chatId={" + chatId + "} уже существует. ChatId должен быть уникальным.");
         }
     }
@@ -201,9 +224,7 @@ public class UserService {
      * @return true - не существует; false - существует
      */
     public boolean isUserDoesNotExist(Long chatId) {
-        Optional<User> optUser = findAllUsers().stream()
-                .filter(u -> u.getChatId().equals(chatId))
-                .findAny();
+        Optional<User> optUser = Optional.of(userRepository.findUserByChatId(chatId));
         return optUser.isEmpty();
     }
 
@@ -213,9 +234,7 @@ public class UserService {
      * @return true - анкета не существует; false - анкета существует
      */
     public boolean isProfileDoesNotExistById(Long id) {
-        Optional<Profile> optProfile = findAllProfiles().stream()
-                .filter(p -> p.getId().equals(id))
-                .findAny();
+        Optional<Profile> optProfile = Optional.of(profileRepository.findProfileById(id));
         return optProfile.isEmpty();
     }
 
@@ -322,23 +341,7 @@ public class UserService {
         }
     }
 
-    /**
-     * Сохранение пользователя и его изменений
-     * @param user данные пользователя
-     */
-    protected void saveUser(User user) {
-        userRepository.save(user);
-        logger.debug("Данные пользователя chatId="+user.getChatId()+" сохранены.");
-    }
 
-    /**
-     * Сохранение анкеты и ее изменений
-     * @param profile данные анкеты
-     */
-    private void saveProfile(Profile profile) {
-        profileRepository.save(profile);
-        logger.debug("Данные анкеты пользователя chatId="+profile.getChatId()+" сохранены.");
-    }
 
     /**
      * Логгирование факта не обновления данных анкеты.
