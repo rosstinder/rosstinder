@@ -40,9 +40,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(update.getMessage().getChatId());
-        sendAnswerMessage(sendMessage);
+        updateController.processUpdate(update);
     }
 
     private void sendAnswerMessage(SendMessage message) {

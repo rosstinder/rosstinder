@@ -1,15 +1,19 @@
 package org.rosstinder.prerevolutionarytindertgbotclient.controller;
 
+import org.rosstinder.prerevolutionarytindertgbotclient.service.RosstinderClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-
-import java.net.URI;
 
 @Component
 public class UpdateController {
     private TelegramBot telegramBot;
-    private RestTemplate restTemplate;
+    private final RosstinderClient rosstinderClient;
+
+    public UpdateController(RosstinderClient rosstinderClient) {
+        this.rosstinderClient = rosstinderClient;
+    }
 
     public void registerBot(TelegramBot telegramBot) {
         this.telegramBot = telegramBot;
@@ -25,12 +29,21 @@ public class UpdateController {
             return;
         }
         if (update.getMessage().getText() != null) {
-            URI url = new URI("localhost:8080/users//status")
-            String userStatus = restTemplate.getForObject()
             String messageText = update.getMessage().getText();
+            System.out.println(rosstinderClient.getImageProfile(message.getChatId()));
             if (messageText.equals("/start")) {
-
+                return;
             }
+        }
+    }
+
+    private void processTextMessage(Update update) {
+        Message message = update.getMessage();
+        Long chatId = message.getChatId();
+        String userStatus = rosstinderClient.getUserStatus(chatId);
+        switch (userStatus) {
+            case "new" -> processStatusNew(update);
+            case ""
         }
     }
 }
