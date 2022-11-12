@@ -29,6 +29,12 @@ public class RosstinderClient {
         return restTemplate.getForObject(uri, ResponseDto.class).getUserStatus();
     }
 
+    public LinkedHashMap<String, String> getGenderAndName(Long chatId) {
+        URI uri = getUri("http://localhost:8080/users/" + chatId + "/profile");
+        ResponseDto responseDto = restTemplate.getForObject(uri, ResponseDto.class);
+        return (LinkedHashMap<String, String>) responseDto.getAttachment2();
+    }
+
     private URI getUri(String url) {
         try {
             return new URI(url);
