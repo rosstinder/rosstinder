@@ -11,6 +11,8 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 
+import java.util.LinkedHashMap;
+
 
 @Component
 public class UpdateController {
@@ -127,20 +129,22 @@ public class UpdateController {
     private void processMenu(Update update) {
         String textMessage = update.getMessage().getText();
         Long chatId = update.getMessage().getChatId();
+        LinkedHashMap<String, Object> nextProfile = rosstinderClient.getNextProfile(chatId);
+        LinkedHashMap<String, Object> nextFavorite = rosstinderClient.getNextFavorite(chatId);
         switch (textMessage) {
             case "Поиск" -> {
                 ReplyKeyboardMarkup keyboard = replyKeyboardMarkupGetter.getKeyboardForSearchAndFavorites();
                 setView(answerSender.sendPhotoWithKeyboard(update,
-                        (String) rosstinderClient.getNextProfile(chatId).get("nameAndGender"),
-                        (byte[]) rosstinderClient.getNextProfile(chatId).get("image"),
+                        (String) nextProfile.get("nameAndGender"),
+                        (byte[]) nextProfile.get("image"),
                         keyboard));
                 rosstinderClient.setNewStatus(chatId, "search");
             }
             case "Любимцы" -> {
                 ReplyKeyboardMarkup keyboard = replyKeyboardMarkupGetter.getKeyboardForSearchAndFavorites();
                 setView(answerSender.sendPhotoWithKeyboard(update,
-                        (String) rosstinderClient.getNextFavorite(chatId).get("nameAndGender"),
-                        (byte[]) rosstinderClient.getNextFavorite(chatId).get("image"),
+                        (String) nextFavorite.get("nameAndGender"),
+                        (byte[]) nextFavorite.get("image"),
                         keyboard));
                 rosstinderClient.setNewStatus(chatId, "favorites");
             }
@@ -164,17 +168,19 @@ public class UpdateController {
         Long chatId = update.getMessage().getChatId();
         switch (textMessage) {
             case "->" -> {
+                LinkedHashMap<String, Object> nextFavorite = rosstinderClient.getNextFavorite(chatId);
                 ReplyKeyboardMarkup keyboard = replyKeyboardMarkupGetter.getKeyboardForSearchAndFavorites();
                 setView(answerSender.sendPhotoWithKeyboard(update,
-                        (String) rosstinderClient.getNextFavorite(chatId).get("nameAndGender"),
-                        (byte[]) rosstinderClient.getNextFavorite(chatId).get("image"),
+                        (String) nextFavorite.get("nameAndGender"),
+                        (byte[]) nextFavorite.get("image"),
                         keyboard));
             }
             case "<-" -> {
+                LinkedHashMap<String, Object> previousFavorite = rosstinderClient.getPreviousFavorite(chatId);
                 ReplyKeyboardMarkup keyboard = replyKeyboardMarkupGetter.getKeyboardForSearchAndFavorites();
                 setView(answerSender.sendPhotoWithKeyboard(update,
-                        (String) rosstinderClient.getPreviousFavorite(chatId).get("nameAndGender"),
-                        (byte[]) rosstinderClient.getPreviousFavorite(chatId).get("image"),
+                        (String) previousFavorite.get("nameAndGender"),
+                        (byte[]) previousFavorite.get("image"),
                         keyboard));
             }
             case "Меню" -> {
@@ -231,18 +237,23 @@ public class UpdateController {
         switch (textMessage) {
             case "->" -> {
                 rosstinderClient.setLikeOrDislike(chatId, "true");
+                if (!rosstinderClient.getRelationship(chatId).equals("")) {
+                    setView(answerSender.sendMessageWithText(update, "Вы любимы"));
+                }
+                LinkedHashMap<String, Object> nextProfile = rosstinderClient.getNextProfile(chatId);
                 ReplyKeyboardMarkup keyboard = replyKeyboardMarkupGetter.getKeyboardForSearchAndFavorites();
                 setView(answerSender.sendPhotoWithKeyboard(update,
-                        (String) rosstinderClient.getNextProfile(chatId).get("nameAndGender"),
-                        (byte[]) rosstinderClient.getNextProfile(chatId).get("image"),
+                        (String) nextProfile.get("nameAndGender"),
+                        (byte[]) nextProfile.get("image"),
                         keyboard));
             }
             case "<-" -> {
+                LinkedHashMap<String, Object> nextProfile = rosstinderClient.getNextProfile(chatId);
                 rosstinderClient.setLikeOrDislike(chatId, "false");
                 ReplyKeyboardMarkup keyboard = replyKeyboardMarkupGetter.getKeyboardForSearchAndFavorites();
                 setView(answerSender.sendPhotoWithKeyboard(update,
-                        (String) rosstinderClient.getNextProfile(chatId).get("nameAndGender"),
-                        (byte[]) rosstinderClient.getNextProfile(chatId).get("image"),
+                        (String) nextProfile.get("nameAndGender"),
+                        (byte[]) nextProfile.get("image"),
                         keyboard));
             }
             case "Меню" -> {
