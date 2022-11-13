@@ -31,8 +31,7 @@ public class FavoriteService {
      * @param isLike флаг лайка (true) / отказа (false)
      * @return возвращает "Вы любимы" в случае взаимного лайка, иначе пустую строку
      */
-    public String makeLikeOrDislike(Long whoChatId, boolean isLike) throws BusinessException {
-        String result;
+    public Long makeLikeOrDislike(Long whoChatId, boolean isLike) throws BusinessException {
         try {
             Long who = userService.findProfileIdByChatId(whoChatId);
             Long whom = userService.findUserByChatId(whoChatId).getLastProfileNumber();
@@ -45,16 +44,10 @@ public class FavoriteService {
             } else {
                 saveFavorite(new Favorite(who, whom, isLike));
             }
-            if (isMatch(who, whom)) {
-                result = "Вы любимы";
-            }
-            else {
-                result = "";
-            }
+            return whom;
         } catch (BusinessException e) {
             throw new BusinessException(e.getMessage());
         }
-        return result;
     }
 
     /**
@@ -253,5 +246,25 @@ public class FavoriteService {
             throw new ServiceException(e.getMessage());
         }
         return result;
+    }
+
+    /**
+     * Метод формирования сообщения в случает взаимности
+     * @param whoChatId идентификтаор пользователя
+     * @return строку с описанием взаимности, либо пустую строку, если в заимность не состоялась
+     */
+    public String getMassageIfMatch(Long whoChatId) throws BusinessException {
+        try {
+            Long who = userService.findProfileIdByChatId(whoChatId);
+            Long whom = userService.findUserByChatId(whoChatId).getLastProfileNumber();
+            if (isMatch(who, whom)) {
+                return "Вы любимы";
+            }
+            else {
+                return "";
+            }
+        } catch (BusinessException e) {
+            throw new BusinessException(e.getMessage());
+        }
     }
 }
