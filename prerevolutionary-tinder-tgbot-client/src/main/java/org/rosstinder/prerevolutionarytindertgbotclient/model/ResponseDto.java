@@ -1,10 +1,6 @@
 package org.rosstinder.prerevolutionarytindertgbotclient.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
-
-import java.util.LinkedHashMap;
 
 @Data
 public class ResponseDto {
