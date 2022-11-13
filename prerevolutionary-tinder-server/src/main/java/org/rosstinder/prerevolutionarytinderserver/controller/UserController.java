@@ -118,8 +118,10 @@ public class UserController {
         Response response;
         try {
             Long nextProfileId = service.findNextProfileByChatId(chatId);
+            String uri = service.findProfileUrl(nextProfileId);
+            String profileDescription = service.findNameAndGender(nextProfileId);
             response = new Response(chatId, "", HttpStatus.OK.toString(),
-                    service.findNameAndGender(nextProfileId), service.findProfileUrl(nextProfileId));
+                    profileDescription, uri);
         }
         catch (BusinessException e) {
             response = handleException(e, HttpStatus.NOT_FOUND.toString());
