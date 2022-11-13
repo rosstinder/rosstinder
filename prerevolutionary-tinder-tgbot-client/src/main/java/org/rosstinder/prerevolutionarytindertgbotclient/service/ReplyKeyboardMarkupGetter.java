@@ -73,6 +73,9 @@ public class ReplyKeyboardMarkupGetter {
         row.add("Изменить описание");
         row.add("Изменить предпочтения");
         keyboard.add(row);
+        row = new KeyboardRow();
+        row.add("Меню");
+        keyboard.add(row);
         replyKeyboardMarkup.setKeyboard(keyboard);
         return replyKeyboardMarkup;
     }

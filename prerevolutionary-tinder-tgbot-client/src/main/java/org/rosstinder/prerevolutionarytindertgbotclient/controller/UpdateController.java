@@ -182,6 +182,7 @@ public class UpdateController {
                 setView(answerSender.sendMessageWithKeyboard(update,
                         "Выберите пункт меню:",
                         keyboard));
+                rosstinderClient.setNewStatus(chatId, "menu");
             }
             default -> {
                 ReplyKeyboardMarkup keyboard = replyKeyboardMarkupGetter.getKeyboardForSearchAndFavorites();
@@ -209,6 +210,13 @@ public class UpdateController {
             case "Изменить предпочтения" -> {
                 rosstinderClient.setNewStatus(chatId, "update preference");
                 setView(answerSender.sendMessageWithKeyboard(update, "Выберите новые предпочтения:", replyKeyboardMarkupGetter.getKeyboardForPreference()));
+            }
+            case "Меню" -> {
+                ReplyKeyboardMarkup keyboard = replyKeyboardMarkupGetter.getKeyboardForMenu();
+                setView(answerSender.sendMessageWithKeyboard(update,
+                        "Выберите пункт меню:",
+                        keyboard));
+                rosstinderClient.setNewStatus(chatId, "menu");
             }
             default -> {
                 ReplyKeyboardMarkup keyboard = replyKeyboardMarkupGetter.getKeyboardForProfile();
@@ -242,6 +250,7 @@ public class UpdateController {
                 setView(answerSender.sendMessageWithKeyboard(update,
                         "Выберите пункт меню:",
                         keyboard));
+                rosstinderClient.setNewStatus(chatId, "menu");
             }
             default -> {
                 ReplyKeyboardMarkup keyboard = replyKeyboardMarkupGetter.getKeyboardForSearchAndFavorites();
