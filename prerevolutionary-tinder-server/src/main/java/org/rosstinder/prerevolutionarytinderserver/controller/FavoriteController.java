@@ -14,6 +14,19 @@ import org.springframework.web.bind.annotation.*;
 public class FavoriteController {
     private final FavoriteService favoriteService;
 
+    @GetMapping(value = "/{chatId}")
+    @ResponseStatus(HttpStatus.OK)
+    public Response findIsMatch(@PathVariable("chatId") Long chatId) {
+        Response response;
+        try {
+            response = new Response(chatId, "", HttpStatus.OK.toString(),
+                    favoriteService.getMassageIfMatch(chatId), null);
+        } catch (BusinessException e) {
+            response = handleException(e, HttpStatus.NOT_FOUND.toString());
+        }
+        return response;
+    }
+
     @PostMapping(value = "/{chatId}")
     @ResponseStatus(HttpStatus.OK)
     public Response makeLikeOrDislike(@PathVariable("chatId") Long chatId, boolean isLike) {
