@@ -65,6 +65,12 @@ public class FavoriteService {
         return favoriteRepository.findAllFavorites();
     }
 
+    /**
+     * Метод редактирует или добавляет новые отношения
+     * @param who кто лайкнул/отверг
+     * @param whom кого лайкнули/отвергли
+     * @param isLike true - лайк, false - отказ
+     */
     private void editLikeOrDislike(Long who, Long whom, boolean isLike) {
         Favorite favorite = favoriteRepository.findFavoriteByWhoAndWhom(who, whom);
         favorite.setLike(isLike);
@@ -78,7 +84,7 @@ public class FavoriteService {
      * @return true если лайк/отказ уже сущетвует в БД, false если записи о лайке/отказе нет
      */
     private boolean isLikeAlreadyExist(Long who, Long whom) {
-        return Optional.of(favoriteRepository.findFavoriteByWhoAndWhom(who, whom)).isPresent();
+        return Optional.ofNullable(favoriteRepository.findFavoriteByWhoAndWhom(who, whom)).isPresent();
     }
 
     /**
@@ -91,15 +97,14 @@ public class FavoriteService {
         try {
             User user = userService.findUserByChatId(chatId);
             Long who = userService.findProfileIdByChatId(chatId);
-            Optional<Long> nextFavorite = findAllFavorites().stream()
-                    .filter(l -> l.isLike() && l.getWhoId().equals(who))
+            Optional<Long> nextFavorite = favoriteRepository.findFavoritesLikeByWho(who).stream()
                     .map(Favorite::getWhomId)
                     .sorted(Long::compareTo)
                     .filter(id -> id.compareTo(user.getLastFavoriteNumber()) > 0)
                     .findFirst();
             if (nextFavorite.isEmpty()) {
                 user.setLastFavoriteNumber(User.ZERO_VALUE);
-                nextFavorite = findAllFavorites().stream()
+                nextFavorite = favoriteRepository.findFavoritesLikeByWho(who).stream()
                         .filter(l -> l.isLike() && l.getWhoId().equals(who))
                         .map(Favorite::getWhomId)
                         .sorted(Long::compareTo)
@@ -147,15 +152,14 @@ public class FavoriteService {
         try {
             User user = userService.findUserByChatId(chatId);
             Long who = userService.findProfileIdByChatId(chatId);
-            Optional<Long> previousFavorite = favoriteRepository.findFavoritesByWho(who).stream()
+            Optional<Long> previousFavorite = favoriteRepository.findFavoritesLikeByWho(who).stream()
                     .map(Favorite::getWhomId)
                     .sorted(Long::compareTo)
                     .filter(id -> id.compareTo(user.getLastFavoriteNumber()) < 0)
                     .findFirst();
             if (previousFavorite.isEmpty()) {
                 user.setLastFavoriteNumber(Long.MAX_VALUE);
-                previousFavorite = favoriteRepository.findFavoritesByWho(who).stream()
-                        .filter(l -> l.isLike() && l.getWhoId().equals(who))
+                previousFavorite = favoriteRepository.findFavoritesLikeByWho(who).stream()
                         .map(Favorite::getWhomId)
                         .sorted(Long::compareTo)
                         .filter(id -> id.compareTo(user.getLastFavoriteNumber()) < 0)
@@ -216,15 +220,17 @@ public class FavoriteService {
      * @return true - пользователь whoChatId любит пользователя whomChatId; false - в противном случае
      */
     private boolean isUserFavoritesAnotherUser(Long who, Long whom) {
-        Optional<Favorite> optFavorite = findAllFavorites().stream()
-                .filter(f -> f.isLike() && f.getWhoId().equals(who) && f.getWhomId().equals(whom))
-                .findAny();
-        return optFavorite.isPresent();
+        Optional<Boolean> optLike = Optional.ofNullable(favoriteRepository.isWhoLikesWhom(who, whom));
+        if (optLike.isPresent()) {
+            return optLike.get();
+        } else {
+            return false;
+        }
     }
 
     /**
-     * Сохранение отношения в БД
-     * @param favorite
+     * Сохранение отношения
+     * @param favorite экземпляр отношения
      */
     private void saveFavorite(Favorite favorite) {
         favoriteRepository.save(favorite);

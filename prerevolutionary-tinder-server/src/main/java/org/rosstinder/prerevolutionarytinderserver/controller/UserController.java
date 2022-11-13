@@ -58,36 +58,36 @@ public class UserController {
         Response response;
         boolean isIncorrectValue = false;
         switch (key) {
-            case ("gender"):
+            case ("gender") -> {
                 try {
                     service.updateGender(chatId, value);
                     response = new Response(chatId, "", HttpStatus.OK.toString(), value, null);
-                    break;
                 } catch (BusinessException e) {
                     response = handleException(e, HttpStatus.BAD_REQUEST.toString());
                 }
-            case ("name"):
+            }
+            case ("name") -> {
                 value = translatorClient.translateDescription(value);
                 service.updateName(chatId, value);
                 response = new Response(chatId, "", HttpStatus.OK.toString(), value, null);
-                break;
-            case ("description"):
+            }
+            case ("description") -> {
                 value = translatorClient.translateDescription(value);
                 service.updateDescription(chatId, value);
                 response = new Response(chatId, "", HttpStatus.OK.toString(), value, null);
-                break;
-            case ("preference"):
+            }
+            case ("preference") -> {
                 try {
                     service.updatePreference(chatId, value);
                     response = new Response(chatId, "", HttpStatus.OK.toString(), value, null);
-                    break;
                 } catch (BusinessException e) {
                     response = handleException(e, HttpStatus.BAD_REQUEST.toString());
                 }
-            default:
+            }
+            default -> {
                 isIncorrectValue = service.incorrectKey(chatId);
                 response = new Response(chatId, "", HttpStatus.NO_CONTENT.toString(), null, null);
-                break;
+            }
         }
         try {
             if (isIncorrectValue) {

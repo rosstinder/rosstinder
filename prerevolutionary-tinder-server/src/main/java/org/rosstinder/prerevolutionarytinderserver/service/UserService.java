@@ -43,13 +43,13 @@ public class UserService {
      * @throws BusinessException В случае отсутствия пользователя бросает BusinessException
      */
     public User findUserByChatId(Long chatId) throws BusinessException {
-        User user = userRepository.findUserByChatId(chatId);
-        if (user == null) {
+        Optional<User> optUser = Optional.ofNullable(userRepository.findUserByChatId(chatId));
+        if (optUser.isEmpty()) {
             logger.info("Пользователь chatId={} не был найден.", chatId);
             throw new BusinessException("Пользователь chatId="+chatId+" не был найден.");
         }
         logger.debug("Пользователь chatId={} найден.", chatId);
-        return user;
+        return optUser.get();
     }
 
     /**
@@ -59,13 +59,13 @@ public class UserService {
      * @throws BusinessException в случае если анкета не была найдена
      */
     public Profile findProfileByChatId(Long chatId) throws BusinessException {
-        Profile profile = profileRepository.findProfileByChatId(chatId);
-        if (profile == null) {
+        Optional<Profile> optProfile = Optional.ofNullable(profileRepository.findProfileByChatId(chatId));
+        if (optProfile.isEmpty()) {
             logger.info("Анкета chatId={} не была найдена.", chatId);
             throw new BusinessException("Анкета chatId="+chatId+" не была найдена.");
         }
         logger.debug("Анкета chatId={} найдена.", chatId);
-        return profile;
+        return optProfile.get();
     }
 
     /**
@@ -75,13 +75,13 @@ public class UserService {
      * @throws BusinessException в случае если анкета не была найдена
      */
     public Profile findProfileById(Long id) throws BusinessException {
-        Profile profile = profileRepository.findProfileById(id);
-        if (profile == null) {
+        Optional<Profile> optProfile = Optional.ofNullable(profileRepository.findProfileById(id));
+        if (optProfile.isEmpty()) {
             logger.info("Анкета id={} не была найдена.", id);
             throw new BusinessException("Анкета chatId="+id+" не была найдена.");
         }
         logger.debug("Анкета chatId={} найдена.", id);
-        return profile;
+        return optProfile.get();
     }
 
     /**
@@ -227,8 +227,8 @@ public class UserService {
      * @return true - не существует; false - существует
      */
     public boolean isUserDoesNotExist(Long chatId) {
-        User user = userRepository.findUserByChatId(chatId);
-        if (user == null) {
+        Optional<User> optUser = Optional.ofNullable(userRepository.findUserByChatId(chatId));
+        if (optUser.isEmpty()) {
             return true;
         }
         return false;
@@ -240,8 +240,8 @@ public class UserService {
      * @return true - анкета не существует; false - анкета существует
      */
     public boolean isProfileDoesNotExistById(Long id) {
-        Profile profile = profileRepository.findProfileById(id);
-        if (profile == null) {
+        Optional<Profile> optProfile = Optional.ofNullable(profileRepository.findProfileById(id));
+        if (optProfile.isEmpty()) {
             return true;
         }
         return false;
@@ -253,8 +253,8 @@ public class UserService {
      * @return true - анкета существует; false - анкета не существует
      */
     private boolean isProfileDoesNotExistByChatId(Long chatId) {
-        Profile profile = profileRepository.findProfileByChatId(chatId);
-        if (profile == null) {
+        Optional<Profile> optProfile = Optional.ofNullable(profileRepository.findProfileByChatId(chatId));
+        if (optProfile.isEmpty()) {
             logger.info("Анкета для пользователя chatId="+chatId+" не найдена.");
             return true;
         } else {
