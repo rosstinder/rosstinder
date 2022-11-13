@@ -1,5 +1,6 @@
 package org.rosstinder.prerevolutionarytindertgbotclient.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.rosstinder.prerevolutionarytindertgbotclient.model.BotState;
 import org.rosstinder.prerevolutionarytindertgbotclient.service.AnswerSender;
 import org.rosstinder.prerevolutionarytindertgbotclient.service.ReplyKeyboardMarkupGetter;
@@ -11,9 +12,10 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 
+import java.text.MessageFormat;
 import java.util.LinkedHashMap;
 
-
+@Slf4j
 @Component
 public class UpdateController {
     private TelegramBot telegramBot;
@@ -33,23 +35,25 @@ public class UpdateController {
 
     public void processUpdate(Update update) {
         if (update == null) {
-            // todo: добавить логирование
+            log.debug("Получен пустой update");
             return;
         }
         if (update.getMessage() == null) {
-            // todo: добавить логирование
+            log.debug("Получено пустое сообщение");
             return;
         }
         if (update.getMessage().getText() != null) {
             processTextMessage(update);
         }
+        log.debug("Получен неподдерживаемый тип сообщения");
     }
 
     private void processTextMessage(Update update) {
         Message message = update.getMessage();
         Long chatId = message.getChatId();
         BotState userStatus = BotState.valueOfLabel(rosstinderClient.getUserStatus(chatId));
-
+        log.info(MessageFormat.format("Получено сообщение \"{0}\" от пользователя #{1} со статусом \"{2}\"",
+                message.getText(), chatId, userStatus));
         switch (userStatus) {
             case NEW -> processNew(update);
             case CHOOSE_GENDER -> processChooseGender(update);
@@ -84,12 +88,14 @@ public class UpdateController {
 
     private void processChooseGender(Update update) {
         String textMessage = update.getMessage().getText();
+        Long chatId = update.getMessage().getChatId();
         if (textMessage.equals("Сударъ") || textMessage.equals("Сударыня")) {
-            Long chatId = update.getMessage().getChatId();
             rosstinderClient.setGender(chatId, textMessage);
+            log.info(MessageFormat.format("Для пользователя #{0} установлен пол {1}", chatId, textMessage));
             setView(answerSender.sendMessageWithText(update, "Введите имя"));
             rosstinderClient.setNewStatus(update.getMessage().getChatId(), "input name");
         } else {
+            log.info(MessageFormat.format("Пользователь #{0} ввел неподходящее сообщение \"{1}\"", chatId, textMessage));
             ReplyKeyboardMarkup keyboard = replyKeyboardMarkupGetter.getKeyboardForGender();
             setView(answerSender.sendMessageWithKeyboard(update, "Выберите пол:", keyboard));
         }
@@ -99,6 +105,7 @@ public class UpdateController {
         String textMessage = update.getMessage().getText();
         Long chatId = update.getMessage().getChatId();
         rosstinderClient.setName(chatId, textMessage);
+        log.info(MessageFormat.format("Для пользователя #{0} установлено имя {1}", chatId, textMessage));
         setView(answerSender.sendMessageWithText(update, "Введите описание"));
         rosstinderClient.setNewStatus(update.getMessage().getChatId(), "input description");
     }
@@ -107,32 +114,35 @@ public class UpdateController {
         String textMessage = update.getMessage().getText();
         Long chatId = update.getMessage().getChatId();
         rosstinderClient.setDescription(chatId, textMessage);
+        log.info(MessageFormat.format("Для пользователя #{0} установлено описание {1}", chatId, textMessage));
         setView(answerSender.sendMessageWithKeyboard(update, "Выберите предпочтения:", replyKeyboardMarkupGetter.getKeyboardForPreference()));
         rosstinderClient.setNewStatus(update.getMessage().getChatId(), "choose preference");
     }
 
     private void processChoosePreference(Update update) {
         String textMessage = update.getMessage().getText();
+        Long chatId = update.getMessage().getChatId();
         if (textMessage.equals("Сударъ") || textMessage.equals("Сударыня") || textMessage.equals("Всех")) {
-            Long chatId = update.getMessage().getChatId();
             rosstinderClient.setPreference(chatId, textMessage);
+            log.info(MessageFormat.format("Для пользователя #{0} установлены предпочтения {1}", chatId, textMessage));
             String caption = rosstinderClient.getGenderAndName(chatId);
             setView(answerSender.sendPhotoWithCaption(update, caption, rosstinderClient.getImageProfile(chatId)));
             setView(answerSender.sendMessageWithKeyboard(update, "Выберите пункт меню", replyKeyboardMarkupGetter.getKeyboardForMenu()));
             rosstinderClient.setNewStatus(update.getMessage().getChatId(), "menu");
         } else {
+            log.info(MessageFormat.format("Пользователь #{0} ввел неподходящее сообщение \"{1}\"", chatId, textMessage));
             ReplyKeyboardMarkup keyboard = replyKeyboardMarkupGetter.getKeyboardForPreference();
             setView(answerSender.sendMessageWithKeyboard(update, "Выберите предпочтения:", keyboard));
         }
     }
 
     private void processMenu(Update update) {
+        isMessageStart(update);
         String textMessage = update.getMessage().getText();
         Long chatId = update.getMessage().getChatId();
-        LinkedHashMap<String, Object> nextProfile = rosstinderClient.getNextProfile(chatId);
-        LinkedHashMap<String, Object> nextFavorite = rosstinderClient.getNextFavorite(chatId);
         switch (textMessage) {
             case "Поиск" -> {
+                LinkedHashMap<String, Object> nextProfile = rosstinderClient.getNextProfile(chatId);
                 ReplyKeyboardMarkup keyboard = replyKeyboardMarkupGetter.getKeyboardForSearchAndFavorites();
                 setView(answerSender.sendPhotoWithKeyboard(update,
                         (String) nextProfile.get("nameAndGender"),
@@ -141,6 +151,7 @@ public class UpdateController {
                 rosstinderClient.setNewStatus(chatId, "search");
             }
             case "Любимцы" -> {
+                LinkedHashMap<String, Object> nextFavorite = rosstinderClient.getNextFavorite(chatId);
                 ReplyKeyboardMarkup keyboard = replyKeyboardMarkupGetter.getKeyboardForSearchAndFavorites();
                 setView(answerSender.sendPhotoWithKeyboard(update,
                         (String) nextFavorite.get("nameAndGender"),
@@ -157,6 +168,7 @@ public class UpdateController {
                 rosstinderClient.setNewStatus(chatId, "profile");
             }
             default -> {
+                log.info(MessageFormat.format("Пользователь #{0} ввел неподходящее сообщение \"{1}\"", chatId, textMessage));
                 ReplyKeyboardMarkup keyboard = replyKeyboardMarkupGetter.getKeyboardForMenu();
                 setView(answerSender.sendMessageWithKeyboard(update, "Выберите пункт меню:", keyboard));
             }
@@ -164,6 +176,7 @@ public class UpdateController {
     }
 
     private void processFavorites(Update update) {
+        isMessageStart(update);
         String textMessage = update.getMessage().getText();
         Long chatId = update.getMessage().getChatId();
         switch (textMessage) {
@@ -191,6 +204,7 @@ public class UpdateController {
                 rosstinderClient.setNewStatus(chatId, "menu");
             }
             default -> {
+                log.info(MessageFormat.format("Пользователь #{0} ввел неподходящее сообщение \"{1}\"", chatId, textMessage));
                 ReplyKeyboardMarkup keyboard = replyKeyboardMarkupGetter.getKeyboardForSearchAndFavorites();
                 setView(answerSender.sendMessageWithKeyboard(update, "Выберите доступное действие:", keyboard));
             }
@@ -198,6 +212,7 @@ public class UpdateController {
     }
 
     private void processProfile(Update update) {
+        isMessageStart(update);
         String textMessage = update.getMessage().getText();
         Long chatId = update.getMessage().getChatId();
         switch (textMessage) {
@@ -225,6 +240,7 @@ public class UpdateController {
                 rosstinderClient.setNewStatus(chatId, "menu");
             }
             default -> {
+                log.info(MessageFormat.format("Пользователь #{0} ввел неподходящее сообщение \"{1}\"", chatId, textMessage));
                 ReplyKeyboardMarkup keyboard = replyKeyboardMarkupGetter.getKeyboardForProfile();
                 setView(answerSender.sendMessageWithKeyboard(update, "Выберите доступное действие:", keyboard));
             }
@@ -239,6 +255,7 @@ public class UpdateController {
                 rosstinderClient.setLikeOrDislike(chatId, "true");
                 if (!rosstinderClient.getRelationship(chatId).equals("")) {
                     setView(answerSender.sendMessageWithText(update, "Вы любимы"));
+                    log.info(MessageFormat.format("Обнаружена взаимная симпатия для пользователя #{0}", chatId));
                 }
                 LinkedHashMap<String, Object> nextProfile = rosstinderClient.getNextProfile(chatId);
                 ReplyKeyboardMarkup keyboard = replyKeyboardMarkupGetter.getKeyboardForSearchAndFavorites();
@@ -264,6 +281,7 @@ public class UpdateController {
                 rosstinderClient.setNewStatus(chatId, "menu");
             }
             default -> {
+                log.info(MessageFormat.format("Пользователь #{0} ввел неподходящее сообщение \"{1}\"", chatId, textMessage));
                 ReplyKeyboardMarkup keyboard = replyKeyboardMarkupGetter.getKeyboardForSearchAndFavorites();
                 setView(answerSender.sendMessageWithKeyboard(update, "Выберите доступное действие:", keyboard));
             }
@@ -272,12 +290,14 @@ public class UpdateController {
 
     private void processUpdateGender(Update update) {
         String textMessage = update.getMessage().getText();
+        Long chatId = update.getMessage().getChatId();
         if (textMessage.equals("Сударъ") || textMessage.equals("Сударыня")) {
-            Long chatId = update.getMessage().getChatId();
             rosstinderClient.setGender(chatId, textMessage);
+            log.info(MessageFormat.format("Для пользователя #{0} установлен пол {1}", chatId, textMessage));
             setView(answerSender.sendMessageWithKeyboard(update, "Выберите пункт анкеты, который хотите изменить", replyKeyboardMarkupGetter.getKeyboardForProfile()));
-            rosstinderClient.setNewStatus(update.getMessage().getChatId(), "profile");
+            rosstinderClient.setNewStatus(chatId, "profile");
         } else {
+            log.info(MessageFormat.format("Пользователь #{0} ввел неподходящее сообщение \"{1}\"", chatId, textMessage));
             ReplyKeyboardMarkup keyboard = replyKeyboardMarkupGetter.getKeyboardForGender();
             setView(answerSender.sendMessageWithKeyboard(update, "Выберите пол:", keyboard));
         }
@@ -287,26 +307,30 @@ public class UpdateController {
         String textMessage = update.getMessage().getText();
         Long chatId = update.getMessage().getChatId();
         rosstinderClient.setName(chatId, textMessage);
+        log.info(MessageFormat.format("Для пользователя #{0} установлено имя {1}", chatId, textMessage));
         setView(answerSender.sendMessageWithKeyboard(update, "Выберите пункт анкеты, который хотите изменить", replyKeyboardMarkupGetter.getKeyboardForProfile()));
-        rosstinderClient.setNewStatus(update.getMessage().getChatId(), "profile");
+        rosstinderClient.setNewStatus(chatId, "profile");
     }
 
     private void processUpdateDescription(Update update) {
         String textMessage = update.getMessage().getText();
         Long chatId = update.getMessage().getChatId();
         rosstinderClient.setDescription(chatId, textMessage);
+        log.info(MessageFormat.format("Для пользователя #{0} установлено описание {1}", chatId, textMessage));
         setView(answerSender.sendMessageWithKeyboard(update, "Выберите пункт анкеты, который хотите изменить", replyKeyboardMarkupGetter.getKeyboardForProfile()));
-        rosstinderClient.setNewStatus(update.getMessage().getChatId(), "profile");
+        rosstinderClient.setNewStatus(chatId, "profile");
     }
 
     private void processUpdatePreference(Update update) {
         String textMessage = update.getMessage().getText();
+        Long chatId = update.getMessage().getChatId();
         if (textMessage.equals("Сударъ") || textMessage.equals("Сударыня") || textMessage.equals("Всех")) {
-            Long chatId = update.getMessage().getChatId();
             rosstinderClient.setPreference(chatId, textMessage);
+            log.info(MessageFormat.format("Для пользователя #{0} установлены предпочтения {1}", chatId, textMessage));
             setView(answerSender.sendMessageWithKeyboard(update, "Выберите пункт анкеты, который хотите изменить", replyKeyboardMarkupGetter.getKeyboardForProfile()));
-            rosstinderClient.setNewStatus(update.getMessage().getChatId(), "profile");
+            rosstinderClient.setNewStatus(chatId, "profile");
         } else {
+            log.info(MessageFormat.format("Пользователь #{0} ввел неподходящее сообщение \"{1}\"", chatId, textMessage));
             ReplyKeyboardMarkup keyboard = replyKeyboardMarkupGetter.getKeyboardForPreference();
             setView(answerSender.sendMessageWithKeyboard(update, "Выберите предпочтения:", keyboard));
         }

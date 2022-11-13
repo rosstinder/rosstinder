@@ -1,16 +1,18 @@
 package org.rosstinder.prerevolutionarytindertgbotclient.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
-import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import javax.annotation.PostConstruct;
+import java.text.MessageFormat;
 
+@Slf4j
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
     @Value("${bot.name}")
@@ -47,6 +49,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     public void sendAnswerMessage(SendMessage message) {
         try {
             execute(message);
+            log.debug(MessageFormat.format("Отправлено сообщение пользователю #{0}", message.getChatId()));
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }
@@ -55,6 +58,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     public void sendAnswerMessage(SendPhoto message) {
         try {
             execute(message);
+            log.debug(MessageFormat.format("Отправлено сообщение с картинкой пользователю #{0}", message.getChatId()));
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }
