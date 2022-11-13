@@ -20,6 +20,4 @@ public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
     @Query(value = "select * from rosstinder.favorites f where f.who = ? and f.is_like = true", nativeQuery = true)
     List<Favorite> findFavoritesLikeByWho(Long who);
 
-    @Query(value = "select f.is_like from rosstinder.favorites f where f.who = ? and f.whom = ?", nativeQuery = true)
-    boolean isWhoLikesWhom(Long who, Long whom);
 }

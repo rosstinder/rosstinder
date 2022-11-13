@@ -310,6 +310,7 @@ public class UserService {
             Profile profile = findProfileByChatId(chatId);
             Optional<Long> nextProfile = findAllProfiles().stream()
                     .filter(p -> !p.getChatId().equals(chatId))
+                    .filter(p -> p.getGender() != null && p.getPreference() != null)
                     .filter(p -> Preference.compareGenderAndPreference(profile.getGender(), p.getPreference())
                             && Preference.compareGenderAndPreference(p.getGender(), profile.getPreference()))
                     .map(Profile::getId)

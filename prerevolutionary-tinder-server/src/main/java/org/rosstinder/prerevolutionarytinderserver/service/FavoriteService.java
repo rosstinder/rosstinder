@@ -220,11 +220,11 @@ public class FavoriteService {
      * @return true - пользователь whoChatId любит пользователя whomChatId; false - в противном случае
      */
     private boolean isUserFavoritesAnotherUser(Long who, Long whom) {
-        Optional<Boolean> optLike = Optional.ofNullable(favoriteRepository.isWhoLikesWhom(who, whom));
-        if (optLike.isPresent()) {
-            return optLike.get();
-        } else {
+        Optional<Favorite> optFavorite = Optional.ofNullable(favoriteRepository.findFavoriteByWhoAndWhom(who, whom));
+        if (optFavorite.isEmpty()) {
             return false;
+        } else {
+            return optFavorite.get().isLike();
         }
     }
 
