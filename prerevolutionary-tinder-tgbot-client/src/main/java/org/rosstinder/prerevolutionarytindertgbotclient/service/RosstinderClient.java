@@ -57,47 +57,41 @@ public class RosstinderClient {
         restTemplate.put("http://localhost:8080/users/" + chatId + "?key=preference&value=" + preference, Void.class);
     }
 
-    public byte[] getImageNextProfile(Long chatId) {
+    public LinkedHashMap<String, Object> getNextProfile(Long chatId) {
+        LinkedHashMap<String, Object> nextProfile = new LinkedHashMap<>();
         URI uri = getUri("http://localhost:8080/users/" + chatId + "/search/nextProfile");
         ResponseDto responseDto = restTemplate.getForObject(uri, ResponseDto.class);
-        byte[] decoded = Base64.getDecoder().decode((String) responseDto.getAttachment2());
-        return decoded;
-    }
-
-    public String getNameAndGenderForNextProfile(Long chatId) {
-        URI uri = getUri("http://localhost:8080/users/" + chatId + "/search/nextProfile");
-        ResponseDto responseDto = restTemplate.getForObject(uri, ResponseDto.class);
-        return (String) responseDto.getAttachment();
+        String nameAndGender = (String) responseDto.getAttachment();
+        byte[] image = Base64.getDecoder().decode((String) responseDto.getAttachment2());
+        nextProfile.put("nameAndGender", nameAndGender);
+        nextProfile.put("image", image);
+        return nextProfile;
     }
 
     public void setLikeOrDislike(Long chatId, String likeOrDislike) {
         restTemplate.postForLocation("http://localhost:8080/favorites/" + chatId + "?isLike=" + likeOrDislike, Void.class);
     }
 
-    public byte[] getImageNextFavorite(Long chatId) {
+    public LinkedHashMap<String, Object> getNextFavorite(Long chatId) {
+        LinkedHashMap<String, Object> nextFavorite = new LinkedHashMap<>();
         URI uri = getUri("http://localhost:8080/favorites/" + chatId + "/nextFavorite");
         ResponseDto responseDto = restTemplate.getForObject(uri, ResponseDto.class);
-        byte[] decoded = Base64.getDecoder().decode((String) responseDto.getAttachment2());
-        return decoded;
+        String nameAndGender = (String) responseDto.getAttachment();
+        byte[] image = Base64.getDecoder().decode((String) responseDto.getAttachment2());
+        nextFavorite.put("nameAndGender", nameAndGender);
+        nextFavorite.put("image", image);
+        return nextFavorite;
     }
 
-    public String getNameAndGenderAndStatusForNextFavorite(Long chatId) {
-        URI uri = getUri("http://localhost:8080/favorites/" + chatId + "/nextFavorite");
-        ResponseDto responseDto = restTemplate.getForObject(uri, ResponseDto.class);
-        return (String) responseDto.getAttachment();
-    }
-
-    public byte[] getImagePreviousFavorite(Long chatId) {
+    public LinkedHashMap<String, Object> getPreviousFavorite(Long chatId) {
+        LinkedHashMap<String, Object> previousFavorite = new LinkedHashMap<>();
         URI uri = getUri("http://localhost:8080/favorites/" + chatId + "/previousFavorite");
         ResponseDto responseDto = restTemplate.getForObject(uri, ResponseDto.class);
-        byte[] decoded = Base64.getDecoder().decode((String) responseDto.getAttachment2());
-        return decoded;
-    }
-
-    public String getNameAndGenderAndStatusForPreviousFavorite(Long chatId) {
-        URI uri = getUri("http://localhost:8080/favorites/" + chatId + "/previousFavorite");
-        ResponseDto responseDto = restTemplate.getForObject(uri, ResponseDto.class);
-        return (String) responseDto.getAttachment();
+        String nameAndGender = (String) responseDto.getAttachment();
+        byte[] image = Base64.getDecoder().decode((String) responseDto.getAttachment2());
+        previousFavorite.put("nameAndGender", nameAndGender);
+        previousFavorite.put("image", image);
+        return previousFavorite;
     }
 
     private URI getUri(String url) {

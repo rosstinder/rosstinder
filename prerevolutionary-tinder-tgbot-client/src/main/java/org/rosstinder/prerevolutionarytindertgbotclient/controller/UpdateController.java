@@ -131,16 +131,16 @@ public class UpdateController {
             case "Поиск" -> {
                 ReplyKeyboardMarkup keyboard = replyKeyboardMarkupGetter.getKeyboardForSearchAndFavorites();
                 setView(answerSender.sendPhotoWithKeyboard(update,
-                        rosstinderClient.getNameAndGenderForNextProfile(chatId),
-                        rosstinderClient.getImageNextProfile(chatId),
+                        (String) rosstinderClient.getNextProfile(chatId).get("nameAndGender"),
+                        (byte[]) rosstinderClient.getNextProfile(chatId).get("image"),
                         keyboard));
                 rosstinderClient.setNewStatus(chatId, "search");
             }
             case "Любимцы" -> {
                 ReplyKeyboardMarkup keyboard = replyKeyboardMarkupGetter.getKeyboardForSearchAndFavorites();
                 setView(answerSender.sendPhotoWithKeyboard(update,
-                        rosstinderClient.getNameAndGenderAndStatusForNextFavorite(chatId),
-                        rosstinderClient.getImageNextFavorite(chatId),
+                        (String) rosstinderClient.getNextFavorite(chatId).get("nameAndGender"),
+                        (byte[]) rosstinderClient.getNextFavorite(chatId).get("image"),
                         keyboard));
                 rosstinderClient.setNewStatus(chatId, "favorites");
             }
@@ -166,15 +166,15 @@ public class UpdateController {
             case "->" -> {
                 ReplyKeyboardMarkup keyboard = replyKeyboardMarkupGetter.getKeyboardForSearchAndFavorites();
                 setView(answerSender.sendPhotoWithKeyboard(update,
-                        rosstinderClient.getNameAndGenderAndStatusForNextFavorite(chatId),
-                        rosstinderClient.getImageNextFavorite(chatId),
+                        (String) rosstinderClient.getNextFavorite(chatId).get("nameAndGender"),
+                        (byte[]) rosstinderClient.getNextFavorite(chatId).get("image"),
                         keyboard));
             }
             case "<-" -> {
                 ReplyKeyboardMarkup keyboard = replyKeyboardMarkupGetter.getKeyboardForSearchAndFavorites();
                 setView(answerSender.sendPhotoWithKeyboard(update,
-                        rosstinderClient.getNameAndGenderAndStatusForPreviousFavorite(chatId),
-                        rosstinderClient.getImagePreviousFavorite(chatId),
+                        (String) rosstinderClient.getPreviousFavorite(chatId).get("nameAndGender"),
+                        (byte[]) rosstinderClient.getPreviousFavorite(chatId).get("image"),
                         keyboard));
             }
             case "Меню" -> {
@@ -233,16 +233,16 @@ public class UpdateController {
                 rosstinderClient.setLikeOrDislike(chatId, "true");
                 ReplyKeyboardMarkup keyboard = replyKeyboardMarkupGetter.getKeyboardForSearchAndFavorites();
                 setView(answerSender.sendPhotoWithKeyboard(update,
-                        rosstinderClient.getNameAndGenderForNextProfile(chatId),
-                        rosstinderClient.getImageNextProfile(chatId),
+                        (String) rosstinderClient.getNextProfile(chatId).get("nameAndGender"),
+                        (byte[]) rosstinderClient.getNextProfile(chatId).get("image"),
                         keyboard));
             }
             case "<-" -> {
                 rosstinderClient.setLikeOrDislike(chatId, "false");
                 ReplyKeyboardMarkup keyboard = replyKeyboardMarkupGetter.getKeyboardForSearchAndFavorites();
                 setView(answerSender.sendPhotoWithKeyboard(update,
-                        rosstinderClient.getNameAndGenderForNextProfile(chatId),
-                        rosstinderClient.getImageNextProfile(chatId),
+                        (String) rosstinderClient.getNextProfile(chatId).get("nameAndGender"),
+                        (byte[]) rosstinderClient.getNextProfile(chatId).get("image"),
                         keyboard));
             }
             case "Меню" -> {
