@@ -16,11 +16,11 @@ public class FavoriteController {
 
     @PostMapping(value = "/{chatId}")
     @ResponseStatus(HttpStatus.OK)
-    public Response makeLikeOrDislike(@PathVariable("chatId") Long chatId, boolean isLike, String status) {
+    public Response makeLikeOrDislike(@PathVariable("chatId") Long chatId, boolean isLike) {
         Response response;
         try {
-            response = new Response(chatId, status, HttpStatus.OK.toString(),
-                    favoriteService.makeLikeOrDislike(chatId, isLike, status), null);
+            response = new Response(chatId, "", HttpStatus.OK.toString(),
+                    favoriteService.makeLikeOrDislike(chatId, isLike), null);
         } catch (BusinessException e) {
             response = handleException(e, HttpStatus.NOT_FOUND.toString());
         }
@@ -29,12 +29,12 @@ public class FavoriteController {
 
     @GetMapping(value = "/{chatId}/nextFavorite")
     @ResponseStatus(HttpStatus.OK)
-    public Response searchNextFavorite(@PathVariable("chatId") Long chatId, String status) {
+    public Response searchNextFavorite(@PathVariable("chatId") Long chatId) {
         Response response;
         try {
-            Long favoriteProfileId = favoriteService.findNextFavoriteChatId(chatId, status);
+            Long favoriteProfileId = favoriteService.findNextFavoriteChatId(chatId);
             response = new Response(chatId,
-                    status, HttpStatus.OK.toString(), favoriteService.findFavoriteRelation(chatId),
+                    "", HttpStatus.OK.toString(), favoriteService.findFavoriteRelation(chatId),
                     favoriteService.findProfileUrl(favoriteProfileId));
         } catch (BusinessException e) {
             response = handleException(e, HttpStatus.NOT_FOUND.toString());
@@ -46,12 +46,12 @@ public class FavoriteController {
 
     @GetMapping(value = "/{chatId}/previousFavorite")
     @ResponseStatus(HttpStatus.OK)
-    public Response searchPreviousFavorite(@PathVariable("chatId") Long chatId, String status) {
+    public Response searchPreviousFavorite(@PathVariable("chatId") Long chatId) {
         Response response;
         try {
-            Long favoriteChatId = favoriteService.findPreviousFavoriteChatId(chatId, status);
+            Long favoriteChatId = favoriteService.findPreviousFavoriteChatId(chatId);
             response = new Response(favoriteChatId,
-                    status, HttpStatus.OK.toString(), favoriteService.findFavoriteRelation(chatId),
+                    "", HttpStatus.OK.toString(), favoriteService.findFavoriteRelation(chatId),
                     favoriteService.findProfileUrl(favoriteChatId));
         } catch (BusinessException e) {
             response = handleException(e, HttpStatus.NOT_FOUND.toString());

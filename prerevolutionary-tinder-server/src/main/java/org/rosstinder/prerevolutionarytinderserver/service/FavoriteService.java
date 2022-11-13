@@ -31,7 +31,7 @@ public class FavoriteService {
      * @param isLike флаг лайка (true) / отказа (false)
      * @return возвращает "Вы любимы" в случае взаимного лайка, иначе пустую строку
      */
-    public String makeLikeOrDislike(Long whoChatId, boolean isLike, String status) throws BusinessException {
+    public String makeLikeOrDislike(Long whoChatId, boolean isLike) throws BusinessException {
         String result;
         try {
             Long who = userService.findProfileIdByChatId(whoChatId);
@@ -46,11 +46,9 @@ public class FavoriteService {
                 saveFavorite(new Favorite(who, whom, isLike));
             }
             if (isMatch(who, whom)) {
-                userService.updateUserStatus(whoChatId, status);
                 result = "Вы любимы";
             }
             else {
-                userService.updateUserStatus(whoChatId, status);
                 result = "";
             }
         } catch (BusinessException e) {
@@ -88,7 +86,7 @@ public class FavoriteService {
      * @param chatId пользователь, который просматривает своих Любимцев
      * @return chatId пользователя, которого следует отобразить следующим при просмотре Любимцев
      */
-    public Long findNextFavoriteChatId(Long chatId, String status) throws BusinessException {
+    public Long findNextFavoriteChatId(Long chatId) throws BusinessException {
         Long result;
         try {
             User user = userService.findUserByChatId(chatId);
@@ -108,14 +106,12 @@ public class FavoriteService {
                         .filter(id -> id.compareTo(user.getLastFavoriteNumber()) > 0)
                         .findFirst();
                 if(nextFavorite.isEmpty()) {
-                    userService.updateUserStatus(chatId, status);
                     logger.info("Пользователь chatId="+chatId+" не проявлял ни к кому любви.");
                     throw new BusinessException("Пользователь chatId="+chatId+" не проявлял ни к кому любви.");
                 }
             }
             result = nextFavorite.get();
             updateUserFavoriteNumber(chatId, result);
-            userService.updateUserStatus(chatId, status);
         } catch (BusinessException e) {
             throw new BusinessException(e.getMessage());
         }
@@ -143,11 +139,10 @@ public class FavoriteService {
     /**
      * Метод находит идендификатор предыдущей анкеты для просмотра
      * @param chatId идентификатор пользователя
-     * @param status статус пользователя
      * @return идентификатор анкеты
      * @throws BusinessException если пользователь не был найден или у пользователя нет любимцев
      */
-    public Long findPreviousFavoriteChatId(Long chatId, String status) throws BusinessException {
+    public Long findPreviousFavoriteChatId(Long chatId) throws BusinessException {
         Long result;
         try {
             User user = userService.findUserByChatId(chatId);
@@ -166,14 +161,12 @@ public class FavoriteService {
                         .filter(id -> id.compareTo(user.getLastFavoriteNumber()) < 0)
                         .reduce((first, second) -> second);
                 if(previousFavorite.isEmpty()) {
-                    userService.updateUserStatus(chatId, status);
                     logger.info("Пользователь chatId="+chatId+" не проявлял ни к кому любви.");
                     throw new BusinessException("Пользователь chatId="+chatId+" не проявлял ни к кому любви.");
                 }
             }
             result = previousFavorite.get();
             updateUserFavoriteNumber(chatId, result);
-            userService.updateUserStatus(chatId, status);
         } catch (BusinessException e) {
             throw new BusinessException(e.getMessage());
         }

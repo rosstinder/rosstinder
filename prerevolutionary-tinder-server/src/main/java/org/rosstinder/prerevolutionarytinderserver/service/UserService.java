@@ -43,13 +43,13 @@ public class UserService {
      * @throws BusinessException В случае отсутствия пользователя бросает BusinessException
      */
     public User findUserByChatId(Long chatId) throws BusinessException {
-        Optional<User> optUser = Optional.of(userRepository.findUserByChatId(chatId));
-        if (optUser.isEmpty()) {
+        User user = userRepository.findUserByChatId(chatId);
+        if (user == null) {
             logger.info("Пользователь chatId={} не был найден.", chatId);
             throw new BusinessException("Пользователь chatId="+chatId+" не был найден.");
         }
         logger.debug("Пользователь chatId={} найден.", chatId);
-        return optUser.get();
+        return user;
     }
 
     /**
@@ -59,13 +59,13 @@ public class UserService {
      * @throws BusinessException в случае если анкета не была найдена
      */
     public Profile findProfileByChatId(Long chatId) throws BusinessException {
-        Optional<Profile> optProfile = Optional.of(profileRepository.findProfileByChatId(chatId));
-        if (optProfile.isEmpty()) {
+        Profile profile = profileRepository.findProfileByChatId(chatId);
+        if (profile == null) {
             logger.info("Анкета chatId={} не была найдена.", chatId);
             throw new BusinessException("Анкета chatId="+chatId+" не была найдена.");
         }
         logger.debug("Анкета chatId={} найдена.", chatId);
-        return optProfile.get();
+        return profile;
     }
 
     /**
@@ -75,13 +75,13 @@ public class UserService {
      * @throws BusinessException в случае если анкета не была найдена
      */
     public Profile findProfileById(Long id) throws BusinessException {
-        Optional<Profile> optProfile = Optional.of(profileRepository.findProfileById(id));
-        if (optProfile.isEmpty()) {
+        Profile profile = profileRepository.findProfileById(id);
+        if (profile == null) {
             logger.info("Анкета id={} не была найдена.", id);
             throw new BusinessException("Анкета chatId="+id+" не была найдена.");
         }
         logger.debug("Анкета chatId={} найдена.", id);
-        return optProfile.get();
+        return profile;
     }
 
     /**
@@ -227,13 +227,11 @@ public class UserService {
      * @return true - не существует; false - существует
      */
     public boolean isUserDoesNotExist(Long chatId) {
-        Optional<User> optUser = Optional.of(userRepository.findUserByChatId(chatId));
-        if (optUser.isEmpty()) {
-            logger.info("Пользователь chatId="+chatId+" не найден");
-        } else {
-            logger.info("Пользователь chatId="+chatId+" найден");
+        User user = userRepository.findUserByChatId(chatId);
+        if (user == null) {
+            return true;
         }
-        return optUser.isEmpty();
+        return false;
     }
 
     /**
@@ -242,8 +240,11 @@ public class UserService {
      * @return true - анкета не существует; false - анкета существует
      */
     public boolean isProfileDoesNotExistById(Long id) {
-        Optional<Profile> optProfile = Optional.of(profileRepository.findProfileById(id));
-        return optProfile.isEmpty();
+        Profile profile = profileRepository.findProfileById(id);
+        if (profile == null) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -252,13 +253,14 @@ public class UserService {
      * @return true - анкета существует; false - анкета не существует
      */
     private boolean isProfileDoesNotExistByChatId(Long chatId) {
-        Optional<Profile> optProfile = Optional.of(profileRepository.findProfileByChatId(chatId));
-        if (optProfile.isEmpty()) {
+        Profile profile = profileRepository.findProfileByChatId(chatId);
+        if (profile == null) {
             logger.info("Анкета для пользователя chatId="+chatId+" не найдена.");
+            return true;
         } else {
             logger.info("Анкета для пользователя chatId="+chatId+" найдена.");
+            return false;
         }
-        return optProfile.isEmpty();
     }
 
     /**

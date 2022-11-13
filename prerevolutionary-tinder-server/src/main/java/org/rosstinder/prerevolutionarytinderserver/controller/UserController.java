@@ -38,13 +38,12 @@ public class UserController {
 
     @GetMapping(value = "/{chatId}/profile")
     @ResponseStatus(HttpStatus.OK)
-    public Response getProfilePictureUrl(@PathVariable("chatId") Long chatId, String status) {
+    public Response getProfilePictureUrl(@PathVariable("chatId") Long chatId) {
         Response response;
         try {
             Long id = service.findProfileIdByChatId(chatId);
-            response = new Response(chatId, status, HttpStatus.OK.toString(),
+            response = new Response(chatId, "", HttpStatus.OK.toString(),
                     service.findNameAndGender(id), service.findProfileUrl(id));
-            service.updateUserStatus(chatId, status);
         } catch (BusinessException e) {
             response = handleException(e, HttpStatus.NOT_FOUND.toString());
         } catch (ServiceException e) {
@@ -55,14 +54,14 @@ public class UserController {
 
     @PutMapping(value = "/{chatId}")
     @ResponseStatus(HttpStatus.OK)
-    public Response updateProfile(@PathVariable("chatId") Long chatId, String key, String value, String status) {
+    public Response updateProfile(@PathVariable("chatId") Long chatId, String key, String value) {
         Response response;
         boolean isIncorrectValue = false;
         switch (key) {
             case ("gender"):
                 try {
                     service.updateGender(chatId, value);
-                    response = new Response(chatId, status, HttpStatus.OK.toString(), value, null);
+                    response = new Response(chatId, "", HttpStatus.OK.toString(), value, null);
                     break;
                 } catch (BusinessException e) {
                     response = handleException(e, HttpStatus.BAD_REQUEST.toString());
@@ -70,29 +69,29 @@ public class UserController {
             case ("name"):
                 value = translatorClient.translateDescription(value);
                 service.updateName(chatId, value);
-                response = new Response(chatId, status, HttpStatus.OK.toString(), value, null);
+                response = new Response(chatId, "", HttpStatus.OK.toString(), value, null);
                 break;
             case ("description"):
                 value = translatorClient.translateDescription(value);
                 service.updateDescription(chatId, value);
-                response = new Response(chatId, status, HttpStatus.OK.toString(), value, null);
+                response = new Response(chatId, "", HttpStatus.OK.toString(), value, null);
                 break;
             case ("preference"):
                 try {
                     service.updatePreference(chatId, value);
-                    response = new Response(chatId, status, HttpStatus.OK.toString(), value, null);
+                    response = new Response(chatId, "", HttpStatus.OK.toString(), value, null);
                     break;
                 } catch (BusinessException e) {
                     response = handleException(e, HttpStatus.BAD_REQUEST.toString());
                 }
             default:
                 isIncorrectValue = service.incorrectKey(chatId);
-                response = new Response(chatId, status, HttpStatus.NO_CONTENT.toString(), null, null);
+                response = new Response(chatId, "", HttpStatus.NO_CONTENT.toString(), null, null);
                 break;
         }
         try {
             if (isIncorrectValue) {
-                service.updateUserStatus(chatId, status);
+                service.updateUserStatus(chatId, "");
             }
         } catch (BusinessException e) {
             response = handleException(e, HttpStatus.NOT_FOUND.toString());
@@ -113,29 +112,13 @@ public class UserController {
         return response;
     }
 
-    @PostMapping(value = "/{chatId}")
-    @ResponseStatus(HttpStatus.CREATED)
-    public Response create(@PathVariable("chatId") Long chatId, String status) {
-        Response response;
-        try {
-            service.createUser(chatId, status);
-            service.createProfile(chatId);
-            service.updateUserStatus(chatId, status);
-            response = new Response(chatId, status, HttpStatus.OK.toString(), null, null);
-        } catch (BusinessException e) {
-            response = handleException(e, HttpStatus.NOT_ACCEPTABLE.toString());
-        }
-        return response;
-    }
-
     @GetMapping(value = "/{chatId}/search/nextProfile")
     @ResponseStatus(HttpStatus.OK)
-    public Response searchNextProfile(@PathVariable("chatId") Long chatId, String status) {
+    public Response searchNextProfile(@PathVariable("chatId") Long chatId) {
         Response response;
         try {
             Long nextProfileId = service.findNextProfileByChatId(chatId);
-            service.updateUserStatus(chatId, status);
-            response = new Response(chatId, status, HttpStatus.OK.toString(),
+            response = new Response(chatId, "", HttpStatus.OK.toString(),
                     service.findNameAndGender(nextProfileId), service.findProfileUrl(nextProfileId));
         }
         catch (BusinessException e) {
