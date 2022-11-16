@@ -28,23 +28,23 @@ public class FavoriteService {
      * Метод проставляет метку лайка/отказа
      *
      * @param whoChatId кто поставил лайк/отказ
-     * @param isLike флаг лайка (true) / отказа (false)
+     * @param isLike    флаг лайка (true) / отказа (false)
      * @return возвращает "Вы любимы" в случае взаимного лайка, иначе пустую строку
      */
-    public Long makeLikeOrDislike(Long whoChatId, boolean isLike) throws BusinessException {
+    public void makeLikeOrDislike(Long whoChatId, boolean isLike) throws BusinessException {
         try {
             Long who = userService.findProfileIdByChatId(whoChatId);
             Long whom = userService.findUserByChatId(whoChatId).getLastProfileNumber();
             if (userService.isProfileDoesNotExistById(whom)) {
                 logger.error("Попытка лайкнуть/дислайкнуть пользователя chatId={}, которого не существует.", whom);
-                throw new BusinessException("Попытка лайкнуть/дислайкнуть пользователя chatId="+whom+", которого не существует.");
+                throw new BusinessException("Попытка лайкнуть/дислайкнуть пользователя chatId=" +
+                        whom + ", которого не существует.");
             }
             if (isLikeAlreadyExist(who, whom)) {
                 editLikeOrDislike(who, whom, isLike);
             } else {
                 saveFavorite(new Favorite(who, whom, isLike));
             }
-            return whom;
         } catch (BusinessException e) {
             throw new BusinessException(e.getMessage());
         }
@@ -52,6 +52,7 @@ public class FavoriteService {
 
     /**
      * Получить все содержимое таблицы likes
+     *
      * @return список записей таблицы likes
      */
     private List<Favorite> findAllFavorites() {
@@ -60,8 +61,9 @@ public class FavoriteService {
 
     /**
      * Метод редактирует или добавляет новые отношения
-     * @param who кто лайкнул/отверг
-     * @param whom кого лайкнули/отвергли
+     *
+     * @param who    кто лайкнул/отверг
+     * @param whom   кого лайкнули/отвергли
      * @param isLike true - лайк, false - отказ
      */
     private void editLikeOrDislike(Long who, Long whom, boolean isLike) {
@@ -72,7 +74,8 @@ public class FavoriteService {
 
     /**
      * Метод проверяет, существовал ли лайк/отказ ранее
-     * @param who кто поставил лайк/отказ
+     *
+     * @param who  кто поставил лайк/отказ
      * @param whom кому поставили лайк/отказ
      * @return true если лайк/отказ уже сущетвует в БД, false если записи о лайке/отказе нет
      */
@@ -82,6 +85,7 @@ public class FavoriteService {
 
     /**
      * Метод вычисляет id следующей анкеты Любимцев
+     *
      * @param chatId пользователь, который просматривает своих Любимцев
      * @return chatId пользователя, которого следует отобразить следующим при просмотре Любимцев
      */
@@ -103,9 +107,9 @@ public class FavoriteService {
                         .sorted(Long::compareTo)
                         .filter(id -> id.compareTo(user.getLastFavoriteNumber()) > 0)
                         .findFirst();
-                if(nextFavorite.isEmpty()) {
-                    logger.info("Пользователь chatId="+chatId+" не проявлял ни к кому любви.");
-                    throw new BusinessException("Пользователь chatId="+chatId+" не проявлял ни к кому любви.");
+                if (nextFavorite.isEmpty()) {
+                    logger.info("Пользователь chatId=" + chatId + " не проявлял ни к кому любви.");
+                    throw new BusinessException("Пользователь chatId=" + chatId + " не проявлял ни к кому любви.");
                 }
             }
             result = nextFavorite.get();
@@ -119,7 +123,8 @@ public class FavoriteService {
 
     /**
      * Метод обновляет последнюю просматриваему анкету в разделе Любимцы
-     * @param chatId идентификатор пользователя
+     *
+     * @param chatId         идентификатор пользователя
      * @param favoriteNumber идентификатор просмотренной анкеты
      * @throws BusinessException если пользователь не найден
      */
@@ -128,14 +133,14 @@ public class FavoriteService {
             User user = userService.findUserByChatId(chatId);
             user.setLastFavoriteNumber(favoriteNumber);
             userService.saveUser(user);
-        }
-        catch (BusinessException e) {
+        } catch (BusinessException e) {
             throw new BusinessException(e.getMessage());
         }
     }
 
     /**
      * Метод находит идендификатор предыдущей анкеты для просмотра
+     *
      * @param chatId идентификатор пользователя
      * @return идентификатор анкеты
      * @throws BusinessException если пользователь не был найден или у пользователя нет любимцев
@@ -157,9 +162,9 @@ public class FavoriteService {
                         .sorted(Long::compareTo)
                         .filter(id -> id.compareTo(user.getLastFavoriteNumber()) < 0)
                         .reduce((first, second) -> second);
-                if(previousFavorite.isEmpty()) {
-                    logger.info("Пользователь chatId="+chatId+" не проявлял ни к кому любви.");
-                    throw new BusinessException("Пользователь chatId="+chatId+" не проявлял ни к кому любви.");
+                if (previousFavorite.isEmpty()) {
+                    logger.info("Пользователь chatId=" + chatId + " не проявлял ни к кому любви.");
+                    throw new BusinessException("Пользователь chatId=" + chatId + " не проявлял ни к кому любви.");
                 }
             }
             result = previousFavorite.get();
@@ -172,6 +177,7 @@ public class FavoriteService {
 
     /**
      * Метод находит статус отношений между текущим пользователем и просматриваемой им анкеты другого пользователя
+     *
      * @param whoChatId идентификатор пользователя, с которым проходит сравнение
      * @return строка с полом, именем анкеты и со статусом отношений
      * @throws BusinessException если один из пользователей не был найден
@@ -198,7 +204,8 @@ public class FavoriteService {
 
     /**
      * Проверка на взаимность двух пользователей
-     * @param who идентификатор первого пользователя
+     *
+     * @param who  идентификатор первого пользователя
      * @param whom идетификатор второго пользователя
      * @return true - взаимность; false - не взаимность
      */
@@ -208,7 +215,8 @@ public class FavoriteService {
 
     /**
      * Метод проверяет, любит ли пользователь другого пользователя
-     * @param who кто любит
+     *
+     * @param who  кто любит
      * @param whom кого любит
      * @return true - пользователь whoChatId любит пользователя whomChatId; false - в противном случае
      */
@@ -223,6 +231,7 @@ public class FavoriteService {
 
     /**
      * Сохранение отношения
+     *
      * @param favorite экземпляр отношения
      */
     private void saveFavorite(Favorite favorite) {
@@ -231,10 +240,11 @@ public class FavoriteService {
 
     /**
      * Нахождение картинки анкеты
+     *
      * @param id идентификатор пользоветеля, чья анкета нужна
      * @return массив байтов картинки
      * @throws BusinessException если пользователь не найден
-     * @throws ServiceException если возникла ошибка при генерации картинки
+     * @throws ServiceException  если возникла ошибка при генерации картинки
      */
     public String findProfileUrl(Long id) throws BusinessException, ServiceException {
         String result;
@@ -250,6 +260,7 @@ public class FavoriteService {
 
     /**
      * Метод формирования сообщения в случает взаимности
+     *
      * @param whoChatId идентификтаор пользователя
      * @return строку с описанием взаимности, либо пустую строку, если в заимность не состоялась
      */
@@ -259,8 +270,7 @@ public class FavoriteService {
             Long whom = userService.findUserByChatId(whoChatId).getLastProfileNumber();
             if (isMatch(who, whom)) {
                 return "Вы любимы";
-            }
-            else {
+            } else {
                 return "";
             }
         } catch (BusinessException e) {

@@ -17,70 +17,42 @@ public class FavoriteController {
     @GetMapping(value = "/{chatId}")
     @ResponseStatus(HttpStatus.OK)
     public Response findIsMatch(@PathVariable("chatId") Long chatId) {
-        Response response;
-        try {
-            response = new Response(chatId, "", HttpStatus.OK.toString(),
-                    favoriteService.getMassageIfMatch(chatId), null);
-        } catch (BusinessException e) {
-            response = handleException(e, HttpStatus.NOT_FOUND.toString());
-        }
-        return response;
+        return new Response(null, HttpStatus.OK.toString(),
+                favoriteService.getMassageIfMatch(chatId), null);
     }
 
     @PostMapping(value = "/{chatId}")
     @ResponseStatus(HttpStatus.OK)
     public Response makeLikeOrDislike(@PathVariable("chatId") Long chatId, boolean isLike) {
-        Response response;
-        try {
-            response = new Response(chatId, "", HttpStatus.OK.toString(),
-                    favoriteService.makeLikeOrDislike(chatId, isLike), null);
-        } catch (BusinessException e) {
-            response = handleException(e, HttpStatus.NOT_FOUND.toString());
-        }
-        return response;
+        favoriteService.makeLikeOrDislike(chatId, isLike);
+        return new Response(null, HttpStatus.OK.toString(), null, null);
     }
 
-    @GetMapping(value = "/{chatId}/nextFavorite")
+    @GetMapping(value = "/{chatId}/next")
     @ResponseStatus(HttpStatus.OK)
     public Response searchNextFavorite(@PathVariable("chatId") Long chatId) {
-        Response response;
-        try {
-            Long favoriteProfileId = favoriteService.findNextFavoriteChatId(chatId);
-            response = new Response(chatId,
-                    "", HttpStatus.OK.toString(), favoriteService.findFavoriteRelation(chatId),
-                    favoriteService.findProfileUrl(favoriteProfileId));
-        } catch (BusinessException e) {
-            response = handleException(e, HttpStatus.NOT_FOUND.toString());
-        } catch (ServiceException e) {
-            response = handleException(e, HttpStatus.INTERNAL_SERVER_ERROR.toString());
-        }
-        return response;
+        Long favoriteProfileId = favoriteService.findNextFavoriteChatId(chatId);
+        return new Response(null, HttpStatus.OK.toString(),
+                favoriteService.findFavoriteRelation(chatId),
+                favoriteService.findProfileUrl(favoriteProfileId));
     }
 
-    @GetMapping(value = "/{chatId}/previousFavorite")
+    @GetMapping(value = "/{chatId}/previous")
     @ResponseStatus(HttpStatus.OK)
     public Response searchPreviousFavorite(@PathVariable("chatId") Long chatId) {
-        Response response;
-        try {
-            Long favoriteChatId = favoriteService.findPreviousFavoriteChatId(chatId);
-            response = new Response(favoriteChatId,
-                    "", HttpStatus.OK.toString(), favoriteService.findFavoriteRelation(chatId),
-                    favoriteService.findProfileUrl(favoriteChatId));
-        } catch (BusinessException e) {
-            response = handleException(e, HttpStatus.NOT_FOUND.toString());
-        } catch (ServiceException e) {
-            response = handleException(e, HttpStatus.INTERNAL_SERVER_ERROR.toString());
-        }
-        return response;
+        Long favoriteChatId = favoriteService.findPreviousFavoriteChatId(chatId);
+        return new Response(null, HttpStatus.OK.toString(),
+                favoriteService.findFavoriteRelation(chatId),
+                favoriteService.findProfileUrl(favoriteChatId));
     }
 
     @ExceptionHandler(BusinessException.class)
     public Response handleException(BusinessException e, String httpStatus) {
-        return new Response(null, null, httpStatus, e.getMessage(), null);
+        return new Response(null, httpStatus, e.getMessage(), null);
     }
 
     @ExceptionHandler(ServiceException.class)
     public Response handleException(ServiceException e, String httpStatus) {
-        return new Response(null, null, httpStatus, e.getMessage(), null);
+        return new Response(null, httpStatus, e.getMessage(), null);
     }
 }
