@@ -54,6 +54,22 @@ public class UserController {
                 service.findNameAndGender(nextProfileId), service.findProfileUrl(nextProfileId));
     }
 
+    @GetMapping(value = "/{chatId}")
+    @ResponseStatus(HttpStatus.OK)
+    public Response findUserByChatId(@PathVariable("chatId") Long chatId) {
+        Response response;
+            if (!service.isUserDoesNotExist(chatId)) {
+                response = new Response(service.findUserByChatId(chatId).getStatus(),
+                        HttpStatus.OK.toString(), null, null);
+            } else {
+                service.createUser(chatId, "new");
+                service.createProfile(chatId);
+                service.updateUserStatus(chatId, "new");
+                response = new Response(service.findUserByChatId(chatId).getStatus(), HttpStatus.OK.toString(), null, null);
+            }
+        return response;
+    }
+
     @ExceptionHandler(BusinessException.class)
     public Response handleException(BusinessException e) {
         return new Response(null, HttpStatus.NOT_ACCEPTABLE.toString(),
