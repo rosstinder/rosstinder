@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import org.rosstinder.prerevolutionarytinderserver.exception.BusinessException;
 import org.rosstinder.prerevolutionarytinderserver.exception.ServiceException;
 import org.rosstinder.prerevolutionarytinderserver.model.Response;
-import org.rosstinder.prerevolutionarytinderserver.service.UserService;
+import org.rosstinder.prerevolutionarytinderserver.service.UserServiceImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @AllArgsConstructor
 public class UserController {
 
-    public final UserService service;
+    public final UserServiceImpl service;
 
     @GetMapping(value = "/{chatId}/status")
     @ResponseStatus(HttpStatus.OK)
@@ -28,7 +28,7 @@ public class UserController {
     public Response getProfilePictureUrl(@PathVariable("chatId") Long chatId) {
         Long id = service.findProfileIdByChatId(chatId);
         return new Response(null, HttpStatus.OK.toString(),
-                service.findNameAndGender(id), service.findProfileUrl(id));
+                service.findNameAndGender(id), service.findProfileByteString(id));
     }
 
     @PutMapping(value = "/{chatId}")
@@ -51,7 +51,7 @@ public class UserController {
     public Response searchNextProfile(@PathVariable("chatId") Long chatId) {
         Long nextProfileId = service.findNextProfileByChatId(chatId);
         return new Response(null, HttpStatus.OK.toString(),
-                service.findNameAndGender(nextProfileId), service.findProfileUrl(nextProfileId));
+                service.findNameAndGender(nextProfileId), service.findProfileByteString(nextProfileId));
     }
 
     @GetMapping(value = "/{chatId}")
