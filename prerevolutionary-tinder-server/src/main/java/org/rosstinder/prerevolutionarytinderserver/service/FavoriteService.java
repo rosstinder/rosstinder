@@ -10,8 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class FavoriteService {
@@ -29,7 +27,7 @@ public class FavoriteService {
      *
      * @param whoChatId кто поставил лайк/отказ
      * @param isLike    флаг лайка (true) / отказа (false)
-     * @return возвращает "Вы любимы" в случае взаимного лайка, иначе пустую строку
+     *
      */
     public void makeLikeOrDislike(Long whoChatId, boolean isLike) throws BusinessException {
         try {
@@ -50,37 +48,14 @@ public class FavoriteService {
         }
     }
 
-    /**
-     * Получить все содержимое таблицы likes
-     *
-     * @return список записей таблицы likes
-     */
-    private List<Favorite> findAllFavorites() {
-        return favoriteRepository.findAllFavorites();
-    }
-
-    /**
-     * Метод редактирует или добавляет новые отношения
-     *
-     * @param who    кто лайкнул/отверг
-     * @param whom   кого лайкнули/отвергли
-     * @param isLike true - лайк, false - отказ
-     */
     private void editLikeOrDislike(Long who, Long whom, boolean isLike) {
         Favorite favorite = favoriteRepository.findFavoriteByWhoAndWhom(who, whom);
         favorite.setLike(isLike);
         saveFavorite(favorite);
     }
 
-    /**
-     * Метод проверяет, существовал ли лайк/отказ ранее
-     *
-     * @param who  кто поставил лайк/отказ
-     * @param whom кому поставили лайк/отказ
-     * @return true если лайк/отказ уже сущетвует в БД, false если записи о лайке/отказе нет
-     */
     private boolean isLikeAlreadyExist(Long who, Long whom) {
-        return Optional.ofNullable(favoriteRepository.findFavoriteByWhoAndWhom(who, whom)).isPresent();
+        return favoriteRepository.findFavoriteByWhoAndWhom(who, whom) != null;
     }
 
     /**
@@ -90,45 +65,38 @@ public class FavoriteService {
      * @return chatId пользователя, которого следует отобразить следующим при просмотре Любимцев
      */
     public Long findNextFavoriteChatId(Long chatId) throws BusinessException {
-        Long result;
+        Long nextFavoriteId;
         try {
             User user = userService.findUserByChatId(chatId);
             Long who = userService.findProfileIdByChatId(chatId);
-            Optional<Long> nextFavorite = favoriteRepository.findFavoritesLikeByWho(who).stream()
+            nextFavoriteId = favoriteRepository.findFavoritesLikeByWho(who).stream()
                     .map(Favorite::getWhomId)
                     .sorted(Long::compareTo)
                     .filter(id -> id.compareTo(user.getLastFavoriteNumber()) > 0)
-                    .findFirst();
-            if (nextFavorite.isEmpty()) {
+                    .findFirst()
+                    .orElse(null);
+            if (nextFavoriteId == null) {
                 user.setLastFavoriteNumber(User.ZERO_VALUE);
-                nextFavorite = favoriteRepository.findFavoritesLikeByWho(who).stream()
+                nextFavoriteId = favoriteRepository.findFavoritesLikeByWho(who).stream()
                         .filter(l -> l.isLike() && l.getWhoId().equals(who))
                         .map(Favorite::getWhomId)
                         .sorted(Long::compareTo)
                         .filter(id -> id.compareTo(user.getLastFavoriteNumber()) > 0)
-                        .findFirst();
-                if (nextFavorite.isEmpty()) {
+                        .findFirst()
+                        .orElse(null);
+                if (nextFavoriteId == null) {
                     logger.info("Пользователь chatId=" + chatId + " не проявлял ни к кому любви.");
                     throw new BusinessException("Пользователь chatId=" + chatId + " не проявлял ни к кому любви.");
                 }
             }
-            result = nextFavorite.get();
-            updateUserFavoriteNumber(chatId, result);
+            updateUserFavoriteNumber(chatId, nextFavoriteId);
         } catch (BusinessException e) {
             throw new BusinessException(e.getMessage());
         }
-
-        return result;
+        return nextFavoriteId;
     }
 
-    /**
-     * Метод обновляет последнюю просматриваему анкету в разделе Любимцы
-     *
-     * @param chatId         идентификатор пользователя
-     * @param favoriteNumber идентификатор просмотренной анкеты
-     * @throws BusinessException если пользователь не найден
-     */
-    public void updateUserFavoriteNumber(Long chatId, Long favoriteNumber) throws BusinessException {
+    private void updateUserFavoriteNumber(Long chatId, Long favoriteNumber) throws BusinessException {
         try {
             User user = userService.findUserByChatId(chatId);
             user.setLastFavoriteNumber(favoriteNumber);
@@ -146,33 +114,34 @@ public class FavoriteService {
      * @throws BusinessException если пользователь не был найден или у пользователя нет любимцев
      */
     public Long findPreviousFavoriteChatId(Long chatId) throws BusinessException {
-        Long result;
+        Long previousFavoriteId;
         try {
             User user = userService.findUserByChatId(chatId);
             Long who = userService.findProfileIdByChatId(chatId);
-            Optional<Long> previousFavorite = favoriteRepository.findFavoritesLikeByWho(who).stream()
+            previousFavoriteId = favoriteRepository.findFavoritesLikeByWho(who).stream()
                     .map(Favorite::getWhomId)
                     .sorted(Long::compareTo)
                     .filter(id -> id.compareTo(user.getLastFavoriteNumber()) < 0)
-                    .findFirst();
-            if (previousFavorite.isEmpty()) {
+                    .findFirst()
+                    .orElse(null);
+            if (previousFavoriteId == null) {
                 user.setLastFavoriteNumber(Long.MAX_VALUE);
-                previousFavorite = favoriteRepository.findFavoritesLikeByWho(who).stream()
+                previousFavoriteId = favoriteRepository.findFavoritesLikeByWho(who).stream()
                         .map(Favorite::getWhomId)
                         .sorted(Long::compareTo)
                         .filter(id -> id.compareTo(user.getLastFavoriteNumber()) < 0)
-                        .reduce((first, second) -> second);
-                if (previousFavorite.isEmpty()) {
+                        .reduce((first, second) -> second)
+                        .orElse(null);
+                if (previousFavoriteId == null) {
                     logger.info("Пользователь chatId=" + chatId + " не проявлял ни к кому любви.");
                     throw new BusinessException("Пользователь chatId=" + chatId + " не проявлял ни к кому любви.");
                 }
             }
-            result = previousFavorite.get();
-            updateUserFavoriteNumber(chatId, result);
+            updateUserFavoriteNumber(chatId, previousFavoriteId);
         } catch (BusinessException e) {
             throw new BusinessException(e.getMessage());
         }
-        return result;
+        return previousFavoriteId;
     }
 
     /**
@@ -202,38 +171,19 @@ public class FavoriteService {
         return result.toString();
     }
 
-    /**
-     * Проверка на взаимность двух пользователей
-     *
-     * @param who  идентификатор первого пользователя
-     * @param whom идетификатор второго пользователя
-     * @return true - взаимность; false - не взаимность
-     */
     private boolean isMatch(Long who, Long whom) {
         return isUserFavoritesAnotherUser(who, whom) && (isUserFavoritesAnotherUser(whom, who));
     }
 
-    /**
-     * Метод проверяет, любит ли пользователь другого пользователя
-     *
-     * @param who  кто любит
-     * @param whom кого любит
-     * @return true - пользователь whoChatId любит пользователя whomChatId; false - в противном случае
-     */
     private boolean isUserFavoritesAnotherUser(Long who, Long whom) {
-        Optional<Favorite> optFavorite = Optional.ofNullable(favoriteRepository.findFavoriteByWhoAndWhom(who, whom));
-        if (optFavorite.isEmpty()) {
+        Favorite favorite = favoriteRepository.findFavoriteByWhoAndWhom(who, whom);
+        if (favorite == null) {
             return false;
         } else {
-            return optFavorite.get().isLike();
+            return favorite.isLike();
         }
     }
 
-    /**
-     * Сохранение отношения
-     *
-     * @param favorite экземпляр отношения
-     */
     private void saveFavorite(Favorite favorite) {
         favoriteRepository.save(favorite);
     }

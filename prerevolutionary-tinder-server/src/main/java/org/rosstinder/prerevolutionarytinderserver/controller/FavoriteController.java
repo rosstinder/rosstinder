@@ -40,10 +40,10 @@ public class FavoriteController {
     @GetMapping(value = "/{chatId}/previous")
     @ResponseStatus(HttpStatus.OK)
     public Response searchPreviousFavorite(@PathVariable("chatId") Long chatId) {
-        Long favoriteChatId = favoriteService.findPreviousFavoriteChatId(chatId);
+        Long favoriteProfileId = favoriteService.findPreviousFavoriteChatId(chatId);
         return new Response(null, HttpStatus.OK.toString(),
                 favoriteService.findFavoriteRelation(chatId),
-                favoriteService.findProfileUrl(favoriteChatId));
+                favoriteService.findProfileUrl(favoriteProfileId));
     }
 
     @ExceptionHandler(BusinessException.class)

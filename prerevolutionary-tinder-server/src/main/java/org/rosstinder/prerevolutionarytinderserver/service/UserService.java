@@ -13,12 +13,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserService {
-
-    private final String[] POSSIBLE_KEYS = {"gender", "name", "description", "preference"};
     private final UserRepository userRepository;
     private final ProfileRepository profileRepository;
     private final Logger logger = LoggerFactory.getLogger(UserService.class);
@@ -28,15 +25,6 @@ public class UserService {
     public UserService(UserRepository userRepository, ProfileRepository profileRepository) {
         this.userRepository = userRepository;
         this.profileRepository = profileRepository;
-    }
-
-    /**
-     * Метод нахождения всех пользователей
-     *
-     * @return список пользователей
-     */
-    private List<User> findAllUsers() {
-        return userRepository.findAllUsers();
     }
 
     /**
@@ -81,13 +69,13 @@ public class UserService {
      * @throws BusinessException в случае если анкета не была найдена
      */
     public Profile findProfileById(Long id) throws BusinessException {
-        Optional<Profile> optProfile = Optional.ofNullable(profileRepository.findProfileById(id));
-        if (optProfile.isEmpty()) {
+        Profile profile = profileRepository.findProfileById(id);
+        if (profile == null) {
             logger.info("Анкета id={} не была найдена.", id);
             throw new BusinessException("Анкета chatId=" + id + " не была найдена.");
         }
         logger.debug("Анкета chatId={} найдена.", id);
-        return optProfile.get();
+        return profile;
     }
 
     /**
@@ -100,24 +88,12 @@ public class UserService {
         logger.debug("Данные пользователя chatId=" + user.getChatId() + " сохранены.");
     }
 
-    /**
-     * Сохранение анкеты и ее изменений
-     *
-     * @param profile данные анкеты
-     */
     private void saveProfile(Profile profile) {
         profileRepository.save(profile);
         logger.debug("Данные анкеты пользователя chatId=" + profile.getChatId() + " сохранены.");
     }
 
-    /**
-     * Обновление пола пользователя
-     *
-     * @param chatId идентификатор
-     * @param gender строка с наименованием пола
-     * @throws BusinessException если анкета пользователя не была найдена или поле gender неверного формата
-     */
-    public void updateGender(Long chatId, String gender) throws BusinessException {
+    private void updateGender(Long chatId, String gender) throws BusinessException {
         try {
             Profile profile = findProfileByChatId(chatId);
             profile.setGender(new Gender(gender));
@@ -130,13 +106,7 @@ public class UserService {
 
     }
 
-    /**
-     * Обновление имени пользователя
-     *
-     * @param chatId идентификтаор
-     * @param name   имя
-     */
-    public void updateName(Long chatId, String name) {
+    private void updateName(Long chatId, String name) {
         try {
             Profile profile = findProfileByChatId(chatId);
             profile.setName(name);
@@ -148,13 +118,7 @@ public class UserService {
 
     }
 
-    /**
-     * Обновление описания пользователя
-     *
-     * @param chatId      идентификатор
-     * @param description описание
-     */
-    public void updateDescription(Long chatId, String description) {
+    private void updateDescription(Long chatId, String description) {
         try {
             Profile profile = findProfileByChatId(chatId);
             profile.setDescription(description);
@@ -165,14 +129,7 @@ public class UserService {
         }
     }
 
-    /**
-     * Обновление предпочтений пользователя
-     *
-     * @param chatId     идентификатор пользователя
-     * @param preference новое значение предпочтения
-     * @throws BusinessException если новое значение предпочтения не удовлетворяет возможным значениям поля
-     */
-    public void updatePreference(Long chatId, String preference) throws BusinessException {
+    private void updatePreference(Long chatId, String preference) throws BusinessException {
         try {
             Profile profile = findProfileByChatId(chatId);
             profile.setPreference(new Preference(preference));
@@ -244,11 +201,8 @@ public class UserService {
      * @return true - не существует; false - существует
      */
     public boolean isUserDoesNotExist(Long chatId) {
-        Optional<User> optUser = Optional.ofNullable(userRepository.findUserByChatId(chatId));
-        if (optUser.isEmpty()) {
-            return true;
-        }
-        return false;
+        User user = userRepository.findUserByChatId(chatId);
+        return user == null;
     }
 
     /**
@@ -258,11 +212,8 @@ public class UserService {
      * @return true - анкета не существует; false - анкета существует
      */
     public boolean isProfileDoesNotExistById(Long id) {
-        Optional<Profile> optProfile = Optional.ofNullable(profileRepository.findProfileById(id));
-        if (optProfile.isEmpty()) {
-            return true;
-        }
-        return false;
+        Profile profile = profileRepository.findProfileById(id);
+        return profile == null;
     }
 
     /**
@@ -272,8 +223,8 @@ public class UserService {
      * @return true - анкета существует; false - анкета не существует
      */
     private boolean isProfileDoesNotExistByChatId(Long chatId) {
-        Optional<Profile> optProfile = Optional.ofNullable(profileRepository.findProfileByChatId(chatId));
-        if (optProfile.isEmpty()) {
+        Profile profile = profileRepository.findProfileByChatId(chatId);
+        if (profile == null) {
             logger.info("Анкета для пользователя chatId=" + chatId + " не найдена.");
             return true;
         } else {
@@ -282,12 +233,7 @@ public class UserService {
         }
     }
 
-    /**
-     * Получение всех анкет
-     *
-     * @return список анкет
-     */
-    public List<Profile> findAllProfiles() {
+    private List<Profile> findAllProfiles() {
         return profileRepository.findAll();
     }
 
@@ -301,18 +247,13 @@ public class UserService {
      */
     public String findProfileUrl(Long id) throws BusinessException, ServiceException {
         String result;
-        Optional<Profile> optProfile = findAllProfiles().stream()
-                .filter(p -> p.getId().equals(id))
-                .findAny();
-        if (optProfile.isEmpty()) {
-            logger.info("Анкета id={} не была найдена.", id);
-            throw new BusinessException("Анкета id=" + id + " не была найдена.");
-        }
-        logger.debug("Анкета id={} найдена.", id);
         try {
-            result = imageGenerator.getGeneratedImage(optProfile.get());
+            Profile profile = findProfileById(id);
+            result = imageGenerator.getGeneratedImage(profile);
         } catch (ServiceException e) {
             throw new ServiceException(e.getMessage());
+        } catch (BusinessException e) {
+            throw new BusinessException(e.getMessage());
         }
         logger.debug("Изображение с описанием анкеты id=" + id + " сгенерировано.");
         return result;
@@ -324,14 +265,14 @@ public class UserService {
      * @param chatId идентификатор пользователя, который желает просмотреть анкету
      * @return идентификатор анкеты (id)
      * @throws BusinessException если пользователь не найден или отсутствуют анкеты,
-     * удовлетворяющие предпочтениям пользователя
+     *                           удовлетворяющие предпочтениям пользователя
      */
     public Long findNextProfileByChatId(Long chatId) throws BusinessException {
-        Long result;
+        Long nextProfileId;
         try {
             User user = findUserByChatId(chatId);
             Profile profile = findProfileByChatId(chatId);
-            Optional<Long> nextProfile = findAllProfiles().stream()
+            nextProfileId = findAllProfiles().stream()
                     .filter(p -> !p.getChatId().equals(chatId))
                     .filter(p -> p.getGender() != null && p.getPreference() != null && p.getName() != null)
                     .filter(p -> Preference.compareGenderAndPreference(profile.getGender(), p.getPreference()) &&
@@ -339,11 +280,12 @@ public class UserService {
                     .map(Profile::getId)
                     .sorted(Long::compareTo)
                     .filter(id -> id.compareTo(user.getLastProfileNumber()) > 0)
-                    .findFirst();
-            if (nextProfile.isEmpty()) {
+                    .findFirst()
+                    .orElse(null);
+            if (nextProfileId == null) {
                 logger.info("Поиск анкеты, удовлетворяющей критериям пользователя chatId={}, начат с начала", chatId);
                 user.setLastProfileNumber(User.ZERO_VALUE);
-                nextProfile = findAllProfiles().stream()
+                nextProfileId = findAllProfiles().stream()
                         .filter(p -> !p.getChatId().equals(chatId))
                         .filter(p -> p.getGender() != null && p.getPreference() != null && p.getName() != null)
                         .filter(p -> Preference.compareGenderAndPreference(profile.getGender(), p.getPreference()) &&
@@ -351,27 +293,21 @@ public class UserService {
                         .map(Profile::getId)
                         .sorted(Long::compareTo)
                         .filter(id -> id.compareTo(user.getLastProfileNumber()) > 0)
-                        .findFirst();
-                if (nextProfile.isEmpty()) {
+                        .findFirst()
+                        .orElse(null);
+                if (nextProfileId == null) {
                     logger.info("Отсутствуют анкеты, удовлетворяющие критериям пользователя chatId=" + chatId + ".");
                     throw new BusinessException("Отсутствуют анкеты, удовлетворяющие критериям пользователя chatId=" + chatId + ".");
                 }
             }
-            updateUserProfileNumber(chatId, nextProfile.get());
-            result = nextProfile.get();
+            updateUserProfileNumber(chatId, nextProfileId);
         } catch (BusinessException e) {
             throw new BusinessException(e.getMessage());
         }
-        return result;
+        return nextProfileId;
     }
 
-    /**
-     * Обновление номера текущей просматриваемой анкеты
-     *
-     * @param chatId        идентификатор пользователя
-     * @param profileNumber идентификатор просматриваемой анкеты
-     */
-    public void updateUserProfileNumber(Long chatId, Long profileNumber) {
+    private void updateUserProfileNumber(Long chatId, Long profileNumber) {
         try {
             User user = findUserByChatId(chatId);
             user.setLastProfileNumber(profileNumber);
@@ -391,8 +327,7 @@ public class UserService {
      */
     public Long findProfileIdByChatId(Long chatId) throws BusinessException {
         try {
-            Long result = findProfileByChatId(chatId).getId();
-            return result;
+            return findProfileByChatId(chatId).getId();
         } catch (BusinessException e) {
             throw new BusinessException(e.getMessage());
         }
@@ -434,11 +369,9 @@ public class UserService {
                     throw new BusinessException(e.getMessage());
                 }
             }
-            default -> {
-                logger.info("Анкета пользователя chatId=" + chatId + " не была обновлена " +
-                        "по причине некорректного значения key в" + " полученном запросе. " +
-                        "Допустимые значения: gender, name, description, preference.");
-            }
+            default -> logger.info("Анкета пользователя chatId=" + chatId + " не была обновлена " +
+                    "по причине некорректного значения key в" + " полученном запросе. " +
+                    "Допустимые значения: gender, name, description, preference.");
         }
     }
 }
