@@ -4,9 +4,8 @@ import lombok.Data;
 
 @Data
 public class ResponseDto {
-    private Long chatId;
-    private String userStatus;
-    private String status;
-    private Object attachment;
-    private Object attachment2;
+    private final String userStatus;
+    private final String status;
+    private final String message;
+    private final String image;
 }
