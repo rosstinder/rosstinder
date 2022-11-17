@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.rosstinder.prerevolutionarytinderserver.exception.ServiceException;
 import org.rosstinder.prerevolutionarytinderserver.model.entity.Profile;
+import org.rosstinder.prerevolutionarytinderserver.service.ImageGeneratorService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +23,7 @@ import java.util.Objects;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ImageGenerator {
+public class ImageGenerator implements ImageGeneratorService {
 
     @Value("${image-background.path}")
     private String BACKGROUND_PATH;
