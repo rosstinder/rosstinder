@@ -1,22 +1,17 @@
 package org.rosstinder.prerevolutionarytinderserver.model;
 
 import lombok.Getter;
-import org.rosstinder.prerevolutionarytinderserver.exception.BusinessException;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+public enum Preference {
+    MALE("Сударъ"),
+    FEMALE("Сударыня"),
+    ALL("Всех");
 
-public class Preference {
-    private final ArrayList VALUES = new ArrayList(Arrays.asList("Сударъ", "Сударыня", "Всех"));
     @Getter
-    private String preference;
+    private final String preference;
 
-    public Preference(String preference) throws BusinessException {
-        if (VALUES.contains(preference)) {
-            this.preference = preference;
-        } else {
-            throw new BusinessException("Неправильный формат предпочтения. Допустимые значения: Сударъ, Сударыня, Всех.");
-        }
+    Preference(String preference) {
+        this.preference = preference;
     }
 
     @Override
@@ -24,12 +19,9 @@ public class Preference {
         return this.preference;
     }
 
-    public static boolean compareGenderAndPreference(String gender, String preference) {
-        if (preference.equals(gender)) {
+    public static boolean compareGenderAndPreference(Gender gender, Preference preference) {
+        if (preference.getPreference().equals(gender.getGender())) {
             return true;
-        } else if (preference.equals("Всех")) {
-            return true;
-        }
-        return false;
+        } else return preference.equals(Preference.ALL);
     }
 }

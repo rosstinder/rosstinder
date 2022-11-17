@@ -13,7 +13,9 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Table(name = "favorites", schema = "rosstinder")
 public class Favorite {
+
     public final static boolean LIKE = true;
+
     public final static boolean DISLIKE = false;
 
     @Column(name = "id", nullable = false)

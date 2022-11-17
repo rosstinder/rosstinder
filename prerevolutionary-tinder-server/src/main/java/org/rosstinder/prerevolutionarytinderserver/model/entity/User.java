@@ -4,7 +4,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Getter
 @Entity
@@ -28,7 +31,6 @@ public class User {
     private Long lastProfileNumber;
 
     public User(Long chatId, String status) {
-        //this.id = id;
         this.chatId = chatId;
         this.status = status;
         this.lastFavoriteNumber = ZERO_VALUE;
