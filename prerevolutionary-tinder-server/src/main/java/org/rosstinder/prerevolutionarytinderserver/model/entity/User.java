@@ -31,7 +31,6 @@ public class User {
     private Long lastProfileNumber;
 
     public User(Long chatId, String status) {
-        //this.id = id;
         this.chatId = chatId;
         this.status = status;
         this.lastFavoriteNumber = ZERO_VALUE;
