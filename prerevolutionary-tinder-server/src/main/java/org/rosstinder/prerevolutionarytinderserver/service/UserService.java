@@ -8,6 +8,7 @@ import org.rosstinder.prerevolutionarytinderserver.model.entity.Profile;
 import org.rosstinder.prerevolutionarytinderserver.model.entity.User;
 import org.rosstinder.prerevolutionarytinderserver.repository.ProfileRepository;
 import org.rosstinder.prerevolutionarytinderserver.repository.UserRepository;
+import org.rosstinder.prerevolutionarytinderserver.service.image.ImageGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
