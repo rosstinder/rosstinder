@@ -47,12 +47,14 @@ public class FavoriteController {
     }
 
     @ExceptionHandler(BusinessException.class)
-    public Response handleException(BusinessException e, String httpStatus) {
-        return new Response(null, httpStatus, e.getMessage(), null);
+    public Response handleException(BusinessException e) {
+        return new Response(null, HttpStatus.NOT_ACCEPTABLE.toString(),
+                e.getMessage(), null);
     }
 
     @ExceptionHandler(ServiceException.class)
-    public Response handleException(ServiceException e, String httpStatus) {
-        return new Response(null, httpStatus, e.getMessage(), null);
+    public Response handleException(ServiceException e) {
+        return new Response(null, HttpStatus.INTERNAL_SERVER_ERROR.toString(),
+                e.getMessage(), null);
     }
 }

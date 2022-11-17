@@ -10,13 +10,16 @@ import org.slf4j.LoggerFactory;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class ImageGenerator {
+public class ImageGeneratorImpl implements ImageGeneratorService {
 
     public static final String BACKGROUND = "/img/prerev-background.jpg";
     private static final int TITLE_FONT_SIZE = 50;
@@ -25,30 +28,31 @@ public class ImageGenerator {
     public Font TITLE_FONT;
     public Font BODY_FONT;
 
-    private final Logger logger = LoggerFactory.getLogger(ImageGenerator.class);
+    private final Logger logger = LoggerFactory.getLogger(ImageGeneratorImpl.class);
 
     {
         try {
-            InputStream inputStream = ImageGenerator.class.getResourceAsStream("/fonts/OldStandard-Bold.ttf");
+            InputStream inputStream = ImageGeneratorImpl.class.getResourceAsStream("/fonts/OldStandard-Bold.ttf");
             Font oldStandardBold = Font.createFont(Font.TRUETYPE_FONT, inputStream);
             TITLE_FONT = oldStandardBold.deriveFont(Font.PLAIN, TITLE_FONT_SIZE);
         } catch (FontFormatException | IOException e) {
             logger.error("Ошибка при попытке чтения файла /fonts/OldStandard-Bold.ttf: " + e.getMessage());
-            throw new RuntimeException(e);
+            throw new ServiceException("Ошибка при попытке чтения файла /fonts/OldStandard-Bold.ttf");
         }
     }
 
     {
         try {
-            InputStream inputStream = ImageGenerator.class.getResourceAsStream("/fonts/OldStandard-Regular.ttf");
+            InputStream inputStream = ImageGeneratorImpl.class.getResourceAsStream("/fonts/OldStandard-Regular.ttf");
             Font oldStandardBold = Font.createFont(Font.TRUETYPE_FONT, inputStream);
             BODY_FONT = oldStandardBold.deriveFont(Font.PLAIN, BODY_FONT_SIZE);
         } catch (FontFormatException | IOException e) {
             logger.error("Ошибка при попытке чтения файла /fonts/OldStandard-Regular.ttf: " + e.getMessage());
-            throw new RuntimeException(e);
+            throw new ServiceException("Ошибка при попытке чтения файла /fonts/OldStandard-Bold.ttf");
         }
     }
 
+    @Override
     public String getGeneratedImage(Profile profile) throws ServiceException {
         try (InputStream input = this.getClass().getResourceAsStream(BACKGROUND)) {
             BufferedImage image = ImageIO.read(Objects.requireNonNull(input));
@@ -69,8 +73,8 @@ public class ImageGenerator {
             ImageIO.write(image, "png", new File("example.png"));
             return new String(Base64.encodeBase64(byteArrayOutputStream.toByteArray()), "ISO-8859-2");
         } catch (IOException ioException) {
-            logger.error("Ошибка при чтении или записи анкеты chatId="+profile.getChatId()+".");
-            throw new ServiceException("Ошибка при чтении или записи анкеты chatId="+profile.getChatId()+".");
+            logger.error("Ошибка при чтении или записи анкеты chatId=" + profile.getChatId() + ".");
+            throw new ServiceException("Ошибка при чтении или записи анкеты chatId=" + profile.getChatId() + ".");
         }
     }
 
@@ -102,8 +106,7 @@ public class ImageGenerator {
     private List<String> splitDescription(FontMetrics titleFontMetrics,
                                           FontMetrics bodyFontMetrics,
                                           String description,
-                                          int widthForText)
-    {
+                                          int widthForText) {
         String[] wordsInDescription = description.split("\\s");
 
         List<String> descriptionLines = new ArrayList<>();

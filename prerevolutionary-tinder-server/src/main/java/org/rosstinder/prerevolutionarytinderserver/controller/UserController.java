@@ -75,7 +75,7 @@ public class UserController {
     }
 
     @ExceptionHandler(ServiceException.class)
-    public Response handleException(ServiceException e, String httpStatus) {
+    public Response handleException(ServiceException e) {
         return new Response(null, HttpStatus.INTERNAL_SERVER_ERROR.toString(),
                 e.getMessage(), null);
     }

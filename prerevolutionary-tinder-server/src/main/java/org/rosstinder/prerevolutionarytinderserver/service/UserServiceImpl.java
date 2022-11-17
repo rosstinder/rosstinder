@@ -97,16 +97,23 @@ public class UserServiceImpl implements UserService {
     }
 
     private void updateGender(Long chatId, String gender) throws BusinessException {
+        Profile profile;
         try {
-            Profile profile = findProfileByChatId(chatId);
-            profile.setGender(new Gender(gender));
-            saveProfile(profile);
-            logger.info("Пол пользователя chatId=" + chatId + " был обновлен.");
+            profile = findProfileByChatId(chatId);
         } catch (BusinessException e) {
             logger.error(e.getMessage());
             throw new BusinessException(e.getMessage());
         }
-
+        switch (gender) {
+            case ("Сударъ") -> profile.setGender(Gender.MALE);
+            case ("Сударыня") -> profile.setGender(Gender.FEMALE);
+            default -> {
+                logger.error("Неправильный формат пола. Допустимые значения: Сударъ, Сударыня.");
+                throw new BusinessException("Неправильный формат пола. Допустимые значения: Сударъ, Сударыня.");
+            }
+        }
+        saveProfile(profile);
+        logger.info("Пол пользователя chatId=" + chatId + " был обновлен.");
     }
 
     private void updateName(Long chatId, String name) {
@@ -133,16 +140,24 @@ public class UserServiceImpl implements UserService {
     }
 
     private void updatePreference(Long chatId, String preference) throws BusinessException {
+        Profile profile;
         try {
-            Profile profile = findProfileByChatId(chatId);
-            profile.setPreference(new Preference(preference));
-            saveProfile(profile);
-            logger.info("Предпочтения пользователя chatId=" + chatId + " были обновлены.");
+            profile = findProfileByChatId(chatId);
         } catch (BusinessException e) {
             logger.error(e.getMessage());
             throw new BusinessException(e.getMessage());
         }
-
+        switch (preference) {
+            case ("Сударъ") -> profile.setPreference(Preference.MALE);
+            case ("Сударыня") -> profile.setPreference(Preference.FEMALE);
+            case ("Всех") -> profile.setPreference(Preference.ALL);
+            default -> {
+                logger.error("Неправильный формат предпочтения. Допустимые значения: Сударъ, Сударыня, Всех.");
+                throw new BusinessException("Неправильный формат предпочтения. Допустимые значения: Сударъ, Сударыня, Всех.");
+            }
+        }
+        saveProfile(profile);
+        logger.info("Предпочтения пользователя chatId=" + chatId + " были обновлены.");
     }
 
     /**

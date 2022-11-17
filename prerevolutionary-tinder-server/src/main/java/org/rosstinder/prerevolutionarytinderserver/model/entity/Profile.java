@@ -24,24 +24,26 @@ public class Profile {
     @Column(name = "name")
     @Setter
     private String name;
+    @Enumerated(EnumType.STRING)
     @Column(name = "gender")
-    private String gender;
+    private Gender gender;
     @Column(name = "description")
     @Setter
     private String description;
+    @Enumerated(EnumType.STRING)
     @Column(name = "preference")
-    private String preference;
+    private Preference preference;
 
     public Profile(Long chatId) {
         this.chatId = chatId;
     }
 
     public void setGender(Gender gender) {
-        this.gender = gender.getGender();
+        this.gender = gender;
     }
 
     public void setPreference(Preference preference) {
-        this.preference = preference.getPreference();
+        this.preference = preference;
     }
 
     @Override

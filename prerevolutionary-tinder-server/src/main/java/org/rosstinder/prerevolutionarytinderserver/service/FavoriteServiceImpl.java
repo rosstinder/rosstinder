@@ -85,15 +85,15 @@ public class FavoriteServiceImpl implements FavoriteService {
                         .filter(id -> id.compareTo(user.getLastFavoriteNumber()) > 0)
                         .findFirst()
                         .orElse(null);
-                if (nextFavoriteId == null) {
-                    logger.info("Пользователь chatId=" + chatId + " не проявлял ни к кому любви.");
-                    throw new BusinessException("Пользователь chatId=" + chatId + " не проявлял ни к кому любви.");
-                }
             }
-            updateUserFavoriteNumber(chatId, nextFavoriteId);
         } catch (BusinessException e) {
             throw new BusinessException(e.getMessage());
         }
+        if (nextFavoriteId == null) {
+            logger.info("Пользователь chatId=" + chatId + " не проявлял ни к кому любви.");
+            throw new BusinessException("Пользователь chatId=" + chatId + " не проявлял ни к кому любви.");
+        }
+        updateUserFavoriteNumber(chatId, nextFavoriteId);
         return nextFavoriteId;
     }
 
