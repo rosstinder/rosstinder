@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
-public class TranslatorClient {
+public class TranslatorClientImpl {
     @Value("${translator.server}")
     private String server;
     RestTemplate restTemplate = new RestTemplate();
