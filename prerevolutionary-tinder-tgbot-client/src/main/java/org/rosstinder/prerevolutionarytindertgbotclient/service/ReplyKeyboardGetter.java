@@ -1,21 +1,21 @@
 package org.rosstinder.prerevolutionarytindertgbotclient.service;
 
+import org.rosstinder.prerevolutionarytindertgbotclient.model.ButtonText;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Component
-public class ReplyKeyboardMarkupGetter {
+public class ReplyKeyboardGetter implements KeyboardGetter {
+
     public ReplyKeyboardMarkup getKeyboardForGender() {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         List<KeyboardRow> keyboard = new ArrayList<>();
-        KeyboardRow row = new KeyboardRow();
-        row.add("Сударъ");
-        row.add("Сударыня");
-        keyboard.add(row);
+        keyboard.add(createKeyboardRow(ButtonText.MALE, ButtonText.FEMALE));
         replyKeyboardMarkup.setKeyboard(keyboard);
         return replyKeyboardMarkup;
     }
@@ -23,13 +23,8 @@ public class ReplyKeyboardMarkupGetter {
     public ReplyKeyboardMarkup getKeyboardForPreference() {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         List<KeyboardRow> keyboard = new ArrayList<>();
-        KeyboardRow row = new KeyboardRow();
-        row.add("Сударъ");
-        row.add("Сударыня");
-        keyboard.add(row);
-        row = new KeyboardRow();
-        row.add("Всех");
-        keyboard.add(row);
+        keyboard.add(createKeyboardRow(ButtonText.MALE, ButtonText.FEMALE));
+        keyboard.add(createKeyboardRow(ButtonText.ALL));
         replyKeyboardMarkup.setKeyboard(keyboard);
         return replyKeyboardMarkup;
     }
@@ -37,27 +32,26 @@ public class ReplyKeyboardMarkupGetter {
     public ReplyKeyboardMarkup getKeyboardForMenu() {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         List<KeyboardRow> keyboard = new ArrayList<>();
-        KeyboardRow row = new KeyboardRow();
-        row.add("Поиск");
-        row.add("Любимцы");
-        keyboard.add(row);
-        row = new KeyboardRow();
-        row.add("Анкета");
-        keyboard.add(row);
+        keyboard.add(createKeyboardRow(ButtonText.SEARCH, ButtonText.FAVORITES));
+        keyboard.add(createKeyboardRow(ButtonText.PROFILE));
         replyKeyboardMarkup.setKeyboard(keyboard);
         return replyKeyboardMarkup;
     }
 
-    public ReplyKeyboardMarkup getKeyboardForSearchAndFavorites() {
+    public ReplyKeyboardMarkup getKeyboardForSearch() {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         List<KeyboardRow> keyboard = new ArrayList<>();
-        KeyboardRow row = new KeyboardRow();
-        row.add("<-");
-        row.add("->");
-        keyboard.add(row);
-        row = new KeyboardRow();
-        row.add("Меню");
-        keyboard.add(row);
+        keyboard.add(createKeyboardRow(ButtonText.DISLIKE, ButtonText.LIKE));
+        keyboard.add(createKeyboardRow(ButtonText.MENU));
+        replyKeyboardMarkup.setKeyboard(keyboard);
+        return replyKeyboardMarkup;
+    }
+
+    public ReplyKeyboardMarkup getKeyboardForFavorites() {
+        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+        List<KeyboardRow> keyboard = new ArrayList<>();
+        keyboard.add(createKeyboardRow(ButtonText.PREVIOUS, ButtonText.NEXT));
+        keyboard.add(createKeyboardRow(ButtonText.MENU));
         replyKeyboardMarkup.setKeyboard(keyboard);
         return replyKeyboardMarkup;
     }
@@ -65,18 +59,16 @@ public class ReplyKeyboardMarkupGetter {
     public ReplyKeyboardMarkup getKeyboardForProfile() {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         List<KeyboardRow> keyboard = new ArrayList<>();
-        KeyboardRow row = new KeyboardRow();
-        row.add("Изменить имя");
-        row.add("Изменить пол");
-        keyboard.add(row);
-        row = new KeyboardRow();
-        row.add("Изменить описание");
-        row.add("Изменить предпочтения");
-        keyboard.add(row);
-        row = new KeyboardRow();
-        row.add("Меню");
-        keyboard.add(row);
+        keyboard.add(createKeyboardRow(ButtonText.CHANGE_NAME, ButtonText.CHANGE_GENDER));
+        keyboard.add(createKeyboardRow(ButtonText.CHANGE_DESCRIPTION, ButtonText.CHANGE_PREFERENCE));
+        keyboard.add(createKeyboardRow(ButtonText.MENU));
         replyKeyboardMarkup.setKeyboard(keyboard);
         return replyKeyboardMarkup;
+    }
+
+    private KeyboardRow createKeyboardRow(ButtonText... buttons) {
+        KeyboardRow row = new KeyboardRow();
+        Arrays.stream(buttons).map(ButtonText::getText).forEach(row::add);
+        return row;
     }
 }
