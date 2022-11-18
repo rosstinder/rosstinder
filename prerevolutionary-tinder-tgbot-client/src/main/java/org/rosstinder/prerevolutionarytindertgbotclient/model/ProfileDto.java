@@ -1,13 +1,14 @@
 package org.rosstinder.prerevolutionarytindertgbotclient.model;
 
-import lombok.Data;
 
-@Data
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ProfileDto {
-    private Long id;
-    private Long chatId;
-    private String name;
-    private String gender;
-    private String description;
-    private String preference;
+    private String caption;
+    private byte[] image;
 }

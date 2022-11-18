@@ -1,11 +1,14 @@
 package org.rosstinder.prerevolutionarytindertgbotclient.model;
 
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ResponseDto {
-    private final String userStatus;
-    private final String status;
-    private final String message;
-    private final String image;
+    private String userStatus;
+    private String status;
+    private String message;
+    private String image;
 }
