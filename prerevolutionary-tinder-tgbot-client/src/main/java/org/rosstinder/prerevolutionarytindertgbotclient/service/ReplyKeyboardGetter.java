@@ -41,7 +41,7 @@ public class ReplyKeyboardGetter implements KeyboardGetter {
     public ReplyKeyboardMarkup getKeyboardForSearch() {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         List<KeyboardRow> keyboard = new ArrayList<>();
-        keyboard.add(createKeyboardRow(ButtonText.DISLIKE, ButtonText.LIKE));
+        keyboard.add(createKeyboardRow(ButtonText.DONT_LIKE, ButtonText.LIKE));
         keyboard.add(createKeyboardRow(ButtonText.MENU));
         replyKeyboardMarkup.setKeyboard(keyboard);
         return replyKeyboardMarkup;
