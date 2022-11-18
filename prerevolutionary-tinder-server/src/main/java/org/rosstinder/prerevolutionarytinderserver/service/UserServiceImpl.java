@@ -19,12 +19,14 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final ProfileRepository profileRepository;
     private final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
-    private final ImageGeneratorImpl imageGenerator = new ImageGeneratorImpl();
-    private final TranslatorClientImpl translatorClient = new TranslatorClientImpl();
+    private final ImageGeneratorService imageGenerator;
+    private final TranslatorClientImpl translatorClient;
 
-    public UserServiceImpl(UserRepository userRepository, ProfileRepository profileRepository) {
+    public UserServiceImpl(UserRepository userRepository, ProfileRepository profileRepository, ImageGeneratorService imageGenerator, TranslatorClientImpl translatorClient) {
         this.userRepository = userRepository;
         this.profileRepository = profileRepository;
+        this.imageGenerator = imageGenerator;
+        this.translatorClient = translatorClient;
     }
 
     /**
