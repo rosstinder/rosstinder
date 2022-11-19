@@ -2,7 +2,6 @@ package org.rosstinder.prerevolutionarytindertgbotclient.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.rosstinder.prerevolutionarytindertgbotclient.handler.BotStateHandler;
-import org.rosstinder.prerevolutionarytindertgbotclient.model.BotState;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -14,7 +13,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import javax.annotation.PostConstruct;
 import java.text.MessageFormat;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Component
@@ -23,7 +21,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     private String botName;
     @Value("${bot.token}")
     private String botToken;
-    private UpdateController updateController;
+    private final UpdateController updateController;
     private final List<BotStateHandler> handlers;
 
 
@@ -34,7 +32,6 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     @PostConstruct
     public void init() {
-        updateController.registerBot(this);
         for (BotStateHandler handler : handlers) {
             handler.registerBot(this);
         }

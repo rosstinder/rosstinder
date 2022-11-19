@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class UpdateController {
-    private TelegramBot telegramBot;
     private final RosstinderClient rosstinderClient;
     private final Map<BotState, BotStateHandler> handlers;
 
@@ -27,11 +26,6 @@ public class UpdateController {
         this.rosstinderClient = rosstinderClient;
         this.handlers = handlers.stream().collect(Collectors.toMap(BotStateHandler::getState, Function.identity()));
     }
-
-    public void registerBot(TelegramBot telegramBot) {
-        this.telegramBot = telegramBot;
-    }
-
 
     public void processUpdate(Update update) {
         if (update == null) {
