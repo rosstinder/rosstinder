@@ -63,7 +63,7 @@ public class StateFavoritesHandler extends BotStateHandler {
     }
 
     private void seePreviousFavorite(Long chatId) {
-        ProfileDto previousFavorite = rosstinderClient.getNextFavorite(chatId);
+        ProfileDto previousFavorite = rosstinderClient.getPreviousFavorite(chatId);
 
         setView(answerSender.sendPhotoWithKeyboard(chatId,
                 previousFavorite.getCaption(),
