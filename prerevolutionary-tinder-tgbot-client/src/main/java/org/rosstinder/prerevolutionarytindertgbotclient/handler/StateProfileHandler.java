@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -27,71 +29,82 @@ public class StateProfileHandler extends BotStateHandler {
     }
 
     @Override
-    public void processState(Update update) {
-        isThisStartMessage(update);
+    public List<Object> processState(Update update) {
 
         String textMessage = update.getMessage().getText();
         Long chatId = update.getMessage().getChatId();
+
+        List<Object> methods = new ArrayList<>();
+
+        if (isThisStartMessage(textMessage)) {
+            methods.add(replyToStartMessage(chatId));
+        }
 
         ButtonText buttonText = getButtonText(textMessage);
 
         switch (buttonText) {
             case CHANGE_NAME -> {
-                changeName(chatId);
+                return changeName(chatId, methods);
             }
             case CHANGE_GENDER -> {
-                changeGender(chatId);
+                return changeGender(chatId, methods);
             }
             case CHANGE_DESCRIPTION -> {
-                changeDescription(chatId);
+                return changeDescription(chatId, methods);
             }
             case CHANGE_PREFERENCE -> {
-                changePreference(chatId);
+                return changePreference(chatId, methods);
             }
             case MENU -> {
-                displayMenu(chatId);
+                return displayMenu(chatId, methods);
             }
             default -> {
-                sendErrorMessage(textMessage, chatId);
+                return sendErrorMessage(textMessage, chatId, methods);
             }
         }
     }
 
-    private void changeName(Long chatId) {
+    private List<Object> changeName(Long chatId, List<Object> methods) {
         rosstinderClient.setNewStatus(chatId, BotState.UPDATE_NAME);
 
-        setView(answerSender.sendMessageWithText(chatId, AnswerText.UPDATE_NAME.getText()));
+        methods.add(answerSender.sendMessageWithText(chatId, AnswerText.UPDATE_NAME.getText()));
+        return methods;
     }
 
-    private void changeGender(Long chatId) {
+    private List<Object> changeGender(Long chatId, List<Object> methods) {
         rosstinderClient.setNewStatus(chatId, BotState.UPDATE_GENDER);
 
-        setView(answerSender.sendMessageWithKeyboard(chatId, AnswerText.UPDATE_GENDER.getText(), replyKeyboardGetter.getKeyboardForGender()));
+        methods.add(answerSender.sendMessageWithKeyboard(chatId, AnswerText.UPDATE_GENDER.getText(), replyKeyboardGetter.getKeyboardForGender()));
+        return methods;
     }
 
-    private void changeDescription(Long chatId) {
+    private List<Object> changeDescription(Long chatId, List<Object> methods) {
         rosstinderClient.setNewStatus(chatId, BotState.UPDATE_DESCRIPTION);
 
-        setView(answerSender.sendMessageWithText(chatId, AnswerText.UPDATE_DESCRIPTION.getText()));
+        methods.add(answerSender.sendMessageWithText(chatId, AnswerText.UPDATE_DESCRIPTION.getText()));
+        return methods;
     }
 
-    private void changePreference(Long chatId) {
+    private List<Object> changePreference(Long chatId, List<Object> methods) {
         rosstinderClient.setNewStatus(chatId, BotState.UPDATE_PREFERENCE);
 
-        setView(answerSender.sendMessageWithKeyboard(chatId, AnswerText.UPDATE_PREFERENCE.getText(), replyKeyboardGetter.getKeyboardForPreference()));
+        methods.add(answerSender.sendMessageWithKeyboard(chatId, AnswerText.UPDATE_PREFERENCE.getText(), replyKeyboardGetter.getKeyboardForPreference()));
+        return methods;
     }
 
-    private void displayMenu(Long chatId) {
-        setView(answerSender.sendMessageWithKeyboard(chatId,
+    private List<Object> displayMenu(Long chatId, List<Object> methods) {
+        methods.add(answerSender.sendMessageWithKeyboard(chatId,
                 AnswerText.MENU.getText(),
                 replyKeyboardGetter.getKeyboardForMenu()));
 
         rosstinderClient.setNewStatus(chatId, BotState.MENU);
+        return methods;
     }
 
-    private void sendErrorMessage(String textMessage, Long chatId) {
+    private List<Object> sendErrorMessage(String textMessage, Long chatId, List<Object> methods) {
         log.info(MessageFormat.format("Пользователь #{0} ввел неподходящее сообщение \"{1}\"", chatId, textMessage));
 
-        setView(answerSender.sendMessageWithKeyboard(chatId, AnswerText.CHOOSE_AVAILABLE_ACTION.getText(), replyKeyboardGetter.getKeyboardForProfile()));
+        methods.add(answerSender.sendMessageWithKeyboard(chatId, AnswerText.CHOOSE_AVAILABLE_ACTION.getText(), replyKeyboardGetter.getKeyboardForProfile()));
+        return methods;
     }
 }

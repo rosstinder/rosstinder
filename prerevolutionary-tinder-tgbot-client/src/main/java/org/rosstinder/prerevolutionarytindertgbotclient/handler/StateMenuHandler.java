@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -28,68 +30,77 @@ public class StateMenuHandler extends BotStateHandler {
     }
 
     @Override
-    public void processState(Update update) {
-        isThisStartMessage(update);
+    public List<Object> processState(Update update) {
 
         Long chatId = update.getMessage().getChatId();
         String textMessage = update.getMessage().getText();
+
+        List<Object> methods = new ArrayList<>();
+
+        if (isThisStartMessage(textMessage)) {
+            methods.add(replyToStartMessage(chatId));
+        }
 
         ButtonText buttonText = getButtonText(textMessage);
 
         switch (buttonText) {
             case SEARCH -> {
-                search(chatId);
+                return search(chatId, methods);
             }
             case FAVORITES -> {
-                seeFavorites(chatId);
+                return displayFavorites(chatId, methods);
             }
             case PROFILE -> {
-                seeProfile(chatId);
+                return displayProfile(chatId, methods);
             }
             default -> {
-                displayMenuAgain(chatId, textMessage);
+                return displayMenuAgain(chatId, textMessage, methods);
             }
         }
     }
 
-    private void search(Long chatId) {
+    private List<Object> search(Long chatId, List<Object> methods) {
         ProfileDto nextProfile = rosstinderClient.getNextProfile(chatId);
 
-        setView(answerSender.sendPhotoWithKeyboard(chatId,
+        methods.add(answerSender.sendPhotoWithKeyboard(chatId,
                 nextProfile.getCaption(),
                 nextProfile.getImage(),
                 replyKeyboardGetter.getKeyboardForSearch()));
 
         rosstinderClient.setNewStatus(chatId, BotState.SEARCH);
+        return methods;
     }
 
-    private void seeFavorites(Long chatId) {
+    private List<Object> displayFavorites(Long chatId, List<Object> methods) {
         ProfileDto nextFavorite = rosstinderClient.getNextFavorite(chatId);
 
-        setView(answerSender.sendPhotoWithKeyboard(chatId,
+        methods.add(answerSender.sendPhotoWithKeyboard(chatId,
                 nextFavorite.getCaption(),
                 nextFavorite.getImage(),
                 replyKeyboardGetter.getKeyboardForFavorites()));
 
         rosstinderClient.setNewStatus(chatId, BotState.FAVORITES);
+        return methods;
     }
 
-    private void seeProfile(Long chatId) {
+    private List<Object> displayProfile(Long chatId, List<Object> methods) {
         ProfileDto profile = rosstinderClient.getProfile(chatId);
 
-        setView(answerSender.sendPhotoWithKeyboard(chatId,
+        methods.add(answerSender.sendPhotoWithKeyboard(chatId,
                 profile.getCaption(),
                 profile.getImage(),
                 replyKeyboardGetter.getKeyboardForProfile()));
 
         rosstinderClient.setNewStatus(chatId, BotState.PROFILE);
+        return methods;
     }
 
-    private void displayMenuAgain(Long chatId, String textMessage) {
+    private List<Object> displayMenuAgain(Long chatId, String textMessage, List<Object> methods) {
         log.info(MessageFormat.format("Пользователь #{0} ввел неподходящее сообщение \"{1}\"", chatId, textMessage));
 
-        setView(answerSender.sendMessageWithKeyboard(chatId,
+        methods.add(answerSender.sendMessageWithKeyboard(chatId,
                 AnswerText.CHOOSE_AVAILABLE_ACTION.getText(),
                 replyKeyboardGetter.getKeyboardForMenu()));
+        return methods;
     }
 }

@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -27,7 +29,9 @@ public class StateChooseGenderHandler extends BotStateHandler {
     }
 
     @Override
-    public void processState(Update update) {
+    public List<Object> processState(Update update) {
+        List<Object> methods = new ArrayList<>();
+
         Long chatId = update.getMessage().getChatId();
         String textMessage = update.getMessage().getText();
 
@@ -35,10 +39,11 @@ public class StateChooseGenderHandler extends BotStateHandler {
             rosstinderClient.setGender(chatId, textMessage);
             log.info(MessageFormat.format("Для пользователя #{0} установлен пол {1}", chatId, textMessage));
             rosstinderClient.setNewStatus(chatId, BotState.INPUT_NAME);
-            setView(answerSender.sendMessageWithText(chatId, AnswerText.INPUT_NAME.getText()));
+            methods.add(answerSender.sendMessageWithText(chatId, AnswerText.INPUT_NAME.getText()));
         } else {
             log.info(MessageFormat.format("Пользователь #{0} ввел неподходящее сообщение \"{1}\"", chatId, textMessage));
-            setView(answerSender.sendMessageWithKeyboard(chatId, AnswerText.CHOOSE_GENDER.getText(), replyKeyboardGetter.getKeyboardForGender()));
+            methods.add(answerSender.sendMessageWithKeyboard(chatId, AnswerText.CHOOSE_GENDER.getText(), replyKeyboardGetter.getKeyboardForGender()));
         }
+        return methods;
     }
 }

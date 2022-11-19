@@ -9,6 +9,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.text.MessageFormat;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -25,22 +26,23 @@ public class UpdateController {
         this.handlers = handlers.stream().collect(Collectors.toMap(BotStateHandler::getState, Function.identity()));
     }
 
-    public void processUpdate(Update update) {
+    public List<Object> processUpdate(Update update) {
         if (update == null) {
             log.debug("Получен пустой update");
-            return;
+            return Collections.emptyList();
         }
         if (update.getMessage() == null) {
             log.debug("Получено пустое сообщение");
-            return;
+            return Collections.emptyList();
         }
         if (update.getMessage().getText() != null) {
-            processTextMessage(update);
+            return processTextMessage(update);
         }
         log.debug("Получен неподдерживаемый тип сообщения");
+        return Collections.emptyList();
     }
 
-    private void processTextMessage(Update update) {
+    private List<Object> processTextMessage(Update update) {
         Message message = update.getMessage();
         Long chatId = message.getChatId();
         BotState userStatus = BotState.valueOfLabel(rosstinderClient.getUserStatus(chatId));
@@ -48,7 +50,8 @@ public class UpdateController {
                 message.getText(), chatId, userStatus));
 
         if (handlers.containsKey(userStatus)) {
-            handlers.get(userStatus).processState(update);
+            return handlers.get(userStatus).processState(update);
         }
+        return Collections.emptyList();
     }
 }

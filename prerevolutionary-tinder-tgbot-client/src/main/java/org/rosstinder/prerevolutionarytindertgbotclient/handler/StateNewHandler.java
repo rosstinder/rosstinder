@@ -1,5 +1,8 @@
 package org.rosstinder.prerevolutionarytindertgbotclient.handler;
 
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.rosstinder.prerevolutionarytindertgbotclient.model.AnswerText;
 import org.rosstinder.prerevolutionarytindertgbotclient.model.BotState;
 import org.rosstinder.prerevolutionarytindertgbotclient.service.AnswerSender;
@@ -9,18 +12,17 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 
+import java.util.ArrayList;
+import java.util.List;
+
+@Slf4j
 @Component
+@RequiredArgsConstructor
 public class StateNewHandler extends BotStateHandler {
 
     private final AnswerSender answerSender;
     private final RosstinderClient rosstinderClient;
     private final ReplyKeyboardGetter replyKeyboardGetter;
-
-    public StateNewHandler(AnswerSender answerSender, RosstinderClient rosstinderClient, ReplyKeyboardGetter replyKeyboardGetter) {
-        this.answerSender = answerSender;
-        this.rosstinderClient = rosstinderClient;
-        this.replyKeyboardGetter = replyKeyboardGetter;
-    }
 
     @Override
     public BotState getState() {
@@ -28,11 +30,15 @@ public class StateNewHandler extends BotStateHandler {
     }
 
     @Override
-    public void processState(Update update) {
+    public List<Object> processState(Update update) {
+        List<Object> methods = new ArrayList<>();
+
         Long chatId = update.getMessage().getChatId();
 
         ReplyKeyboardMarkup keyboard = replyKeyboardGetter.getKeyboardForGender();
         rosstinderClient.setNewStatus(chatId, BotState.CHOOSE_GENDER);
-        setView(answerSender.sendMessageWithKeyboard(chatId, AnswerText.CHOOSE_GENDER.getText(), keyboard));
+        methods.add(answerSender.sendMessageWithKeyboard(chatId, AnswerText.CHOOSE_GENDER.getText(), keyboard));
+
+        return methods;
     }
 }
