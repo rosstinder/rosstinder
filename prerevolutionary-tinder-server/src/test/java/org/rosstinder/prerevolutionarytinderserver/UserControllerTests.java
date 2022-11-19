@@ -36,6 +36,6 @@ public class UserControllerTests {
                 .contentType(MediaType.APPLICATION_JSON);
         mockMvc.perform(mockRequest)
                 .andExpect(jsonPath("$.status", is("406 NOT_ACCEPTABLE")))
-                .andExpect(jsonPath("$.message", is("Неправильный формат предпочтения. Допустимые значения: Сударъ, Сударыня, Всех.")));
+                .andExpect(jsonPath("$.message", is("Неправильный формат предпочтения. Допустимые значения: Сударъ, Сударыня, Всехъ.")));
     }
 }

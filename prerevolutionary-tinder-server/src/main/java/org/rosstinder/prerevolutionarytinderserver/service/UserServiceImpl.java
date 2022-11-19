@@ -152,10 +152,10 @@ public class UserServiceImpl implements UserService {
         switch (preference) {
             case ("Сударъ") -> profile.setPreference(Preference.MALE);
             case ("Сударыня") -> profile.setPreference(Preference.FEMALE);
-            case ("Всех") -> profile.setPreference(Preference.ALL);
+            case ("Всехъ") -> profile.setPreference(Preference.ALL);
             default -> {
-                logger.error("Неправильный формат предпочтения. Допустимые значения: Сударъ, Сударыня, Всех.");
-                throw new BusinessException("Неправильный формат предпочтения. Допустимые значения: Сударъ, Сударыня, Всех.");
+                logger.error("Неправильный формат предпочтения. Допустимые значения: Сударъ, Сударыня, Всехъ.");
+                throw new BusinessException("Неправильный формат предпочтения. Допустимые значения: Сударъ, Сударыня, Всехъ.");
             }
         }
         saveProfile(profile);

@@ -5,7 +5,7 @@ import lombok.Getter;
 public enum Preference {
     MALE("Сударъ"),
     FEMALE("Сударыня"),
-    ALL("Всех");
+    ALL("Всехъ");
 
     @Getter
     private final String preference;
