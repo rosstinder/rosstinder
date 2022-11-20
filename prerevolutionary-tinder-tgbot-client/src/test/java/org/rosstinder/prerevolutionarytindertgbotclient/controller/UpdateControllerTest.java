@@ -8,9 +8,9 @@ import org.rosstinder.prerevolutionarytindertgbotclient.handler.StateChooseGende
 import org.rosstinder.prerevolutionarytindertgbotclient.handler.StateInputDescriptionHandler;
 import org.rosstinder.prerevolutionarytindertgbotclient.handler.StateInputNameHandler;
 import org.rosstinder.prerevolutionarytindertgbotclient.model.AnswerText;
-import org.rosstinder.prerevolutionarytindertgbotclient.service.AnswerSender;
+import org.rosstinder.prerevolutionarytindertgbotclient.service.TelegramAnswerSender;
 import org.rosstinder.prerevolutionarytindertgbotclient.service.ReplyKeyboardGetter;
-import org.rosstinder.prerevolutionarytindertgbotclient.service.RosstinderClient;
+import org.rosstinder.prerevolutionarytindertgbotclient.service.RosstinderClientImpl;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -19,14 +19,14 @@ import java.util.Collections;
 import java.util.List;
 
 class UpdateControllerTest {
-    RosstinderClient rosstinderClient = Mockito.mock(RosstinderClient.class);
+    RosstinderClientImpl rosstinderClientImpl = Mockito.mock(RosstinderClientImpl.class);
     Message message = Mockito.mock(Message.class);
-    AnswerSender answerSender = new AnswerSender();
+    TelegramAnswerSender telegramAnswerSender = new TelegramAnswerSender();
     ReplyKeyboardGetter replyKeyboardGetter = new ReplyKeyboardGetter();
-    List<BotStateHandler> botStateHandlers = List.of(new StateChooseGenderHandler(answerSender, rosstinderClient, replyKeyboardGetter),
-            new StateInputNameHandler(answerSender, rosstinderClient),
-            new StateInputDescriptionHandler(answerSender, rosstinderClient, replyKeyboardGetter));
-    UpdateController updateController = new UpdateController(rosstinderClient, botStateHandlers);
+    List<BotStateHandler> botStateHandlers = List.of(new StateChooseGenderHandler(telegramAnswerSender, rosstinderClientImpl, replyKeyboardGetter),
+            new StateInputNameHandler(telegramAnswerSender, rosstinderClientImpl),
+            new StateInputDescriptionHandler(telegramAnswerSender, rosstinderClientImpl, replyKeyboardGetter));
+    UpdateController updateController = new UpdateController(rosstinderClientImpl, botStateHandlers);
 
     @Test
     void processUpdate_mustReturnEmptyList_whenUpdateDoesntContainMessages() {
@@ -48,7 +48,7 @@ class UpdateControllerTest {
         Mockito.when(message.getText()).thenReturn("Сударъ");
         Update update = new Update();
         update.setMessage(message);
-        Mockito.when(rosstinderClient.getUserStatus(update.getMessage().getChatId())).thenReturn("choose gender");
+        Mockito.when(rosstinderClientImpl.getUserStatus(update.getMessage().getChatId())).thenReturn("choose gender");
 
         Assertions.assertEquals(AnswerText.INPUT_NAME.getText(), ((SendMessage) updateController.processUpdate(update).get(0)).getText());
     }

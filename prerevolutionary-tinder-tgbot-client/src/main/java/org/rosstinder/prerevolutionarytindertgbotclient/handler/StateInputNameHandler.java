@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.rosstinder.prerevolutionarytindertgbotclient.model.AnswerText;
 import org.rosstinder.prerevolutionarytindertgbotclient.model.BotState;
-import org.rosstinder.prerevolutionarytindertgbotclient.service.AnswerSender;
-import org.rosstinder.prerevolutionarytindertgbotclient.service.RosstinderClient;
+import org.rosstinder.prerevolutionarytindertgbotclient.service.TelegramAnswerSender;
+import org.rosstinder.prerevolutionarytindertgbotclient.service.RosstinderClientImpl;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -17,8 +17,8 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class StateInputNameHandler extends BotStateHandler {
-    private final AnswerSender answerSender;
-    private final RosstinderClient rosstinderClient;
+    private final TelegramAnswerSender telegramAnswerSender;
+    private final RosstinderClientImpl rosstinderClientImpl;
 
     @Override
     public BotState getState() {
@@ -33,14 +33,14 @@ public class StateInputNameHandler extends BotStateHandler {
         String textMessage = update.getMessage().getText();
 
         if (isTextLengthNoMoreThanNCharacters(textMessage, AnswerText.TOO_LONG_NAME.getLength())) {
-            rosstinderClient.setName(chatId, textMessage);
+            rosstinderClientImpl.setName(chatId, textMessage);
             log.info(MessageFormat.format("Для пользователя #{0} установлено имя {1}", chatId, textMessage));
 
-            methods.add(answerSender.sendMessageWithText(chatId, AnswerText.INPUT_DESCRIPTION.getText()));
-            rosstinderClient.setNewStatus(chatId, BotState.INPUT_DESCRIPTION);
+            methods.add(telegramAnswerSender.sendMessageWithText(chatId, AnswerText.INPUT_DESCRIPTION.getText()));
+            rosstinderClientImpl.setNewStatus(chatId, BotState.INPUT_DESCRIPTION);
         } else {
             log.info(MessageFormat.format("Пользователь #{0} ввел слишком длинное имя: \"{1}\"", chatId, textMessage));
-            methods.add(answerSender.sendMessageWithText(chatId, AnswerText.TOO_LONG_NAME.getText()));
+            methods.add(telegramAnswerSender.sendMessageWithText(chatId, AnswerText.TOO_LONG_NAME.getText()));
         }
         return methods;
     }

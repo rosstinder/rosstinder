@@ -5,9 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.rosstinder.prerevolutionarytindertgbotclient.model.AnswerText;
 import org.rosstinder.prerevolutionarytindertgbotclient.model.BotState;
 import org.rosstinder.prerevolutionarytindertgbotclient.model.ButtonText;
-import org.rosstinder.prerevolutionarytindertgbotclient.service.AnswerSender;
+import org.rosstinder.prerevolutionarytindertgbotclient.service.TelegramAnswerSender;
 import org.rosstinder.prerevolutionarytindertgbotclient.service.ReplyKeyboardGetter;
-import org.rosstinder.prerevolutionarytindertgbotclient.service.RosstinderClient;
+import org.rosstinder.prerevolutionarytindertgbotclient.service.RosstinderClientImpl;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -19,8 +19,8 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class StateProfileHandler extends BotStateHandler {
-    private final AnswerSender answerSender;
-    private final RosstinderClient rosstinderClient;
+    private final TelegramAnswerSender telegramAnswerSender;
+    private final RosstinderClientImpl rosstinderClientImpl;
     private final ReplyKeyboardGetter replyKeyboardGetter;
 
     @Override
@@ -65,46 +65,46 @@ public class StateProfileHandler extends BotStateHandler {
     }
 
     private List<Object> changeName(Long chatId, List<Object> methods) {
-        rosstinderClient.setNewStatus(chatId, BotState.UPDATE_NAME);
+        rosstinderClientImpl.setNewStatus(chatId, BotState.UPDATE_NAME);
 
-        methods.add(answerSender.sendMessageWithText(chatId, AnswerText.UPDATE_NAME.getText()));
+        methods.add(telegramAnswerSender.sendMessageWithText(chatId, AnswerText.UPDATE_NAME.getText()));
         return methods;
     }
 
     private List<Object> changeGender(Long chatId, List<Object> methods) {
-        rosstinderClient.setNewStatus(chatId, BotState.UPDATE_GENDER);
+        rosstinderClientImpl.setNewStatus(chatId, BotState.UPDATE_GENDER);
 
-        methods.add(answerSender.sendMessageWithKeyboard(chatId, AnswerText.UPDATE_GENDER.getText(), replyKeyboardGetter.getKeyboardForGender()));
+        methods.add(telegramAnswerSender.sendMessageWithKeyboard(chatId, AnswerText.UPDATE_GENDER.getText(), replyKeyboardGetter.getKeyboardForGender()));
         return methods;
     }
 
     private List<Object> changeDescription(Long chatId, List<Object> methods) {
-        rosstinderClient.setNewStatus(chatId, BotState.UPDATE_DESCRIPTION);
+        rosstinderClientImpl.setNewStatus(chatId, BotState.UPDATE_DESCRIPTION);
 
-        methods.add(answerSender.sendMessageWithText(chatId, AnswerText.UPDATE_DESCRIPTION.getText()));
+        methods.add(telegramAnswerSender.sendMessageWithText(chatId, AnswerText.UPDATE_DESCRIPTION.getText()));
         return methods;
     }
 
     private List<Object> changePreference(Long chatId, List<Object> methods) {
-        rosstinderClient.setNewStatus(chatId, BotState.UPDATE_PREFERENCE);
+        rosstinderClientImpl.setNewStatus(chatId, BotState.UPDATE_PREFERENCE);
 
-        methods.add(answerSender.sendMessageWithKeyboard(chatId, AnswerText.UPDATE_PREFERENCE.getText(), replyKeyboardGetter.getKeyboardForPreference()));
+        methods.add(telegramAnswerSender.sendMessageWithKeyboard(chatId, AnswerText.UPDATE_PREFERENCE.getText(), replyKeyboardGetter.getKeyboardForPreference()));
         return methods;
     }
 
     private List<Object> displayMenu(Long chatId, List<Object> methods) {
-        methods.add(answerSender.sendMessageWithKeyboard(chatId,
+        methods.add(telegramAnswerSender.sendMessageWithKeyboard(chatId,
                 AnswerText.MENU.getText(),
                 replyKeyboardGetter.getKeyboardForMenu()));
 
-        rosstinderClient.setNewStatus(chatId, BotState.MENU);
+        rosstinderClientImpl.setNewStatus(chatId, BotState.MENU);
         return methods;
     }
 
     private List<Object> sendErrorMessage(String textMessage, Long chatId, List<Object> methods) {
         log.info(MessageFormat.format("Пользователь #{0} ввел неподходящее сообщение \"{1}\"", chatId, textMessage));
 
-        methods.add(answerSender.sendMessageWithKeyboard(chatId, AnswerText.CHOOSE_AVAILABLE_ACTION.getText(), replyKeyboardGetter.getKeyboardForProfile()));
+        methods.add(telegramAnswerSender.sendMessageWithKeyboard(chatId, AnswerText.CHOOSE_AVAILABLE_ACTION.getText(), replyKeyboardGetter.getKeyboardForProfile()));
         return methods;
     }
 }

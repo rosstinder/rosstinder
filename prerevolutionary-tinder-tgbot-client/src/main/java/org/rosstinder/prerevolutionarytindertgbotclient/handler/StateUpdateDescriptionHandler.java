@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.rosstinder.prerevolutionarytindertgbotclient.model.AnswerText;
 import org.rosstinder.prerevolutionarytindertgbotclient.model.BotState;
-import org.rosstinder.prerevolutionarytindertgbotclient.service.AnswerSender;
+import org.rosstinder.prerevolutionarytindertgbotclient.service.TelegramAnswerSender;
 import org.rosstinder.prerevolutionarytindertgbotclient.service.ReplyKeyboardGetter;
-import org.rosstinder.prerevolutionarytindertgbotclient.service.RosstinderClient;
+import org.rosstinder.prerevolutionarytindertgbotclient.service.RosstinderClientImpl;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -18,8 +18,8 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class StateUpdateDescriptionHandler extends BotStateHandler {
-    private final AnswerSender answerSender;
-    private final RosstinderClient rosstinderClient;
+    private final TelegramAnswerSender telegramAnswerSender;
+    private final RosstinderClientImpl rosstinderClientImpl;
     private final ReplyKeyboardGetter replyKeyboardGetter;
 
     @Override
@@ -35,14 +35,14 @@ public class StateUpdateDescriptionHandler extends BotStateHandler {
         Long chatId = update.getMessage().getChatId();
 
         if (isTextLengthNoMoreThanNCharacters(textMessage, AnswerText.TOO_LONG_DESCRIPTION.getLength())) {
-            rosstinderClient.setDescription(chatId, textMessage);
+            rosstinderClientImpl.setDescription(chatId, textMessage);
             log.info(MessageFormat.format("Для пользователя #{0} установлено описание {1}", chatId, textMessage));
 
-            methods.add(answerSender.sendMessageWithKeyboard(chatId, AnswerText.PROFILE.getText(), replyKeyboardGetter.getKeyboardForProfile()));
-            rosstinderClient.setNewStatus(chatId, BotState.PROFILE);
+            methods.add(telegramAnswerSender.sendMessageWithKeyboard(chatId, AnswerText.PROFILE.getText(), replyKeyboardGetter.getKeyboardForProfile()));
+            rosstinderClientImpl.setNewStatus(chatId, BotState.PROFILE);
         } else {
             log.info(MessageFormat.format("Пользователь #{0} ввел слишком длинное описание: \"{1}\"", chatId, textMessage));
-            methods.add(answerSender.sendMessageWithText(chatId, AnswerText.TOO_LONG_DESCRIPTION.getText()));
+            methods.add(telegramAnswerSender.sendMessageWithText(chatId, AnswerText.TOO_LONG_DESCRIPTION.getText()));
         }
         return methods;
     }

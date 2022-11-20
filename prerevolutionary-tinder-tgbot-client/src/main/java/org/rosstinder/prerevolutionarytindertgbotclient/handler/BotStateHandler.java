@@ -2,8 +2,8 @@ package org.rosstinder.prerevolutionarytindertgbotclient.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.rosstinder.prerevolutionarytindertgbotclient.model.*;
-import org.rosstinder.prerevolutionarytindertgbotclient.service.AnswerSender;
-import org.rosstinder.prerevolutionarytindertgbotclient.service.RosstinderClient;
+import org.rosstinder.prerevolutionarytindertgbotclient.service.TelegramAnswerSender;
+import org.rosstinder.prerevolutionarytindertgbotclient.service.RosstinderClientImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
@@ -15,17 +15,17 @@ import java.util.List;
 @Slf4j
 @Component
 public abstract class BotStateHandler {
-    private AnswerSender answerSender;
-    private RosstinderClient rosstinderClient;
+    private TelegramAnswerSender telegramAnswerSender;
+    private RosstinderClientImpl rosstinderClientImpl;
 
     @Autowired
-    public void setAnswerSender(AnswerSender answerSender) {
-        this.answerSender = answerSender;
+    public void setAnswerSender(TelegramAnswerSender telegramAnswerSender) {
+        this.telegramAnswerSender = telegramAnswerSender;
     }
 
     @Autowired
-    public void setRosstinderClient(RosstinderClient rosstinderClient) {
-        this.rosstinderClient = rosstinderClient;
+    public void setRosstinderClient(RosstinderClientImpl rosstinderClientImpl) {
+        this.rosstinderClientImpl = rosstinderClientImpl;
     }
 
     public abstract BotState getState();
@@ -34,9 +34,9 @@ public abstract class BotStateHandler {
 
     protected SendPhoto replyToStartMessage(Long chatId) {
         log.info(MessageFormat.format("От пользователя #{0} получена команда /start", chatId));
-        ProfileDto profile = rosstinderClient.getNextFavorite(chatId);
+        ProfileDto profile = rosstinderClientImpl.getNextFavorite(chatId);
 
-        return answerSender.sendPhotoWithCaption(chatId,
+        return telegramAnswerSender.sendPhotoWithCaption(chatId,
                 profile.getCaption(),
                 profile.getImage());
     }

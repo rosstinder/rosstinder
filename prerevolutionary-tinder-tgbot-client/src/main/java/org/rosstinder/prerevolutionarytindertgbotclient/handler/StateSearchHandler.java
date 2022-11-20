@@ -6,9 +6,9 @@ import org.rosstinder.prerevolutionarytindertgbotclient.model.AnswerText;
 import org.rosstinder.prerevolutionarytindertgbotclient.model.BotState;
 import org.rosstinder.prerevolutionarytindertgbotclient.model.ButtonText;
 import org.rosstinder.prerevolutionarytindertgbotclient.model.ProfileDto;
-import org.rosstinder.prerevolutionarytindertgbotclient.service.AnswerSender;
+import org.rosstinder.prerevolutionarytindertgbotclient.service.TelegramAnswerSender;
 import org.rosstinder.prerevolutionarytindertgbotclient.service.ReplyKeyboardGetter;
-import org.rosstinder.prerevolutionarytindertgbotclient.service.RosstinderClient;
+import org.rosstinder.prerevolutionarytindertgbotclient.service.RosstinderClientImpl;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -20,8 +20,8 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class StateSearchHandler extends BotStateHandler {
-    private final AnswerSender answerSender;
-    private final RosstinderClient rosstinderClient;
+    private final TelegramAnswerSender telegramAnswerSender;
+    private final RosstinderClientImpl rosstinderClientImpl;
     private final ReplyKeyboardGetter replyKeyboardGetter;
 
     @Override
@@ -60,17 +60,17 @@ public class StateSearchHandler extends BotStateHandler {
     }
 
     private List<Object> likeThisProfileAndDisplayNextOne(Long chatId, List<Object> methods) {
-        rosstinderClient.setLikeOrDislike(chatId, "true");
+        rosstinderClientImpl.setLikeOrDislike(chatId, "true");
 
-        if (!rosstinderClient.getRelationship(chatId).equals("")) {
-            methods.add(answerSender.sendMessageWithText(chatId, AnswerText.MUTUAL_LOVE.getText()));
+        if (!rosstinderClientImpl.getRelationship(chatId).equals("")) {
+            methods.add(telegramAnswerSender.sendMessageWithText(chatId, AnswerText.MUTUAL_LOVE.getText()));
 
             log.info(MessageFormat.format("Обнаружена взаимная симпатия для пользователя #{0}", chatId));
         }
 
-        ProfileDto nextProfile = rosstinderClient.getNextProfile(chatId);
+        ProfileDto nextProfile = rosstinderClientImpl.getNextProfile(chatId);
 
-        methods.add(answerSender.sendPhotoWithKeyboard(chatId,
+        methods.add(telegramAnswerSender.sendPhotoWithKeyboard(chatId,
                 nextProfile.getCaption(),
                 nextProfile.getImage(),
                 replyKeyboardGetter.getKeyboardForSearch()));
@@ -79,11 +79,11 @@ public class StateSearchHandler extends BotStateHandler {
     }
 
     private List<Object> dontLikeThisProfileAndDisplayNextOne(Long chatId, List<Object> methods) {
-        rosstinderClient.setLikeOrDislike(chatId, "false");
+        rosstinderClientImpl.setLikeOrDislike(chatId, "false");
 
-        ProfileDto nextProfile = rosstinderClient.getNextProfile(chatId);
+        ProfileDto nextProfile = rosstinderClientImpl.getNextProfile(chatId);
 
-        methods.add(answerSender.sendPhotoWithKeyboard(chatId,
+        methods.add(telegramAnswerSender.sendPhotoWithKeyboard(chatId,
                 nextProfile.getCaption(),
                 nextProfile.getImage(),
                 replyKeyboardGetter.getKeyboardForSearch()));
@@ -91,18 +91,18 @@ public class StateSearchHandler extends BotStateHandler {
     }
 
     private List<Object> displayMenu(Long chatId, List<Object> methods) {
-        methods.add(answerSender.sendMessageWithKeyboard(chatId,
+        methods.add(telegramAnswerSender.sendMessageWithKeyboard(chatId,
                 AnswerText.MENU.getText(),
                 replyKeyboardGetter.getKeyboardForMenu()));
 
-        rosstinderClient.setNewStatus(chatId, BotState.MENU);
+        rosstinderClientImpl.setNewStatus(chatId, BotState.MENU);
         return methods;
     }
 
     private List<Object> sendErrorMessage(Long chatId, String textMessage, List<Object> methods) {
         log.info(MessageFormat.format("Пользователь #{0} ввел неподходящее сообщение \"{1}\"", chatId, textMessage));
 
-        methods.add(answerSender.sendMessageWithKeyboard(chatId, AnswerText.CHOOSE_AVAILABLE_ACTION.getText(), replyKeyboardGetter.getKeyboardForSearch()));
+        methods.add(telegramAnswerSender.sendMessageWithKeyboard(chatId, AnswerText.CHOOSE_AVAILABLE_ACTION.getText(), replyKeyboardGetter.getKeyboardForSearch()));
         return methods;
     }
 }

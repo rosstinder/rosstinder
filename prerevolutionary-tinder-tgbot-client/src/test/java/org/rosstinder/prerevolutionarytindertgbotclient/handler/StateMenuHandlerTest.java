@@ -4,20 +4,19 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.rosstinder.prerevolutionarytindertgbotclient.model.*;
-import org.rosstinder.prerevolutionarytindertgbotclient.service.AnswerSender;
+import org.rosstinder.prerevolutionarytindertgbotclient.service.TelegramAnswerSender;
 import org.rosstinder.prerevolutionarytindertgbotclient.service.ReplyKeyboardGetter;
-import org.rosstinder.prerevolutionarytindertgbotclient.service.RosstinderClient;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.rosstinder.prerevolutionarytindertgbotclient.service.RosstinderClientImpl;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 class StateMenuHandlerTest {
-    RosstinderClient rosstinderClient = Mockito.mock(RosstinderClient.class);
+    RosstinderClientImpl rosstinderClientImpl = Mockito.mock(RosstinderClientImpl.class);
     Message message = Mockito.mock(Message.class);
-    AnswerSender answerSender = new AnswerSender();
+    TelegramAnswerSender telegramAnswerSender = new TelegramAnswerSender();
     ReplyKeyboardGetter replyKeyboardGetter = new ReplyKeyboardGetter();
-    StateMenuHandler stateMenuHandler = new StateMenuHandler(answerSender, rosstinderClient, replyKeyboardGetter);
+    StateMenuHandler stateMenuHandler = new StateMenuHandler(telegramAnswerSender, rosstinderClientImpl, replyKeyboardGetter);
 
     @Test
     void getState_shouldReturnStatusMenu_whenReferToThisHandler() {
@@ -30,8 +29,8 @@ class StateMenuHandlerTest {
         Mockito.when(message.getText()).thenReturn(ButtonText.SEARCH.getText());
         Update update = new Update();
         update.setMessage(message);
-        Mockito.when(rosstinderClient.getUserStatus(update.getMessage().getChatId())).thenReturn("menu");
-        Mockito.when(rosstinderClient.getNextProfile(update.getMessage().getChatId())).thenReturn(new ProfileDto("Это тест, друг", new byte[]{12, 23}));
+        Mockito.when(rosstinderClientImpl.getUserStatus(update.getMessage().getChatId())).thenReturn("menu");
+        Mockito.when(rosstinderClientImpl.getNextProfile(update.getMessage().getChatId())).thenReturn(new ProfileDto("Это тест, друг", new byte[]{12, 23}));
 
         Assertions.assertEquals("Это тест, друг", ((SendPhoto) stateMenuHandler.processState(update).get(0)).getCaption());
     }

@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.rosstinder.prerevolutionarytindertgbotclient.model.AnswerText;
 import org.rosstinder.prerevolutionarytindertgbotclient.model.BotState;
-import org.rosstinder.prerevolutionarytindertgbotclient.service.AnswerSender;
+import org.rosstinder.prerevolutionarytindertgbotclient.service.TelegramAnswerSender;
 import org.rosstinder.prerevolutionarytindertgbotclient.service.ReplyKeyboardGetter;
-import org.rosstinder.prerevolutionarytindertgbotclient.service.RosstinderClient;
+import org.rosstinder.prerevolutionarytindertgbotclient.service.RosstinderClientImpl;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -18,8 +18,8 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class StateChooseGenderHandler extends BotStateHandler {
-    private final AnswerSender answerSender;
-    private final RosstinderClient rosstinderClient;
+    private final TelegramAnswerSender telegramAnswerSender;
+    private final RosstinderClientImpl rosstinderClientImpl;
     private final ReplyKeyboardGetter replyKeyboardGetter;
 
 
@@ -36,13 +36,13 @@ public class StateChooseGenderHandler extends BotStateHandler {
         String textMessage = update.getMessage().getText();
 
         if (isGender(textMessage)) {
-            rosstinderClient.setGender(chatId, textMessage);
+            rosstinderClientImpl.setGender(chatId, textMessage);
             log.info(MessageFormat.format("Для пользователя #{0} установлен пол {1}", chatId, textMessage));
-            rosstinderClient.setNewStatus(chatId, BotState.INPUT_NAME);
-            methods.add(answerSender.sendMessageWithText(chatId, AnswerText.INPUT_NAME.getText()));
+            rosstinderClientImpl.setNewStatus(chatId, BotState.INPUT_NAME);
+            methods.add(telegramAnswerSender.sendMessageWithText(chatId, AnswerText.INPUT_NAME.getText()));
         } else {
             log.info(MessageFormat.format("Пользователь #{0} ввел неподходящее сообщение \"{1}\"", chatId, textMessage));
-            methods.add(answerSender.sendMessageWithKeyboard(chatId, AnswerText.CHOOSE_GENDER.getText(), replyKeyboardGetter.getKeyboardForGender()));
+            methods.add(telegramAnswerSender.sendMessageWithKeyboard(chatId, AnswerText.CHOOSE_GENDER.getText(), replyKeyboardGetter.getKeyboardForGender()));
         }
         return methods;
     }

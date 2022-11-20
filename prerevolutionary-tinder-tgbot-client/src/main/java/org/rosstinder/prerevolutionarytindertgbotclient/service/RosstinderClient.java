@@ -1,128 +1,35 @@
 package org.rosstinder.prerevolutionarytindertgbotclient.service;
 
-import lombok.extern.slf4j.Slf4j;
 import org.rosstinder.prerevolutionarytindertgbotclient.model.BotState;
 import org.rosstinder.prerevolutionarytindertgbotclient.model.ProfileDto;
-import org.rosstinder.prerevolutionarytindertgbotclient.model.ResponseDto;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.text.MessageFormat;
-import java.util.Base64;
-import java.util.Objects;
 
-@Slf4j
-@Component
-public class RosstinderClient {
-    RestTemplate restTemplate = new RestTemplate();
+public interface RosstinderClient {
 
-    @Value("${rosstinder.server}")
-    private String server;
+    String getUserStatus(Long chatId);
 
-    public String getUserStatus(Long chatId) {
-        URI uri = getUri(server + "/users/" + chatId);
+    ProfileDto getProfile(Long chatId);
 
-        log.debug(MessageFormat.format("Отправлен GET-запрос: {0}", uri.toString()));
+    ProfileDto getNextProfile(Long chatId);
 
-        return Objects.requireNonNull(restTemplate.getForObject(uri, ResponseDto.class)).getUserStatus();
-    }
+    ProfileDto getNextFavorite(Long chatId);
 
-    public ProfileDto getProfile(Long chatId) {
-        URI uri = getUri(server + "/users/" + chatId + "/profile");
-        ResponseDto responseDto = restTemplate.getForObject(uri, ResponseDto.class);
+    ProfileDto getPreviousFavorite(Long chatId);
 
-        log.debug(MessageFormat.format("Отправлен GET-запрос: {0}", uri.toString()));
+    String getRelationship(Long chatId);
 
-        return new ProfileDto(Objects.requireNonNull(responseDto).getMessage(), Base64.getDecoder().decode(responseDto.getImage()));
-    }
+    void setNewStatus(Long chatId, BotState status);
 
-    public ProfileDto getNextProfile(Long chatId) {
-        URI uri = getUri(server + "/users/" + chatId + "/search");
-        ResponseDto responseDto = restTemplate.getForObject(uri, ResponseDto.class);
+    void setGender(Long chatId, String gender);
 
-        log.debug(MessageFormat.format("Отправлен GET-запрос: {0}", uri.toString()));
+    void setName(Long chatId, String name);
 
-        return new ProfileDto(Objects.requireNonNull(responseDto).getMessage(), Base64.getDecoder().decode(responseDto.getImage()));
-    }
+    void setDescription(Long chatId, String description);
 
-    public ProfileDto getNextFavorite(Long chatId) {
-        URI uri = getUri(server + "/favorites/" + chatId + "/next");
-        ResponseDto responseDto = restTemplate.getForObject(uri, ResponseDto.class);
+    void setPreference(Long chatId, String preference);
 
-        log.debug(MessageFormat.format("Отправлен GET-запрос: {0}", uri.toString()));
+    void setLikeOrDislike(Long chatId, String likeOrDislike);
 
-        return new ProfileDto(Objects.requireNonNull(responseDto).getMessage(), Base64.getDecoder().decode(responseDto.getImage()));
-    }
-
-    public ProfileDto getPreviousFavorite(Long chatId) {
-        URI uri = getUri(server + "/favorites/" + chatId + "/previous");
-        ResponseDto responseDto = restTemplate.getForObject(uri, ResponseDto.class);
-
-        log.debug(MessageFormat.format("Отправлен GET-запрос: {0}", uri.toString()));
-
-        return new ProfileDto(Objects.requireNonNull(responseDto).getMessage(), Base64.getDecoder().decode(responseDto.getImage()));
-    }
-
-    public String getRelationship(Long chatId) {
-        URI uri = getUri(server + "/favorites/" + chatId);
-        ResponseDto responseDto = restTemplate.getForObject(uri, ResponseDto.class);
-
-        log.debug(MessageFormat.format("Отправлен GET-запрос: {0}", uri.toString()));
-
-        return Objects.requireNonNull(responseDto).getMessage();
-    }
-
-    public void setNewStatus(Long chatId, BotState status) {
-        String url = server + "/users/" + chatId + "/status" + "?status=" + status.getStatus();
-        restTemplate.put(url, Void.class);
-
-        log.debug(MessageFormat.format("Отправлен PUT-запрос: {0}", url));
-    }
-
-    public void setGender(Long chatId, String gender) {
-        String url = server + "/users/" + chatId + "?key=gender&value=" + gender;
-        restTemplate.put(url, Void.class);
-
-        log.debug(MessageFormat.format("Отправлен PUT-запрос: {0}", url));
-    }
-
-    public void setName(Long chatId, String name) {
-        String url = server + "/users/" + chatId + "?key=name&value=" + name;
-        restTemplate.put(url, Void.class);
-
-        log.debug(MessageFormat.format("Отправлен PUT-запрос: {0}", url));
-
-    }
-
-    public void setDescription(Long chatId, String description) {
-        String url = server + "/users/" + chatId + "?key=description&value=" + description;
-        restTemplate.put(url, Void.class);
-
-        log.debug(MessageFormat.format("Отправлен PUT-запрос: {0}", url));
-    }
-
-    public void setPreference(Long chatId, String preference) {
-        String url = server + "/users/" + chatId + "?key=preference&value=" + preference;
-        restTemplate.put(url, Void.class);
-
-        log.debug(MessageFormat.format("Отправлен PUT-запрос: {0}", url));
-    }
-
-    public void setLikeOrDislike(Long chatId, String likeOrDislike) {
-        String url = server + "/favorites/" + chatId + "?isLike=" + likeOrDislike;
-        restTemplate.postForLocation(url, Void.class);
-
-        log.debug(MessageFormat.format("Отправлен PUT-запрос: {0}", url));
-    }
-
-    private URI getUri(String url) {
-        try {
-            return new URI(url);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    URI getUri(String url);
 }
