@@ -17,8 +17,8 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class StateInputNameHandler extends BotStateHandler {
-    private final RosstinderClient rosstinderClient;
     private final AnswerSender answerSender;
+    private final RosstinderClient rosstinderClient;
 
     @Override
     public BotState getState() {
