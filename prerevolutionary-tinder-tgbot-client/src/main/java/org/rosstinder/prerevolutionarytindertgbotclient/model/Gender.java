@@ -5,11 +5,12 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Getter
 @RequiredArgsConstructor
 public enum Gender {
-    MALE("Сударь"), FEMALE("Сударыня");
+    MALE("Сударъ"), FEMALE("Сударыня");
 
     private final String gender;
 
@@ -21,7 +22,7 @@ public enum Gender {
         }
     }
 
-    public static Gender valueOfLabel(String label) {
-        return BY_LABEL.get(label);
+    public static Optional<Gender> valueOfLabel(String label) {
+        return Optional.ofNullable(BY_LABEL.get(label));
     }
 }

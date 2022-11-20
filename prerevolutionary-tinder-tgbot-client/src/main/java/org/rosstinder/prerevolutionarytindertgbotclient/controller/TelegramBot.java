@@ -2,7 +2,6 @@ package org.rosstinder.prerevolutionarytindertgbotclient.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.rosstinder.prerevolutionarytindertgbotclient.handler.BotStateHandler;
-import org.rosstinder.prerevolutionarytindertgbotclient.model.BotState;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -14,7 +13,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import javax.annotation.PostConstruct;
 import java.text.MessageFormat;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Component
@@ -23,7 +21,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     private String botName;
     @Value("${bot.token}")
     private String botToken;
-    private UpdateController updateController;
+    private final UpdateController updateController;
     private final List<BotStateHandler> handlers;
 
 
@@ -32,13 +30,6 @@ public class TelegramBot extends TelegramLongPollingBot {
         this.handlers = handlers;
     }
 
-    @PostConstruct
-    public void init() {
-        updateController.registerBot(this);
-        for (BotStateHandler handler : handlers) {
-            handler.registerBot(this);
-        }
-    }
 
     @Override
     public String getBotUsername() {
@@ -52,22 +43,21 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        updateController.processUpdate(update);
-    }
-
-    public void sendAnswerMessage(SendMessage message) {
-        try {
-            execute(message);
-            log.debug(MessageFormat.format("Отправлено сообщение пользователю #{0}", message.getChatId()));
-        } catch (TelegramApiException e) {
-            throw new RuntimeException(e);
+        List<Object> methods = updateController.processUpdate(update);
+        for (Object method : methods) {
+            sendAnswerMessage(method);
         }
     }
 
-    public void sendAnswerMessage(SendPhoto message) {
+    public void sendAnswerMessage(Object method) {
         try {
-            execute(message);
-            log.debug(MessageFormat.format("Отправлено сообщение с картинкой пользователю #{0}", message.getChatId()));
+            if (method instanceof SendMessage message) {
+                execute(message);
+                log.debug(MessageFormat.format("Отправлено сообщение пользователю #{0}", message.getChatId()));
+            } else if (method instanceof SendPhoto photo) {
+                execute(photo);
+                log.debug(MessageFormat.format("Отправлено сообщение с картинкой пользователю #{0}", photo.getChatId()));
+            }
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }

@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -27,7 +29,9 @@ public class StateChoosePreferenceHandler extends BotStateHandler {
     }
 
     @Override
-    public void processState(Update update) {
+    public List<Object> processState(Update update) {
+        List<Object> methods = new ArrayList<>();
+
         Long chatId = update.getMessage().getChatId();
         String textMessage = update.getMessage().getText();
 
@@ -37,13 +41,14 @@ public class StateChoosePreferenceHandler extends BotStateHandler {
 
             ProfileDto profile = rosstinderClient.getProfile(chatId);
 
-            setView(answerSender.sendPhotoWithCaption(chatId, profile.getCaption(), profile.getImage()));
+            methods.add(answerSender.sendPhotoWithCaption(chatId, profile.getCaption(), profile.getImage()));
 
-            setView(answerSender.sendMessageWithKeyboard(chatId, AnswerText.MENU.getText(), replyKeyboardGetter.getKeyboardForMenu()));
+            methods.add(answerSender.sendMessageWithKeyboard(chatId, AnswerText.MENU.getText(), replyKeyboardGetter.getKeyboardForMenu()));
             rosstinderClient.setNewStatus(chatId, BotState.MENU);
         } else {
             log.info(MessageFormat.format("Пользователь #{0} ввел неподходящее сообщение \"{1}\"", chatId, textMessage));
-            setView(answerSender.sendMessageWithKeyboard(chatId, AnswerText.CHOOSE_PREFERENCE.getText(), replyKeyboardGetter.getKeyboardForPreference()));
+            methods.add(answerSender.sendMessageWithKeyboard(chatId, AnswerText.CHOOSE_PREFERENCE.getText(), replyKeyboardGetter.getKeyboardForPreference()));
         }
+        return methods;
     }
 }

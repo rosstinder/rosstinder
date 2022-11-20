@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Slf4j
@@ -29,59 +31,68 @@ public class StateFavoritesHandler extends BotStateHandler {
     }
 
     @Override
-    public void processState(Update update) {
-        isThisStartMessage(update);
+    public List<Object> processState(Update update) {
 
         String textMessage = update.getMessage().getText();
         Long chatId = update.getMessage().getChatId();
+
+        List<Object> methods = new ArrayList<>();
+
+        if (isThisStartMessage(textMessage)) {
+            methods.add(replyToStartMessage(chatId));
+        }
 
         ButtonText buttonText = getButtonText(textMessage);
 
         switch (buttonText) {
             case NEXT -> {
-                seeNextFavorite(chatId);
+                return displayNextFavorite(chatId, methods);
             }
             case PREVIOUS -> {
-                seePreviousFavorite(chatId);
+                return displayPreviousFavorite(chatId, methods);
             }
             case MENU -> {
-                displayMenu(chatId);
+                return displayMenu(chatId, methods);
             }
             default -> {
-                sendErrorMessage(textMessage, chatId);
+                return sendErrorMessage(textMessage, chatId, methods);
             }
         }
     }
 
-    private void seeNextFavorite(Long chatId) {
+    private List<Object> displayNextFavorite(Long chatId, List<Object> methods) {
         ProfileDto nextFavorite = rosstinderClient.getNextFavorite(chatId);
 
-        setView(answerSender.sendPhotoWithKeyboard(chatId,
+        methods.add(answerSender.sendPhotoWithKeyboard(chatId,
                 nextFavorite.getCaption(),
                 nextFavorite.getImage(),
                 replyKeyboardGetter.getKeyboardForFavorites()));
+        return methods;
     }
 
-    private void seePreviousFavorite(Long chatId) {
-        ProfileDto previousFavorite = rosstinderClient.getNextFavorite(chatId);
+    private List<Object> displayPreviousFavorite(Long chatId, List<Object> methods) {
+        ProfileDto previousFavorite = rosstinderClient.getPreviousFavorite(chatId);
 
-        setView(answerSender.sendPhotoWithKeyboard(chatId,
+        methods.add(answerSender.sendPhotoWithKeyboard(chatId,
                 previousFavorite.getCaption(),
                 previousFavorite.getImage(),
                 replyKeyboardGetter.getKeyboardForFavorites()));
+        return methods;
     }
 
-    private void displayMenu(Long chatId) {
-        setView(answerSender.sendMessageWithKeyboard(chatId,
+    private List<Object> displayMenu(Long chatId, List<Object> methods) {
+        methods.add(answerSender.sendMessageWithKeyboard(chatId,
                 AnswerText.MENU.getText(),
                 replyKeyboardGetter.getKeyboardForMenu()));
 
         rosstinderClient.setNewStatus(chatId, BotState.MENU);
+        return methods;
     }
 
-    private void sendErrorMessage(String textMessage, Long chatId) {
+    private List<Object> sendErrorMessage(String textMessage, Long chatId, List<Object> methods) {
         log.info(MessageFormat.format("Пользователь #{0} ввел неподходящее сообщение \"{1}\"", chatId, textMessage));
 
-        setView(answerSender.sendMessageWithKeyboard(chatId, AnswerText.CHOOSE_AVAILABLE_ACTION.getText(), replyKeyboardGetter.getKeyboardForFavorites()));
+        methods.add(answerSender.sendMessageWithKeyboard(chatId, AnswerText.CHOOSE_AVAILABLE_ACTION.getText(), replyKeyboardGetter.getKeyboardForFavorites()));
+        return methods;
     }
 }

@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -26,7 +28,9 @@ public class StateInputDescriptionHandler extends BotStateHandler {
     }
 
     @Override
-    public void processState(Update update) {
+    public List<Object> processState(Update update) {
+        List<Object> methods = new ArrayList<>();
+
         Long chatId = update.getMessage().getChatId();
         String textMessage = update.getMessage().getText();
 
@@ -34,11 +38,12 @@ public class StateInputDescriptionHandler extends BotStateHandler {
             rosstinderClient.setDescription(chatId, textMessage);
             log.info(MessageFormat.format("Для пользователя #{0} установлено описание {1}", chatId, textMessage));
 
-            setView(answerSender.sendMessageWithKeyboard(chatId, AnswerText.CHOOSE_PREFERENCE.getText(), replyKeyboardGetter.getKeyboardForPreference()));
+            methods.add(answerSender.sendMessageWithKeyboard(chatId, AnswerText.CHOOSE_PREFERENCE.getText(), replyKeyboardGetter.getKeyboardForPreference()));
             rosstinderClient.setNewStatus(chatId, BotState.CHOOSE_PREFERENCE);
         } else {
             log.info(MessageFormat.format("Пользователь #{0} ввел слишком длинное описание: \"{1}\"", chatId, textMessage));
-            setView(answerSender.sendMessageWithText(chatId, AnswerText.TOO_LONG_DESCRIPTION.getText()));
+            methods.add(answerSender.sendMessageWithText(chatId, AnswerText.TOO_LONG_DESCRIPTION.getText()));
         }
+        return methods;
     }
 }

@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Getter
 @RequiredArgsConstructor
@@ -23,7 +24,7 @@ public enum Preference {
         }
     }
 
-    public static Preference valueOfLabel(String label) {
-        return BY_LABEL.get(label);
+    public static Optional<Preference> valueOfLabel(String label) {
+        return Optional.ofNullable(BY_LABEL.get(label));
     }
 }
