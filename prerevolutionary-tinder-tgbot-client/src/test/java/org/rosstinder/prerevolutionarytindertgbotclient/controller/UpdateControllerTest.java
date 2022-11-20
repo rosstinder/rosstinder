@@ -8,9 +8,9 @@ import org.rosstinder.prerevolutionarytindertgbotclient.handler.StateChooseGende
 import org.rosstinder.prerevolutionarytindertgbotclient.handler.StateInputDescriptionHandler;
 import org.rosstinder.prerevolutionarytindertgbotclient.handler.StateInputNameHandler;
 import org.rosstinder.prerevolutionarytindertgbotclient.model.AnswerText;
-import org.rosstinder.prerevolutionarytindertgbotclient.service.TelegramAnswerSender;
 import org.rosstinder.prerevolutionarytindertgbotclient.service.ReplyKeyboardGetter;
 import org.rosstinder.prerevolutionarytindertgbotclient.service.RosstinderClientImpl;
+import org.rosstinder.prerevolutionarytindertgbotclient.service.TelegramAnswerSender;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;

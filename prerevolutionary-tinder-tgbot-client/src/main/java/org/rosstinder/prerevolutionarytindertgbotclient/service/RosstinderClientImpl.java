@@ -16,7 +16,7 @@ import java.util.Objects;
 
 @Slf4j
 @Component
-public class RosstinderClientImpl implements RosstinderClient{
+public class RosstinderClientImpl implements RosstinderClient {
     RestTemplate restTemplate = new RestTemplate();
 
     @Value("${rosstinder.server}")
