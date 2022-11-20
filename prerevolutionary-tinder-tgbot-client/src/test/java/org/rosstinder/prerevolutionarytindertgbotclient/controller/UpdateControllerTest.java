@@ -35,7 +35,7 @@ class UpdateControllerTest {
     }
 
     @Test
-    void processUpdate_mustReturnEmptyList_whenUserSubmittedMessageWithoutText() {
+    void processUpdate_mustReturnEmptyList_whenUserSubmitMessageWithoutText() {
         Update update = new Update();
         update.setMessage(message);
 

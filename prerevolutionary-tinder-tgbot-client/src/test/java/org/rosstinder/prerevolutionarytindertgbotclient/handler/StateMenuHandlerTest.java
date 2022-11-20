@@ -20,12 +20,12 @@ class StateMenuHandlerTest {
     StateMenuHandler stateMenuHandler = new StateMenuHandler(answerSender, rosstinderClient, replyKeyboardGetter);
 
     @Test
-    void getState_shouldReturnStatusMenu_whenReferredToThisHandler() {
+    void getState_shouldReturnStatusMenu_whenReferToThisHandler() {
         Assertions.assertEquals(BotState.MENU, stateMenuHandler.getState());
     }
 
     @Test
-    void processState_shouldReturnNextProfile_whenUserChoseSearch() {
+    void processState_shouldReturnNextProfile_whenUserChooseSearch() {
         Mockito.when(message.getChatId()).thenReturn(741852963L);
         Mockito.when(message.getText()).thenReturn(ButtonText.SEARCH.getText());
         Update update = new Update();
@@ -37,22 +37,22 @@ class StateMenuHandlerTest {
     }
 
     @Test
-    void isThisStartMessage_shouldReturnTrue_whenUserEnteredStartMessage() {
+    void isThisStartMessage_shouldReturnTrue_whenUserEnterStartMessage() {
         Assertions.assertTrue(stateMenuHandler.isThisStartMessage("/start"));
     }
 
     @Test
-    void isThisStartMessage_shouldReturnFalse_whenUserEnteredNoStartMessage() {
+    void isThisStartMessage_shouldReturnFalse_whenUserEnterNoStartMessage() {
         Assertions.assertFalse(stateMenuHandler.isThisStartMessage("Hello world"));
     }
 
     @Test
-    void isGender_shouldReturnTrue_whenUserEnteredMessageMale() {
+    void isGender_shouldReturnTrue_whenUserEnterMessageMale() {
         Assertions.assertTrue(stateMenuHandler.isGender("Сударъ"));
     }
 
     @Test
-    void isGender_shouldReturnFalse_whenUserEnteredMessageIncorrectGender() {
+    void isGender_shouldReturnFalse_whenUserEnterMessageIncorrectGender() {
         Assertions.assertFalse(stateMenuHandler.isGender("Сударь"));
     }
 }

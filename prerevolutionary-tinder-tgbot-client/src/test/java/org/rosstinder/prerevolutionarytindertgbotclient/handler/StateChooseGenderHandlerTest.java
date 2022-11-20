@@ -20,7 +20,7 @@ class StateChooseGenderHandlerTest {
     StateChooseGenderHandler stateChooseGenderHandler = new StateChooseGenderHandler(answerSender, rosstinderClient, replyKeyboardGetter);
 
     @Test
-    void getState_shouldReturnStatusChooseGender_whenReferredToThisHandler() {
+    void getState_shouldReturnStatusChooseGender_whenReferToThisHandler() {
         Assertions.assertEquals(BotState.CHOOSE_GENDER, stateChooseGenderHandler.getState());
     }
 

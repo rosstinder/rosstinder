@@ -24,12 +24,12 @@ class StateInputNameHandlerTest {
     StateInputNameHandler stateInputNameHandler = new StateInputNameHandler(answerSender, rosstinderClient);
 
     @Test
-    void getState_shouldReturnStatusInputName_whenReferredToThisHandler() {
+    void getState_shouldReturnStatusInputName_whenReferToThisHandler() {
         Assertions.assertEquals(BotState.INPUT_NAME, stateInputNameHandler.getState());
     }
 
     @Test
-    void processState_shouldReturnMessageNameTooLong_whenUserEnteredNameLongerThan32Characters() {
+    void processState_shouldReturnMessageNameTooLong_whenUserEnterNameLongerThan32Characters() {
         Mockito.when(message.getChatId()).thenReturn(741852963L);
         Mockito.when(message.getText()).thenReturn("Александривансергейпетригорьарсен");
         Update update = new Update();
@@ -40,7 +40,7 @@ class StateInputNameHandlerTest {
     }
 
     @Test
-    void processState_shouldReturnMessageInputDescription_whenUserEnteredSuitableName() {
+    void processState_shouldReturnMessageInputDescription_whenUserEnterSuitableName() {
         Mockito.when(message.getChatId()).thenReturn(741852963L);
         Mockito.when(message.getText()).thenReturn("Александр");
         Update update = new Update();

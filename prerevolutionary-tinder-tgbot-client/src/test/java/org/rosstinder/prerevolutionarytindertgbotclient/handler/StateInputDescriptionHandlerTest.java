@@ -22,12 +22,12 @@ class StateInputDescriptionHandlerTest {
     StateInputDescriptionHandler stateInputDescriptionHandler = new StateInputDescriptionHandler(answerSender, rosstinderClient, replyKeyboardGetter);
 
     @Test
-    void getState_shouldReturnStatusInputDescription_whenReferredToThisHandler() {
+    void getState_shouldReturnStatusInputDescription_whenReferToThisHandler() {
         Assertions.assertEquals(BotState.INPUT_DESCRIPTION, stateInputDescriptionHandler.getState());
     }
 
     @Test
-    void processUpdate_shouldReturnMessageTooLongDescription_whenUserEnteredDescriptionLongerThan512Characters() {
+    void processUpdate_shouldReturnMessageTooLongDescription_whenUserEnterDescriptionLongerThan512Characters() {
         Mockito.when(message.getChatId()).thenReturn(741852963L);
         Mockito.when(message.getText()).thenReturn("МолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловек");
         Update update = new Update();
@@ -38,7 +38,7 @@ class StateInputDescriptionHandlerTest {
     }
 
     @Test
-    void processUpdate_shouldReturnMessageChoosePreference_whenUserEnteredSuitableDescription() {
+    void processUpdate_shouldReturnMessageChoosePreference_whenUserEnterSuitableDescription() {
         Mockito.when(message.getChatId()).thenReturn(741852963L);
         Mockito.when(message.getText()).thenReturn("Молодойчеловек");
         Update update = new Update();
