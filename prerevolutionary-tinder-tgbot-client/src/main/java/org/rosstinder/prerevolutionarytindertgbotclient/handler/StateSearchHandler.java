@@ -7,7 +7,7 @@ import org.rosstinder.prerevolutionarytindertgbotclient.model.BotState;
 import org.rosstinder.prerevolutionarytindertgbotclient.model.ButtonText;
 import org.rosstinder.prerevolutionarytindertgbotclient.model.ProfileDto;
 import org.rosstinder.prerevolutionarytindertgbotclient.service.ReplyKeyboardGetter;
-import org.rosstinder.prerevolutionarytindertgbotclient.service.RosstinderClientImpl;
+import org.rosstinder.prerevolutionarytindertgbotclient.service.RosstinderClient;
 import org.rosstinder.prerevolutionarytindertgbotclient.service.TelegramAnswerSender;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -21,7 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StateSearchHandler extends BotStateHandler {
     private final TelegramAnswerSender telegramAnswerSender;
-    private final RosstinderClientImpl rosstinderClientImpl;
+    private final RosstinderClient rosstinderClient;
     private final ReplyKeyboardGetter replyKeyboardGetter;
 
     @Override
@@ -60,15 +60,15 @@ public class StateSearchHandler extends BotStateHandler {
     }
 
     private List<Object> likeThisProfileAndDisplayNextOne(Long chatId, List<Object> methods) {
-        rosstinderClientImpl.setLikeOrDislike(chatId, "true");
+        rosstinderClient.setLikeOrDislike(chatId, "true");
 
-        if (!rosstinderClientImpl.getRelationship(chatId).equals("")) {
+        if (!rosstinderClient.getRelationship(chatId).equals("")) {
             methods.add(telegramAnswerSender.sendMessageWithText(chatId, AnswerText.MUTUAL_LOVE.getText()));
 
             log.info(MessageFormat.format("Обнаружена взаимная симпатия для пользователя #{0}", chatId));
         }
 
-        ProfileDto nextProfile = rosstinderClientImpl.getNextProfile(chatId);
+        ProfileDto nextProfile = rosstinderClient.getNextProfile(chatId);
 
         methods.add(telegramAnswerSender.sendPhotoWithKeyboard(chatId,
                 nextProfile.getCaption(),
@@ -79,9 +79,9 @@ public class StateSearchHandler extends BotStateHandler {
     }
 
     private List<Object> dontLikeThisProfileAndDisplayNextOne(Long chatId, List<Object> methods) {
-        rosstinderClientImpl.setLikeOrDislike(chatId, "false");
+        rosstinderClient.setLikeOrDislike(chatId, "false");
 
-        ProfileDto nextProfile = rosstinderClientImpl.getNextProfile(chatId);
+        ProfileDto nextProfile = rosstinderClient.getNextProfile(chatId);
 
         methods.add(telegramAnswerSender.sendPhotoWithKeyboard(chatId,
                 nextProfile.getCaption(),
@@ -95,7 +95,7 @@ public class StateSearchHandler extends BotStateHandler {
                 AnswerText.MENU.getText(),
                 replyKeyboardGetter.getKeyboardForMenu()));
 
-        rosstinderClientImpl.setNewStatus(chatId, BotState.MENU);
+        rosstinderClient.setNewStatus(chatId, BotState.MENU);
         return methods;
     }
 

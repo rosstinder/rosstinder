@@ -9,7 +9,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import java.io.ByteArrayInputStream;
 
 @Component
-public class TelegramAnswerSender implements AnswerSender {
+public class TelegramAnswerSender {
 
     private static final String DEFAULT_FILE_NAME = "image.png";
 

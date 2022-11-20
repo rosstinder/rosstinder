@@ -2,7 +2,7 @@ package org.rosstinder.prerevolutionarytindertgbotclient.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.rosstinder.prerevolutionarytindertgbotclient.model.*;
-import org.rosstinder.prerevolutionarytindertgbotclient.service.RosstinderClientImpl;
+import org.rosstinder.prerevolutionarytindertgbotclient.service.RosstinderClient;
 import org.rosstinder.prerevolutionarytindertgbotclient.service.TelegramAnswerSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,7 +16,7 @@ import java.util.List;
 @Component
 public abstract class BotStateHandler {
     private TelegramAnswerSender telegramAnswerSender;
-    private RosstinderClientImpl rosstinderClientImpl;
+    private RosstinderClient rosstinderClient;
 
     @Autowired
     public void setAnswerSender(TelegramAnswerSender telegramAnswerSender) {
@@ -24,8 +24,8 @@ public abstract class BotStateHandler {
     }
 
     @Autowired
-    public void setRosstinderClient(RosstinderClientImpl rosstinderClientImpl) {
-        this.rosstinderClientImpl = rosstinderClientImpl;
+    public void setRosstinderClient(RosstinderClient rosstinderClient) {
+        this.rosstinderClient = rosstinderClient;
     }
 
     public abstract BotState getState();
@@ -34,7 +34,7 @@ public abstract class BotStateHandler {
 
     protected SendPhoto replyToStartMessage(Long chatId) {
         log.info(MessageFormat.format("От пользователя #{0} получена команда /start", chatId));
-        ProfileDto profile = rosstinderClientImpl.getProfile(chatId);
+        ProfileDto profile = rosstinderClient.getProfile(chatId);
 
         return telegramAnswerSender.sendPhotoWithCaption(chatId,
                 profile.getCaption(),

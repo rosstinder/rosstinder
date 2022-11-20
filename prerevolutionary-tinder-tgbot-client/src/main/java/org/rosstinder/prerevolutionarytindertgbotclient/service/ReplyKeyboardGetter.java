@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Component
-public class ReplyKeyboardGetter implements KeyboardGetter {
+public class ReplyKeyboardGetter {
 
     public ReplyKeyboardMarkup getKeyboardForGender() {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();

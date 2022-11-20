@@ -5,17 +5,17 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.rosstinder.prerevolutionarytindertgbotclient.model.AnswerText;
 import org.rosstinder.prerevolutionarytindertgbotclient.model.BotState;
-import org.rosstinder.prerevolutionarytindertgbotclient.service.RosstinderClientImpl;
+import org.rosstinder.prerevolutionarytindertgbotclient.service.RosstinderClient;
 import org.rosstinder.prerevolutionarytindertgbotclient.service.TelegramAnswerSender;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 class StateInputNameHandlerTest {
-    RosstinderClientImpl rosstinderClientImpl = Mockito.mock(RosstinderClientImpl.class);
+    RosstinderClient rosstinderClient = Mockito.mock(RosstinderClient.class);
     Message message = Mockito.mock(Message.class);
     TelegramAnswerSender telegramAnswerSender = new TelegramAnswerSender();
-    StateInputNameHandler stateInputNameHandler = new StateInputNameHandler(telegramAnswerSender, rosstinderClientImpl);
+    StateInputNameHandler stateInputNameHandler = new StateInputNameHandler(telegramAnswerSender, rosstinderClient);
 
     @Test
     void getState_shouldReturnStatusInputName_whenReferToThisHandler() {
@@ -28,7 +28,7 @@ class StateInputNameHandlerTest {
         Mockito.when(message.getText()).thenReturn("Александривансергейпетригорьарсен");
         Update update = new Update();
         update.setMessage(message);
-        Mockito.when(rosstinderClientImpl.getUserStatus(update.getMessage().getChatId())).thenReturn("input name");
+        Mockito.when(rosstinderClient.getUserStatus(update.getMessage().getChatId())).thenReturn("input name");
 
         Assertions.assertEquals(AnswerText.TOO_LONG_NAME.getText(), ((SendMessage) stateInputNameHandler.processState(update).get(0)).getText());
     }
@@ -39,7 +39,7 @@ class StateInputNameHandlerTest {
         Mockito.when(message.getText()).thenReturn("Александр");
         Update update = new Update();
         update.setMessage(message);
-        Mockito.when(rosstinderClientImpl.getUserStatus(update.getMessage().getChatId())).thenReturn("input name");
+        Mockito.when(rosstinderClient.getUserStatus(update.getMessage().getChatId())).thenReturn("input name");
 
         Assertions.assertEquals(AnswerText.INPUT_DESCRIPTION.getText(), ((SendMessage) stateInputNameHandler.processState(update).get(0)).getText());
     }

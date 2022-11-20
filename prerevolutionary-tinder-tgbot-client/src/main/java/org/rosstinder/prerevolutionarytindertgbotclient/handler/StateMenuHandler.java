@@ -7,7 +7,7 @@ import org.rosstinder.prerevolutionarytindertgbotclient.model.BotState;
 import org.rosstinder.prerevolutionarytindertgbotclient.model.ButtonText;
 import org.rosstinder.prerevolutionarytindertgbotclient.model.ProfileDto;
 import org.rosstinder.prerevolutionarytindertgbotclient.service.ReplyKeyboardGetter;
-import org.rosstinder.prerevolutionarytindertgbotclient.service.RosstinderClientImpl;
+import org.rosstinder.prerevolutionarytindertgbotclient.service.RosstinderClient;
 import org.rosstinder.prerevolutionarytindertgbotclient.service.TelegramAnswerSender;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -21,7 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StateMenuHandler extends BotStateHandler {
     private final TelegramAnswerSender telegramAnswerSender;
-    private final RosstinderClientImpl rosstinderClientImpl;
+    private final RosstinderClient rosstinderClient;
     private final ReplyKeyboardGetter replyKeyboardGetter;
 
     @Override
@@ -60,38 +60,38 @@ public class StateMenuHandler extends BotStateHandler {
     }
 
     private List<Object> search(Long chatId, List<Object> methods) {
-        ProfileDto nextProfile = rosstinderClientImpl.getNextProfile(chatId);
+        ProfileDto nextProfile = rosstinderClient.getNextProfile(chatId);
 
         methods.add(telegramAnswerSender.sendPhotoWithKeyboard(chatId,
                 nextProfile.getCaption(),
                 nextProfile.getImage(),
                 replyKeyboardGetter.getKeyboardForSearch()));
 
-        rosstinderClientImpl.setNewStatus(chatId, BotState.SEARCH);
+        rosstinderClient.setNewStatus(chatId, BotState.SEARCH);
         return methods;
     }
 
     private List<Object> displayFavorites(Long chatId, List<Object> methods) {
-        ProfileDto nextFavorite = rosstinderClientImpl.getNextFavorite(chatId);
+        ProfileDto nextFavorite = rosstinderClient.getNextFavorite(chatId);
 
         methods.add(telegramAnswerSender.sendPhotoWithKeyboard(chatId,
                 nextFavorite.getCaption(),
                 nextFavorite.getImage(),
                 replyKeyboardGetter.getKeyboardForFavorites()));
 
-        rosstinderClientImpl.setNewStatus(chatId, BotState.FAVORITES);
+        rosstinderClient.setNewStatus(chatId, BotState.FAVORITES);
         return methods;
     }
 
     private List<Object> displayProfile(Long chatId, List<Object> methods) {
-        ProfileDto profile = rosstinderClientImpl.getProfile(chatId);
+        ProfileDto profile = rosstinderClient.getProfile(chatId);
 
         methods.add(telegramAnswerSender.sendPhotoWithKeyboard(chatId,
                 profile.getCaption(),
                 profile.getImage(),
                 replyKeyboardGetter.getKeyboardForProfile()));
 
-        rosstinderClientImpl.setNewStatus(chatId, BotState.PROFILE);
+        rosstinderClient.setNewStatus(chatId, BotState.PROFILE);
         return methods;
     }
 

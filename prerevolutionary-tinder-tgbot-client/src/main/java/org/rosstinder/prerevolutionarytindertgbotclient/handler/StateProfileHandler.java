@@ -6,7 +6,7 @@ import org.rosstinder.prerevolutionarytindertgbotclient.model.AnswerText;
 import org.rosstinder.prerevolutionarytindertgbotclient.model.BotState;
 import org.rosstinder.prerevolutionarytindertgbotclient.model.ButtonText;
 import org.rosstinder.prerevolutionarytindertgbotclient.service.ReplyKeyboardGetter;
-import org.rosstinder.prerevolutionarytindertgbotclient.service.RosstinderClientImpl;
+import org.rosstinder.prerevolutionarytindertgbotclient.service.RosstinderClient;
 import org.rosstinder.prerevolutionarytindertgbotclient.service.TelegramAnswerSender;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -20,7 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StateProfileHandler extends BotStateHandler {
     private final TelegramAnswerSender telegramAnswerSender;
-    private final RosstinderClientImpl rosstinderClientImpl;
+    private final RosstinderClient rosstinderClient;
     private final ReplyKeyboardGetter replyKeyboardGetter;
 
     @Override
@@ -65,28 +65,28 @@ public class StateProfileHandler extends BotStateHandler {
     }
 
     private List<Object> changeName(Long chatId, List<Object> methods) {
-        rosstinderClientImpl.setNewStatus(chatId, BotState.UPDATE_NAME);
+        rosstinderClient.setNewStatus(chatId, BotState.UPDATE_NAME);
 
         methods.add(telegramAnswerSender.sendMessageWithText(chatId, AnswerText.UPDATE_NAME.getText()));
         return methods;
     }
 
     private List<Object> changeGender(Long chatId, List<Object> methods) {
-        rosstinderClientImpl.setNewStatus(chatId, BotState.UPDATE_GENDER);
+        rosstinderClient.setNewStatus(chatId, BotState.UPDATE_GENDER);
 
         methods.add(telegramAnswerSender.sendMessageWithKeyboard(chatId, AnswerText.UPDATE_GENDER.getText(), replyKeyboardGetter.getKeyboardForGender()));
         return methods;
     }
 
     private List<Object> changeDescription(Long chatId, List<Object> methods) {
-        rosstinderClientImpl.setNewStatus(chatId, BotState.UPDATE_DESCRIPTION);
+        rosstinderClient.setNewStatus(chatId, BotState.UPDATE_DESCRIPTION);
 
         methods.add(telegramAnswerSender.sendMessageWithText(chatId, AnswerText.UPDATE_DESCRIPTION.getText()));
         return methods;
     }
 
     private List<Object> changePreference(Long chatId, List<Object> methods) {
-        rosstinderClientImpl.setNewStatus(chatId, BotState.UPDATE_PREFERENCE);
+        rosstinderClient.setNewStatus(chatId, BotState.UPDATE_PREFERENCE);
 
         methods.add(telegramAnswerSender.sendMessageWithKeyboard(chatId, AnswerText.UPDATE_PREFERENCE.getText(), replyKeyboardGetter.getKeyboardForPreference()));
         return methods;
@@ -97,7 +97,7 @@ public class StateProfileHandler extends BotStateHandler {
                 AnswerText.MENU.getText(),
                 replyKeyboardGetter.getKeyboardForMenu()));
 
-        rosstinderClientImpl.setNewStatus(chatId, BotState.MENU);
+        rosstinderClient.setNewStatus(chatId, BotState.MENU);
         return methods;
     }
 

@@ -7,7 +7,7 @@ import org.rosstinder.prerevolutionarytindertgbotclient.model.BotState;
 import org.rosstinder.prerevolutionarytindertgbotclient.model.ButtonText;
 import org.rosstinder.prerevolutionarytindertgbotclient.model.ProfileDto;
 import org.rosstinder.prerevolutionarytindertgbotclient.service.ReplyKeyboardGetter;
-import org.rosstinder.prerevolutionarytindertgbotclient.service.RosstinderClientImpl;
+import org.rosstinder.prerevolutionarytindertgbotclient.service.RosstinderClient;
 import org.rosstinder.prerevolutionarytindertgbotclient.service.TelegramAnswerSender;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -22,7 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StateFavoritesHandler extends BotStateHandler {
     private final TelegramAnswerSender telegramAnswerSender;
-    private final RosstinderClientImpl rosstinderClientImpl;
+    private final RosstinderClient rosstinderClient;
     private final ReplyKeyboardGetter replyKeyboardGetter;
 
     @Override
@@ -61,7 +61,7 @@ public class StateFavoritesHandler extends BotStateHandler {
     }
 
     private List<Object> displayNextFavorite(Long chatId, List<Object> methods) {
-        ProfileDto nextFavorite = rosstinderClientImpl.getNextFavorite(chatId);
+        ProfileDto nextFavorite = rosstinderClient.getNextFavorite(chatId);
 
         methods.add(telegramAnswerSender.sendPhotoWithKeyboard(chatId,
                 nextFavorite.getCaption(),
@@ -71,7 +71,7 @@ public class StateFavoritesHandler extends BotStateHandler {
     }
 
     private List<Object> displayPreviousFavorite(Long chatId, List<Object> methods) {
-        ProfileDto previousFavorite = rosstinderClientImpl.getPreviousFavorite(chatId);
+        ProfileDto previousFavorite = rosstinderClient.getPreviousFavorite(chatId);
 
         methods.add(telegramAnswerSender.sendPhotoWithKeyboard(chatId,
                 previousFavorite.getCaption(),
@@ -85,7 +85,7 @@ public class StateFavoritesHandler extends BotStateHandler {
                 AnswerText.MENU.getText(),
                 replyKeyboardGetter.getKeyboardForMenu()));
 
-        rosstinderClientImpl.setNewStatus(chatId, BotState.MENU);
+        rosstinderClient.setNewStatus(chatId, BotState.MENU);
         return methods;
     }
 
