@@ -11,7 +11,6 @@ import org.rosstinder.prerevolutionarytindertgbotclient.model.AnswerText;
 import org.rosstinder.prerevolutionarytindertgbotclient.service.AnswerSender;
 import org.rosstinder.prerevolutionarytindertgbotclient.service.ReplyKeyboardGetter;
 import org.rosstinder.prerevolutionarytindertgbotclient.service.RosstinderClient;
-import org.springframework.boot.test.context.TestComponent;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -19,7 +18,6 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import java.util.Collections;
 import java.util.List;
 
-@TestComponent
 class UpdateControllerTest {
     RosstinderClient rosstinderClient = Mockito.mock(RosstinderClient.class);
     Message message = Mockito.mock(Message.class);
