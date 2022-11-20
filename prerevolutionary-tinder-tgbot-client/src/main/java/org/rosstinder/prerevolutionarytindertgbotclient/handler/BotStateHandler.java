@@ -34,7 +34,7 @@ public abstract class BotStateHandler {
 
     protected SendPhoto replyToStartMessage(Long chatId) {
         log.info(MessageFormat.format("От пользователя #{0} получена команда /start", chatId));
-        ProfileDto profile = rosstinderClientImpl.getNextFavorite(chatId);
+        ProfileDto profile = rosstinderClientImpl.getProfile(chatId);
 
         return telegramAnswerSender.sendPhotoWithCaption(chatId,
                 profile.getCaption(),
