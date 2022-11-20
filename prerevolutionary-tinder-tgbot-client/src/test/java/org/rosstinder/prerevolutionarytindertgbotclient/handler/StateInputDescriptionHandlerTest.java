@@ -29,7 +29,7 @@ class StateInputDescriptionHandlerTest {
     @Test
     void processUpdate_shouldReturnMessageTooLongDescription_whenUserEnterDescriptionLongerThan512Characters() {
         Mockito.when(message.getChatId()).thenReturn(741852963L);
-        Mockito.when(message.getText()).thenReturn("МолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловекМолодойчеловек");
+        Mockito.when(message.getText()).thenReturn(new String(new byte[513]));
         Update update = new Update();
         update.setMessage(message);
         Mockito.when(rosstinderClient.getUserStatus(update.getMessage().getChatId())).thenReturn("input description");
